@@ -1,0 +1,181 @@
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const morgan = require('morgan');
+const helmet = require('helmet');
+const compression = require('compression');
+const connectDB = require('./config/db');
+const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+const { startNotificationWorker } = require('./utils/notificationWorker');
+
+dotenv.config();
+
+// connectDB and worker start moved to server startup chain
+
+const http = require('http');
+const { Server } = require("socket.io");
+
+const app = express();
+const server = http.createServer(app);
+
+// Configuración de orígenes permitidos
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5005',
+    process.env.FRONTEND_URL // URL de producción (Vercel)
+].filter(Boolean);
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Permitir solicitudes sin origen (como apps móviles o curl)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log('Bloqueado por CORS:', origin);
+            callback(new Error('No permitido por CORS'));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+};
+
+// Socket.IO con CORS
+const io = new Server(server, {
+    cors: {
+        origin: allowedOrigins,
+        methods: ["GET", "POST"],
+        credentials: true
+    }
+});
+
+// ... Socket.IO Logic ... (mantener lógica existente)
+io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+
+    socket.on('join_room', (room) => {
+        socket.join(room);
+        console.log(`User ${socket.id} joined room: ${room}`);
+    });
+
+    socket.on('send_message', (data) => {
+        socket.to(data.room).emit('receive_message', data);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected', socket.id);
+    });
+});
+
+app.use(express.json());
+app.use(cors(corsOptions));
+app.use(helmet());
+app.use(compression());
+
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
+
+// Routes
+app.use('/api/projects', require('./routes/projectRoutes'));
+app.use('/api/applicants', require('./routes/applicantRoutes'));
+app.use('/api/curriculum', require('./routes/curriculumRoutes'));
+app.use('/api/config', require('./routes/configRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/companies', require('./routes/companyRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/comments', require('./routes/commentRoutes'));
+app.use('/api/chat', require('./routes/chatRoutes'));
+
+// Auto-Seeding SuperAdmin and Migration
+const User = require('./models/User');
+const seedAdmin = async () => {
+    try {
+        // MIGRATION: Update old roles to new roles
+        const updateResult = await User.updateMany(
+            { role: { $in: ['Ceo_Reclutando', 'Admin_Reclutando', 'Usuario_Reclutando'] } },
+            [
+                {
+                    $set: {
+                        role: {
+                            $switch: {
+                                branches: [
+                                    { case: { $eq: ['$role', 'Ceo_Reclutando'] }, then: 'Ceo_Centralizat' },
+                                    { case: { $eq: ['$role', 'Admin_Reclutando'] }, then: 'Admin_Centralizat' },
+                                    { case: { $eq: ['$role', 'Usuario_Reclutando'] }, then: 'Usuario_Centralizat' }
+                                ],
+                                default: '$role' // Should not happen given the query, but safe fallback
+                            }
+                        }
+                    }
+                }
+            ]
+        );
+        if (updateResult.modifiedCount > 0) {
+            console.log(`--- MIGRATION: Updated ${updateResult.modifiedCount} users to new Centraliza-T roles ---`);
+        }
+
+        const email = 'ceo@synoptyk.cl'; // Dedicated SuperAdmin Email
+        const password = 'BarrientosJobsMosk';
+        const name = 'SuperAdmin CEO';
+
+        let admin = await User.findOne({ email });
+
+        if (!admin) {
+            // Check for any existing admin to migrate or create new
+            const potentialOldAdmins = ['ceo_centralizat@synoptyk.cl', 'ceo_reclutando@synoptyk.cl'];
+            let foundOldAdmin = null;
+
+            for (const oldEmail of potentialOldAdmins) {
+                foundOldAdmin = await User.findOne({ email: oldEmail });
+                if (foundOldAdmin) break;
+            }
+
+            if (foundOldAdmin) {
+                foundOldAdmin.email = email;
+                foundOldAdmin.role = 'Ceo_Centralizat';
+                foundOldAdmin.password = password;
+                await foundOldAdmin.save();
+                console.log(`--- SEED: Updated old Admin ${foundOldAdmin.email} to ${email} and role Ceo_Centralizat ---`);
+            } else {
+                await User.create({
+                    name,
+                    email,
+                    password,
+                    role: 'Ceo_Centralizat'
+                });
+                console.log('--- SEED: SuperAdmin created successfully with email: ' + email);
+            }
+        } else {
+            // Ensure powers are always correct for this specific email
+            admin.role = 'Ceo_Centralizat';
+            await admin.save();
+            console.log('--- SEED: God-Level Access verified for ' + email);
+        }
+    } catch (error) {
+        console.error('--- SEED ERROR:', error.message);
+    }
+};
+seedAdmin();
+
+app.get('/', (req, res) => {
+    res.send('API Reclutando active');
+});
+
+// Middleware
+app.use(notFound);
+app.use(errorHandler);
+
+const PORT = process.env.SERVER_PORT || 5000;
+
+// Connect to Database first, then start server
+connectDB().then(() => {
+    startNotificationWorker();
+    server.listen(PORT, () => {
+        console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    });
+}).catch((err) => {
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1);
+});
