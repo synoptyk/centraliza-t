@@ -34,9 +34,10 @@ const corsOptions = {
 
         // Check if origin is in allowedOrigins or matches synoptyk.cl or vercel.app
         const isAllowed = allowedOrigins.some(ao => origin.startsWith(ao.replace(/\/$/, '')));
-        const isOfficialDomain = origin.endsWith('synoptyk.cl') || origin.endsWith('vercel.app');
+        const isOfficialDomain = origin.endsWith('synoptyk.cl') || origin.endsWith('vercel.app') || origin.includes('centraliza-t');
+        const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
 
-        if (isAllowed || isOfficialDomain) {
+        if (isAllowed || isOfficialDomain || isLocalhost) {
             callback(null, true);
         } else {
             console.log('Bloqueado por CORS:', origin);
