@@ -220,6 +220,27 @@ const PORT = process.env.PORT || process.env.SERVER_PORT || 5000;
 // Connect to Database first, then start server
 connectDB().then(() => {
     startNotificationWorker();
+
+    // Verify SMTP Connection on Startup
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.zoho.com',
+        port: process.env.SMTP_PORT || 465,
+        secure: Number(process.env.SMTP_PORT) === 465,
+        auth: {
+            user: process.env.SMTP_USER || process.env.SMTP_EMAIL,
+            pass: process.env.SMTP_PASS || process.env.SMTP_PASSWORD
+        }
+    });
+
+    transporter.verify((error, success) => {
+        if (error) {
+            console.error('--- SMTP SERVER ERROR (Check Credentials/Zoho Logs):', error.message);
+        } else {
+            console.log('--- SMTP SERVER READY (Zoho Connected Successfully) ---');
+        }
+    });
+
     server.listen(PORT, () => {
         console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
     });
