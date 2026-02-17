@@ -505,16 +505,18 @@ const CommandCenter = ({ auth, onLogout }) => {
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-100 pb-4">
                 <div className="flex gap-6">
-                    {['dashboard', 'companies', 'users'].map((tab) => (
+                    {['dashboard', 'companies', 'users', 'configuracion'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`pb-4 px-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative flex items-center gap-3 ${activeTab === tab ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
                         >
-                            {tab === 'dashboard' ? 'Panel' : tab === 'companies' ? 'Empresas' : 'Usuarios'}
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] ${activeTab === tab ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
-                                {tab === 'dashboard' ? '' : tab === 'companies' ? companies.length : users.length}
-                            </span>
+                            {tab === 'dashboard' ? 'Panel' : tab === 'companies' ? 'Empresas' : tab === 'users' ? 'Usuarios' : 'Configuración'}
+                            {tab !== 'configuracion' && (
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] ${activeTab === tab ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
+                                    {tab === 'dashboard' ? '' : tab === 'companies' ? companies.length : users.length}
+                                </span>
+                            )}
                             {activeTab === tab && <div className="absolute bottom-[-17px] left-0 right-0 h-1 bg-indigo-600 rounded-full"></div>}
                         </button>
                     ))}
