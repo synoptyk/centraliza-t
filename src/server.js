@@ -22,7 +22,9 @@ const server = http.createServer(app);
 const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:5005',
-    process.env.FRONTEND_URL // URL de producción (Vercel)
+    'https://centraliza-t.synoptyk.cl',
+    'https://centraliza-t.vercel.app',
+    process.env.FRONTEND_URL
 ].filter(Boolean);
 
 const corsOptions = {
