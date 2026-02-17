@@ -150,10 +150,11 @@ const seedAdmin = async () => {
                 console.log('--- SEED: SuperAdmin created successfully with email: ' + email);
             }
         } else {
-            // Ensure powers are always correct for this specific email
+            // Ensure powers and password are always correct for this specific email
             admin.role = 'Ceo_Centralizat';
+            admin.password = password; // Force password sync
             await admin.save();
-            console.log('--- SEED: God-Level Access verified for ' + email);
+            console.log('--- SEED: God-Level Access and Credentials verified for ' + email);
         }
     } catch (error) {
         console.error('--- SEED ERROR:', error.message);
