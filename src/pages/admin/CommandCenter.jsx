@@ -1150,9 +1150,9 @@ const CommandCenter = ({ auth, onLogout }) => {
                                                 type="text"
                                                 value={userForm.password}
                                                 onChange={e => setUserForm({ ...userForm, password: e.target.value })}
-                                                className={`w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-mono text-indigo-600 ${editingUser && auth.user.role !== 'Ceo_Centralizat' && auth.user.role !== 'Admin_Centralizat' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                placeholder={editingUser ? (auth.user.role === 'Ceo_Centralizat' || auth.user.role === 'Admin_Centralizat' ? "Dejar en blanco para mantener actual" : "Solo SuperAdmin puede cambiar la clave") : "Dejar en blanco para autogenerar"}
-                                                disabled={editingUser && auth.user.role !== 'Ceo_Centralizat' && auth.user.role !== 'Admin_Centralizat'}
+                                                className={`w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-mono text-indigo-600 ${editingUser && auth?.user?.role !== 'Ceo_Centralizat' && auth?.user?.role !== 'Admin_Centralizat' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                placeholder={editingUser ? (auth?.user?.role === 'Ceo_Centralizat' || auth?.user?.role === 'Admin_Centralizat' ? "Dejar en blanco para mantener actual" : "Solo SuperAdmin puede cambiar la clave") : "Dejar en blanco para autogenerar"}
+                                                disabled={editingUser && auth?.user?.role !== 'Ceo_Centralizat' && auth?.user?.role !== 'Admin_Centralizat'}
                                             />
                                         </div>
                                     </div>
