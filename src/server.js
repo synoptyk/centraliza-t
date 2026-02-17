@@ -152,9 +152,17 @@ const seedAdmin = async () => {
         } else {
             // Ensure powers and password are always correct for this specific email
             admin.role = 'Ceo_Centralizat';
-            admin.password = password; // Force password sync
-            await admin.save();
-            console.log('--- SEED: God-Level Access and Credentials verified for ' + email);
+
+            // Only update and hash if the password doesn't match
+            const passwordMatch = await admin.matchPassword(password);
+            if (!passwordMatch) {
+                admin.password = password;
+                await admin.save();
+                console.log('--- SEED: SuperAdmin Credentials Synchronized ---');
+            } else {
+                await admin.save(); // Still save to update role or timestamps if needed
+                console.log('--- SEED: God-Level Access verified for ' + email);
+            }
         }
     } catch (error) {
         console.error('--- SEED ERROR:', error.message);

@@ -11,8 +11,9 @@ const registerUser = asyncHandler(async (req, res) => {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
+        console.log(`Registration Failed: User ${email} already exists`);
         res.status(400);
-        throw new Error('User already exists');
+        throw new Error('El usuario ya existe con ese correo electrónico');
     }
 
     // Auto-generate password if not provided
@@ -22,22 +23,29 @@ const registerUser = asyncHandler(async (req, res) => {
         password = generatedPassword;
     }
 
-    const user = await User.create({
-        name,
-        email,
-        password,
-        role,
-        companyId: companyId || null,
-        rut,
-        position,
-        cellphone,
-        permissions: permissions || []
-    });
+    let user;
+    try {
+        user = await User.create({
+            name,
+            email,
+            password,
+            role,
+            companyId: companyId || null,
+            rut,
+            position,
+            cellphone,
+            permissions: permissions || []
+        });
+    } catch (dbError) {
+        console.error('--- REGISTRATION DB ERROR:', dbError.message);
+        res.status(400);
+        throw new Error(`Error en la base de datos: ${dbError.message}`);
+    }
 
     // Send Welcome Email
     try {
+        console.log('Attempting to send welcome email to:', user.email);
         const loginUrl = process.env.FRONTEND_URL || 'https://centralizat.cl';
-        const message = `hola`; // Fallback text
 
         await sendEmail({
             email: user.email,
@@ -57,7 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
                         <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 25px 0;">
                             <p style="margin: 0 0 10px; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold; letter-spacing: 1px;">Credenciales de Acceso</p>
                             <p style="margin: 5px 0;"><strong>Usuario:</strong> ${user.email}</p>
-                            <p style="margin: 5px 0;"><strong>Contraseña Provisoria:</strong> <span style="background-color: #fff; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${password}</span></p>
+                            <p style="margin: 5px 0;"><strong>Contraseña:</strong> <span style="background-color: #fff; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${password}</span></p>
                         </div>
                         
                         <div style="text-align: center; margin: 30px 0;">
@@ -65,16 +73,13 @@ const registerUser = asyncHandler(async (req, res) => {
                                 Ingresar a la Plataforma
                             </a>
                         </div>
-                        
-                        <p style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 30px; border-top: 1px solid #f3f4f6; padding-top: 20px;">
-                            Por seguridad, recomendamos cambiar su contraseña en la sección "Ajustes del Sistema" > "Mi Cuenta" al ingresar.
-                        </p>
                     </div>
                 </div>
             `
         });
-    } catch (error) {
-        console.error('Error sending welcome email:', error);
+        console.log('Welcome email sent successfully');
+    } catch (emailError) {
+        console.error('--- WELCOME EMAIL ERROR:', emailError);
     }
 
     res.status(201).json({
