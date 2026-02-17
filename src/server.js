@@ -31,7 +31,12 @@ const corsOptions = {
     origin: function (origin, callback) {
         // Permitir solicitudes sin origen (como apps móviles o curl)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1) {
+
+        // Check if origin is in allowedOrigins or matches synoptyk.cl or vercel.app
+        const isAllowed = allowedOrigins.some(ao => origin.startsWith(ao.replace(/\/$/, '')));
+        const isOfficialDomain = origin.endsWith('synoptyk.cl') || origin.endsWith('vercel.app');
+
+        if (isAllowed || isOfficialDomain) {
             callback(null, true);
         } else {
             console.log('Bloqueado por CORS:', origin);
@@ -45,7 +50,7 @@ const corsOptions = {
 // Socket.IO con CORS
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins,
+        origin: "*", // More permissive for socket.io during debugging
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -89,6 +94,32 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/comments', require('./routes/commentRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
+
+// Diagnostic Route for Email
+const sendEmail = require('./utils/sendEmail');
+app.post('/api/test-email', async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ message: 'Email is required' });
+
+        console.log(`--- SMTP DIAGNOSTIC: Testing with ${email} ---`);
+        await sendEmail({
+            email,
+            subject: 'Prueba de Conexión SMTP - CENTRALIZA-T',
+            message: 'Si recibes este correo, la configuración SMTP es correcta.',
+            html: '<h1>Prueba Exitosa</h1><p>El sistema de correos está funcionando con Zoho.</p>'
+        });
+        res.json({ success: true, message: 'Email enviado con éxito' });
+    } catch (error) {
+        console.error('--- SMTP DIAGNOSTIC FAIL:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al enviar email',
+            error: error.message,
+            code: error.code
+        });
+    }
+});
 
 // Auto-Seeding SuperAdmin and Migration
 const User = require('./models/User');
