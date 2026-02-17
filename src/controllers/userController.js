@@ -42,45 +42,38 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error(`Error en la base de datos: ${dbError.message}`);
     }
 
-    // Send Welcome Email
-    try {
-        console.log('Attempting to send welcome email to:', user.email);
-        const loginUrl = process.env.FRONTEND_URL || 'https://centralizat.cl';
-
-        await sendEmail({
-            email: user.email,
-            subject: 'Bienvenido al Ecosistema CENTRALIZA-T - Credenciales de Acceso',
-            message: `Hola ${user.name}, bienvenido a CENTRALIZA-T. Sus credenciales son: Email: ${user.email}, Contraseña: ${password}. Ingrese en: ${loginUrl}`,
-            html: `
-                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                    <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                        <h1 style="color: white; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">CENTRALIZA-T</h1>
-                        <p style="color: #e0e7ff; margin: 5px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 4px;">Ecosystem v5.0</p>
+    // Send Welcome Email in background
+    const loginUrl = process.env.FRONTEND_URL || 'https://centralizat.cl';
+    sendEmail({
+        email: user.email,
+        subject: 'Bienvenido al Ecosistema CENTRALIZA-T - Credenciales de Acceso',
+        message: `Hola ${user.name}, bienvenido a CENTRALIZA-T. Sus credenciales son: Email: ${user.email}, Contraseña: ${password}. Ingrese en: ${loginUrl}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                    <h1 style="color: white; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">CENTRALIZA-T</h1>
+                    <p style="color: #e0e7ff; margin: 5px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 4px;">Ecosystem v5.0</p>
+                </div>
+                
+                <div style="padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+                    <h2 style="color: #1f2937; margin-top: 0;">Bienvenido(a), ${user.name}</h2>
+                    <p style="color: #4b5563; line-height: 1.6;">Su cuenta ha sido creada exitosamente en el Ecosistema Digital de Gestión.</p>
+                    
+                    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                        <p style="margin: 0 0 10px; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold; letter-spacing: 1px;">Credenciales de Acceso</p>
+                        <p style="margin: 5px 0;"><strong>Usuario:</strong> ${user.email}</p>
+                        <p style="margin: 5px 0;"><strong>Contraseña:</strong> <span style="background-color: #fff; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${password}</span></p>
                     </div>
                     
-                    <div style="padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-                        <h2 style="color: #1f2937; margin-top: 0;">Bienvenido(a), ${user.name}</h2>
-                        <p style="color: #4b5563; line-height: 1.6;">Su cuenta ha sido creada exitosamente en el Ecosistema Digital de Gestión.</p>
-                        
-                        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 25px 0;">
-                            <p style="margin: 0 0 10px; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold; letter-spacing: 1px;">Credenciales de Acceso</p>
-                            <p style="margin: 5px 0;"><strong>Usuario:</strong> ${user.email}</p>
-                            <p style="margin: 5px 0;"><strong>Contraseña:</strong> <span style="background-color: #fff; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${password}</span></p>
-                        </div>
-                        
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="${loginUrl}" style="background-color: #4f46e5; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);">
-                                Ingresar a la Plataforma
-                            </a>
-                        </div>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${loginUrl}" style="background-color: #4f46e5; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);">
+                            Ingresar a la Plataforma
+                        </a>
                     </div>
                 </div>
-            `
-        });
-        console.log('Welcome email sent successfully');
-    } catch (emailError) {
-        console.error('--- WELCOME EMAIL ERROR:', emailError);
-    }
+            </div>
+        `
+    }).catch(err => console.error('--- Background Welcome Email Fail:', err.message));
 
     res.status(201).json({
         _id: user._id,

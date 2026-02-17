@@ -50,7 +50,13 @@ const corsOptions = {
 // Socket.IO con CORS
 const io = new Server(server, {
     cors: {
-        origin: "*", // More permissive for socket.io during debugging
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin) || origin.endsWith('synoptyk.cl') || origin.endsWith('vercel.app')) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS for Sockets'));
+            }
+        },
         methods: ["GET", "POST"],
         credentials: true
     }
