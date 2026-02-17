@@ -124,42 +124,44 @@ const getUsers = asyncHandler(async (req, res) => {
 const updateUser = asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
 
-    if (user) {
-        user.name = req.body.name || user.name;
-        user.email = req.body.email || user.email;
-        user.role = req.body.role || user.role;
-        user.rut = req.body.rut || user.rut;
-        user.position = req.body.position || user.position;
-        user.cellphone = req.body.cellphone || user.cellphone;
-        user.permissions = req.body.permissions || user.permissions;
-        user.photo = req.body.photo || user.photo;
+    try {
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.email = req.body.email || user.email;
+            user.role = req.body.role || user.role;
+            user.rut = req.body.rut || user.rut;
+            user.position = req.body.position || user.position;
+            user.cellphone = req.body.cellphone || user.cellphone;
+            user.permissions = req.body.permissions || user.permissions;
+            user.photo = req.body.photo || user.photo;
 
-        // Handle company update carefully
-        // If companyId is explicitly sent as null (from frontend for "End to End"), set it to null
-        // If it's undefined (not sent), don't change it.
-        // If it's a valid ID, set it.
-        if (req.body.companyId === null) {
-            user.companyId = null;
-        } else if (req.body.companyId) {
-            user.companyId = req.body.companyId;
+            if (req.body.companyId === null) {
+                user.companyId = null;
+            } else if (req.body.companyId) {
+                user.companyId = req.body.companyId;
+            }
+
+            if (req.body.password) {
+                user.password = req.body.password;
+            }
+
+            const updatedUser = await user.save();
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                photo: updatedUser.photo,
+                role: updatedUser.role,
+                companyId: updatedUser.companyId
+            });
+        } else {
+            res.status(404);
+            throw new Error('User not found');
         }
-
-        if (req.body.password) {
-            user.password = req.body.password;
-        }
-
-        const updatedUser = await user.save();
-        res.json({
-            _id: updatedUser._id,
-            name: updatedUser.name,
-            email: updatedUser.email,
-            photo: updatedUser.photo,
-            role: updatedUser.role,
-            companyId: updatedUser.companyId
-        });
-    } else {
-        res.status(404);
-        throw new Error('User not found');
+    } catch (error) {
+        console.error('--- updateUser ERROR:', error);
+        res.status(error.status || 500);
+        throw error;
     }
 });
 
@@ -168,12 +170,18 @@ const updateUser = asyncHandler(async (req, res) => {
 const deleteUser = asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
 
-    if (user) {
-        await user.deleteOne();
-        res.json({ message: 'User removed' });
-    } else {
-        res.status(404);
-        throw new Error('User not found');
+    try {
+        if (user) {
+            await user.deleteOne();
+            res.json({ message: 'User removed' });
+        } else {
+            res.status(404);
+            throw new Error('User not found');
+        }
+    } catch (error) {
+        console.error('--- deleteUser ERROR:', error);
+        res.status(error.status || 500);
+        throw error;
     }
 });
 
