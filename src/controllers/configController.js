@@ -22,10 +22,11 @@ const updateConfig = asyncHandler(async (req, res) => {
     let config = await Config.findOne();
 
     if (!config) {
-        config = new Config({ managers, admins });
+        config = new Config({ managers, admins, smtp: req.body.smtp });
     } else {
         if (managers) config.managers = managers;
         if (admins) config.admins = admins;
+        if (req.body.smtp) config.smtp = req.body.smtp;
     }
 
     const updatedConfig = await config.save();

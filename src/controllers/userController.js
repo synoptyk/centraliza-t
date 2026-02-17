@@ -80,7 +80,8 @@ const registerUser = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        companyId: user.companyId
+        companyId: user.companyId,
+        password: password // Return generated password for Frontend display
     });
 });
 

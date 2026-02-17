@@ -40,6 +40,17 @@ const CommandCenter = ({ auth, onLogout }) => {
     const [showBulkModal, setShowBulkModal] = useState(false);
     const [bulkType, setBulkType] = useState('companies'); // 'companies' or 'users'
     const [bulkLoading, setBulkLoading] = useState(false);
+    const [configForm, setConfigForm] = useState({
+        smtp: {
+            host: 'smtp.zoho.com',
+            port: 465,
+            email: '',
+            password: '',
+            fromName: 'Soporte Centraliza-T'
+        }
+    });
+    const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+    const [createdCredentials, setCreatedCredentials] = useState(null);
 
     // Company Form
     const [companyForm, setCompanyForm] = useState({
@@ -74,7 +85,20 @@ const CommandCenter = ({ auth, onLogout }) => {
     // Fetch data on mount
     useEffect(() => {
         fetchData();
+        fetchConfig();
     }, []);
+
+    const fetchConfig = async () => {
+        try {
+            const { data } = await api.get('/config');
+            if (data && data.smtp) {
+                setConfigForm(prev => ({ ...prev, smtp: { ...prev.smtp, ...data.smtp } }));
+            }
+        } catch (error) {
+            console.error('Error fetching config:', error);
+        }
+    };
+
 
     // KPI Data
     const kpiData = {
@@ -203,8 +227,13 @@ const CommandCenter = ({ auth, onLogout }) => {
                 await api.put(`/users/${editingUser._id}`, payload);
                 toast.success('Usuario actualizado exitosamente');
             } else {
-                await api.post('/users', payload);
-                toast.success('Usuario creado con éxito. Se ha enviado un correo con las credenciales.');
+                const res = await api.post('/users', payload);
+                if (res.data && res.data.password) {
+                    setCreatedCredentials(res.data);
+                    setShowCredentialsModal(true);
+                } else {
+                    toast.success('Usuario creado (sin retorno de contraseña).');
+                }
             }
             setShowUserModal(false);
             setEditingUser(null);
@@ -215,6 +244,17 @@ const CommandCenter = ({ auth, onLogout }) => {
             fetchData();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Error al guardar usuario');
+        }
+    };
+
+    const handleSubmitConfig = async (e) => {
+        e.preventDefault();
+        try {
+            await api.put('/config', configForm);
+            toast.success('Configuración del sistema actualizada');
+        } catch (error) {
+            console.error('Error updating config:', error);
+            toast.error('Error al guardar configuración');
         }
     };
 
@@ -669,7 +709,7 @@ const CommandCenter = ({ auth, onLogout }) => {
                     ) : (
                         <NoDataMessage icon={Building2} tab="empresas" />
                     )
-                ) : (
+                ) : activeTab === 'users' ? (
                     users.length > 0 ? (
                         <div className="p-8 space-y-4">
                             {viewMode === 'grid' ? (
@@ -722,7 +762,74 @@ const CommandCenter = ({ auth, onLogout }) => {
                     ) : (
                         <NoDataMessage icon={Users} tab="usuarios" />
                     )
-                )}
+                ) : activeTab === 'configuracion' ? (
+                    <div className="p-10 max-w-4xl mx-auto">
+                        <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
+                                <ShieldCheck size={20} className="text-indigo-600" /> Configuración de Correo (SMTP)
+                            </h3>
+                            <form onSubmit={handleSubmitConfig} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Servidor SMTP</label>
+                                        <input
+                                            type="text"
+                                            value={configForm.smtp.host}
+                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, host: e.target.value } })}
+                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
+                                            placeholder="smtp.zoho.com"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Puerto</label>
+                                        <input
+                                            type="number"
+                                            value={configForm.smtp.port}
+                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, port: Number(e.target.value) } })}
+                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
+                                            placeholder="465"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Email de Soporte (Remitente)</label>
+                                        <input
+                                            type="email"
+                                            value={configForm.smtp.email}
+                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, email: e.target.value } })}
+                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
+                                            placeholder="soporte@empresa.com"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Contraseña (App Password)</label>
+                                        <input
+                                            type="password"
+                                            value={configForm.smtp.password}
+                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, password: e.target.value } })}
+                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
+                                            placeholder="••••••••••••"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Nombre del Remitente</label>
+                                        <input
+                                            type="text"
+                                            value={configForm.smtp.fromName}
+                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, fromName: e.target.value } })}
+                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
+                                            placeholder="Soporte Centraliza-T"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="pt-4 flex justify-end">
+                                    <button type="submit" className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
+                                        Guardar Configuración
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                ) : null}
             </div>
 
             {/* Company Modal */}
@@ -1035,6 +1142,16 @@ const CommandCenter = ({ auth, onLogout }) => {
                                             <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Cargo</label>
                                             <input type="text" value={userForm.position} onChange={e => setUserForm({ ...userForm, position: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
                                         </div>
+                                        <div className="col-span-2 space-y-2">
+                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Contraseña {editingUser ? '(Opcional)' : ''}</label>
+                                            <input
+                                                type="text"
+                                                value={userForm.password}
+                                                onChange={e => setUserForm({ ...userForm, password: e.target.value })}
+                                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-mono text-indigo-600"
+                                                placeholder={editingUser ? "Dejar en blanco para mantener actual" : "Dejar en blanco para autogenerar"}
+                                            />
+                                        </div>
                                     </div>
 
                                     <h3 className="text-sm font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2 mt-6">Vinculación Empresarial</h3>
@@ -1131,6 +1248,52 @@ const CommandCenter = ({ auth, onLogout }) => {
                 </div>
             )}
 
+            {/* Credentials Modal */}
+            {showCredentialsModal && createdCredentials && (
+                <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-[70] p-4 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-300">
+                        <div className="p-8 text-center space-y-6">
+                            <div className="w-20 h-20 bg-emerald-100 rounded-full mx-auto flex items-center justify-center mb-4">
+                                <CheckSquare size={40} className="text-emerald-600" />
+                            </div>
+                            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Usuario Creado Exitosamente</h2>
+                            <p className="text-slate-500 text-xs font-bold leading-relaxed">
+                                El usuario ha sido registrado. Aquí tienes sus credenciales de acceso iniciales.
+                            </p>
+
+                            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-left space-y-4">
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email</p>
+                                    <p className="text-sm font-bold text-slate-800 break-all select-all">{createdCredentials.email}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contraseña</p>
+                                    <p className="text-xl font-mono font-black text-indigo-600 select-all">{createdCredentials.password}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`Credenciales Centraliza-T:\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}\nURL: https://centraliza-t.synoptyk.cl`);
+                                        toast.success('Copiado al portapapeles');
+                                    }}
+                                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+                                >
+                                    Copiar Credenciales
+                                </button>
+                                <button
+                                    onClick={() => setShowCredentialsModal(false)}
+                                    className="w-full py-4 bg-white text-slate-500 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-50 transition-all border border-slate-100"
+                                >
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Bulk Upload Modal */}
             {showBulkModal && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[60] p-4">
@@ -1182,68 +1345,74 @@ const CommandCenter = ({ auth, onLogout }) => {
 };
 
 // Help helper components to keep main return clean
-const CompanyCard = ({ company, onEdit, onDelete }) => (
-    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md transition-all">
-        <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-                <Building2 size={24} className="text-indigo-600" />
-            </div>
-            <div className="flex-1">
-                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">{company.name}</h3>
-                <div className="flex gap-4 text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">
-                    <span>RUT: {company.rut}</span>
-                    {company.industry && <span> | {company.industry}</span>}
+function CompanyCard({ company, onEdit, onDelete }) {
+    return (
+        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md transition-all">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <Building2 size={24} className="text-indigo-600" />
                 </div>
-            </div>
-            <div className="flex gap-2">
-                <button onClick={() => onEdit(company)} className="p-2 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 border border-slate-100 transition-all shadow-sm"><Pencil size={16} /></button>
-                <button onClick={() => onDelete(company._id)} className="p-2 bg-white text-red-500 rounded-xl hover:bg-red-50 border border-slate-100 transition-all shadow-sm"><Trash2 size={16} /></button>
-            </div>
-        </div>
-    </div>
-);
-
-const UserCard = ({ user, onEdit, onDelete }) => (
-    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md transition-all h-full flex flex-col justify-between">
-        <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center">
-                <Users size={24} className="text-violet-600" />
-            </div>
-            <div className="flex-1">
-                <h3 className="text-base font-black text-slate-900 uppercase tracking-tight leading-tight">{user.name}</h3>
-                <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider">{user.position || 'Colaborador'}</p>
-            </div>
-        </div>
-        <div className="space-y-3">
-            <div className="flex flex-col gap-0.5">
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Contacto</p>
-                <p className="text-xs font-bold text-slate-700 truncate">{user.email}</p>
-            </div>
-            <div className="flex flex-col gap-0.5">
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Empresa</p>
-                <p className="text-xs font-bold text-slate-700">{user.companyId?.name || 'CENTRALIZA-T'}</p>
-            </div>
-            <div className="pt-4 flex items-center justify-between">
-                <span className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${user.role.includes('Admin') ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
-                    {user.role}
-                </span>
-                <div className="flex gap-1">
-                    <button onClick={() => onEdit(user)} className="p-2 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 border border-slate-100 transition-all"><Pencil size={14} /></button>
-                    <button onClick={() => onDelete(user._id)} className="p-2 bg-white text-red-500 rounded-xl hover:bg-red-50 border border-slate-100 transition-all"><Trash2 size={14} /></button>
+                <div className="flex-1">
+                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">{company.name}</h3>
+                    <div className="flex gap-4 text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">
+                        <span>RUT: {company.rut}</span>
+                        {company.industry && <span> | {company.industry}</span>}
+                    </div>
+                </div>
+                <div className="flex gap-2">
+                    <button onClick={() => onEdit(company)} className="p-2 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 border border-slate-100 transition-all shadow-sm"><Pencil size={16} /></button>
+                    <button onClick={() => onDelete(company._id)} className="p-2 bg-white text-red-500 rounded-xl hover:bg-red-50 border border-slate-100 transition-all shadow-sm"><Trash2 size={16} /></button>
                 </div>
             </div>
         </div>
-    </div>
-);
+    );
+}
 
-const NoDataMessage = ({ icon: Icon, tab }) => (
-    <div className="p-12 text-center space-y-4">
-        <div className="w-20 h-20 bg-slate-50 rounded-3xl mx-auto flex items-center justify-center text-slate-300">
-            <Icon size={40} />
+function UserCard({ user, onEdit, onDelete }) {
+    return (
+        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md transition-all h-full flex flex-col justify-between">
+            <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center">
+                    <Users size={24} className="text-violet-600" />
+                </div>
+                <div className="flex-1">
+                    <h3 className="text-base font-black text-slate-900 uppercase tracking-tight leading-tight">{user.name}</h3>
+                    <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider">{user.position || 'Colaborador'}</p>
+                </div>
+            </div>
+            <div className="space-y-3">
+                <div className="flex flex-col gap-0.5">
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Contacto</p>
+                    <p className="text-xs font-bold text-slate-700 truncate">{user.email}</p>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Empresa</p>
+                    <p className="text-xs font-bold text-slate-700">{user.companyId?.name || 'CENTRALIZA-T'}</p>
+                </div>
+                <div className="pt-4 flex items-center justify-between">
+                    <span className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${user.role.includes('Admin') ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
+                        {user.role}
+                    </span>
+                    <div className="flex gap-1">
+                        <button onClick={() => onEdit(user)} className="p-2 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 border border-slate-100 transition-all"><Pencil size={14} /></button>
+                        <button onClick={() => onDelete(user._id)} className="p-2 bg-white text-red-500 rounded-xl hover:bg-red-50 border border-slate-100 transition-all"><Trash2 size={14} /></button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <h3 className="text-sm font-black text-slate-900 uppercase tracking-tighter">No hay {tab} activas</h3>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em]">Las nuevas {tab} aparecerán aquí una vez registradas.</p>
-    </div>
-);
+    );
+}
+
+function NoDataMessage({ icon: Icon, tab }) {
+    return (
+        <div className="p-12 text-center space-y-4">
+            <div className="w-20 h-20 bg-slate-50 rounded-3xl mx-auto flex items-center justify-center text-slate-300">
+                <Icon size={40} />
+            </div>
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-tighter">No hay {tab} activas</h3>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em]">Las nuevas {tab} aparecerán aquí una vez registradas.</p>
+        </div>
+    );
+}
 
 export default CommandCenter;
