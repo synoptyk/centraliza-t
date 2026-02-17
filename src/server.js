@@ -156,7 +156,7 @@ const seedAdmin = async () => {
             console.log(`--- MIGRATION: Updated ${updateResult.modifiedCount} users to new Centraliza-T roles ---`);
         }
 
-        const email = 'ceo@synoptyk.cl'; // Dedicated SuperAdmin Email
+        const email = 'soporte@synoptyk.cl'; // Dedicated SuperAdmin Email
         const password = 'BarrientosJobsMosk';
         const name = 'SuperAdmin CEO';
 
@@ -164,7 +164,7 @@ const seedAdmin = async () => {
 
         if (!admin) {
             // Check for any existing admin to migrate or create new
-            const potentialOldAdmins = ['ceo_centralizat@synoptyk.cl', 'ceo_reclutando@synoptyk.cl'];
+            const potentialOldAdmins = ['ceo@synoptyk.cl', 'ceo_centralizat@synoptyk.cl', 'ceo_reclutando@synoptyk.cl'];
             let foundOldAdmin = null;
 
             for (const oldEmail of potentialOldAdmins) {
