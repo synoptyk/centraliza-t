@@ -1,6 +1,6 @@
 {
     "name": "centraliza-t",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "private": true,
     "proxy": "http://localhost:5005",
     "main": "src/server.js",

@@ -1293,7 +1293,7 @@ const CommandCenter = ({ auth, onLogout }) => {
                                                 name: createdCredentials.name,
                                                 email: createdCredentials.email,
                                                 password: createdCredentials.password
-                                            });
+                                            }, { timeout: 45000 });
                                             toast.dismiss();
                                             toast.success('Correo enviado exitosamente');
                                         } catch (error) {
