@@ -244,4 +244,55 @@ const uploadAvatar = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { registerUser, getUsers, updateUser, deleteUser, bulkRegisterUsers, uploadAvatar };
+// @desc    Resend credentials email (Manual Trigger)
+// @route   POST /api/users/resend-credentials
+const resendCredentials = asyncHandler(async (req, res) => {
+    const { name, email, password } = req.body;
+
+    if (!email || !password) {
+        res.status(400);
+        throw new Error('Email and password are required');
+    }
+
+    const loginUrl = process.env.FRONTEND_URL || 'https://centralizat.cl';
+
+    try {
+        await sendEmail({
+            email: email,
+            subject: 'Reenvío de Credenciales - Ecosistema CENTRALIZA-T',
+            message: `Hola ${name}, aquí tiene sus credenciales nuevamente: Email: ${email}, Contraseña: ${password}. Ingrese en: ${loginUrl}`,
+            html: `
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                    <h1 style="color: white; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">CENTRALIZA-T</h1>
+                    <p style="color: #e0e7ff; margin: 5px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 4px;">Reenvío de Accesos</p>
+                </div>
+                
+                <div style="padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+                    <h2 style="color: #1f2937; margin-top: 0;">Hola, ${name}</h2>
+                    <p style="color: #4b5563; line-height: 1.6;">Se ha solicitado el reenvío de sus credenciales de acceso.</p>
+                    
+                    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                        <p style="margin: 0 0 10px; font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: bold; letter-spacing: 1px;">Credenciales de Acceso</p>
+                        <p style="margin: 5px 0;"><strong>Usuario:</strong> ${email}</p>
+                        <p style="margin: 5px 0;"><strong>Contraseña:</strong> <span style="background-color: #fff; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${password}</span></p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${loginUrl}" style="background-color: #4f46e5; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);">
+                            Ingresar a la Plataforma
+                        </a>
+                    </div>
+                </div>
+            </div>
+            `
+        });
+        res.json({ message: 'Credenciales reenviadas exitosamente' });
+    } catch (error) {
+        console.error('Error resending credentials:', error);
+        res.status(500);
+        throw new Error('Error al enviar el correo');
+    }
+});
+
+module.exports = { registerUser, getUsers, updateUser, deleteUser, bulkRegisterUsers, uploadAvatar, resendCredentials };
