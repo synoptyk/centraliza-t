@@ -4,7 +4,7 @@ import API_URL from '../config/api';
 // Instancia centralizada de API
 const api = axios.create({
     baseURL: API_URL + '/api',
-    timeout: 10000,
+    timeout: 45000,
 });
 
 // Interceptor de Peticiones: Inyecta el token en cada llamada

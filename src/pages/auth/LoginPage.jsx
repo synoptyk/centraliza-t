@@ -34,7 +34,14 @@ const LoginPage = ({ setAuth }) => {
                 navigate('/');
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Identidad no verificada');
+            console.error('Login Error:', error);
+            if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+                toast.error('El servidor está despertando... Por favor intente nuevamente en 10 segundos.');
+            } else if (!error.response) {
+                toast.error('Error de conexión con el servidor. Verifique su internet.');
+            } else {
+                toast.error(error.response?.data?.message || 'Credenciales incorrectas');
+            }
         } finally {
             setLoading(false);
         }
