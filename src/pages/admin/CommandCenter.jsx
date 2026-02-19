@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Building2, Users, ShieldCheck, CheckSquare, Square, Pencil, Trash2, LayoutGrid, List, Download, Upload, FileSpreadsheet, AlertCircle, TrendingUp, DollarSign, Activity, Zap, X as CloseIcon } from 'lucide-react';
+import { Plus, Building2, Users, ShieldCheck, CheckSquare, Square, Pencil, Trash2, LayoutGrid, List, Download, Upload, FileSpreadsheet, AlertCircle, TrendingUp, DollarSign, Activity, Zap, X as CloseIcon, Eye, EyeOff, RefreshCw, Key } from 'lucide-react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import PageWrapper from '../../components/PageWrapper';
@@ -40,6 +40,7 @@ const CommandCenter = ({ auth, onLogout }) => {
     const [showBulkModal, setShowBulkModal] = useState(false);
     const [bulkType, setBulkType] = useState('companies'); // 'companies' or 'users'
     const [bulkLoading, setBulkLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // New state for password visibility
     const [configForm, setConfigForm] = useState({
         smtp: {
             host: 'smtp.zoho.com',
@@ -244,6 +245,45 @@ const CommandCenter = ({ auth, onLogout }) => {
             fetchData();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Error al guardar usuario');
+        }
+    };
+
+    const handleGeneratePassword = () => {
+        const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-2).toUpperCase();
+        setUserForm(prev => ({ ...prev, password: randomPassword }));
+        setShowPassword(true); // Show it so user can see what was generated
+    };
+
+    const handleResetAndResend = async () => {
+        if (!editingUser) return;
+        if (!window.confirm(`ADVERTENCIA DE SEGURIDAD\n\nEstá a punto de RESTABLECER la contraseña para ${editingUser.name}.\n\nEsta acción:\n1. Generará una NUEVA contraseña segura y la guardará en la base de datos.\n2. Enviará un correo al usuario con las nuevas credenciales.\n\nLa contraseña anterior, si existía, dejará de funcionar.\n\n¿Desea continuar?`)) {
+            return;
+        }
+
+        const newPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-2).toUpperCase();
+
+        try {
+            toast.loading('Generando nuevas credenciales...');
+
+            // 1. Update user with new password
+            await api.put(`/users/${editingUser._id}`, {
+                password: newPassword
+            });
+
+            // 2. Trigger resend credentials email
+            await api.post('/users/resend-credentials', {
+                name: editingUser.name,
+                email: editingUser.email,
+                password: newPassword
+            }, { timeout: 45000 });
+
+            toast.dismiss();
+            toast.success('Credenciales restablecidas y enviadas por correo');
+            setShowUserModal(false);
+        } catch (error) {
+            toast.dismiss();
+            console.error('Reset Error:', error);
+            toast.error(error.response?.data?.message || 'Error al restablecer credenciales');
         }
     };
 
@@ -1169,14 +1209,36 @@ const CommandCenter = ({ auth, onLogout }) => {
                                         </div>
                                         <div className="col-span-2 space-y-2">
                                             <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Contraseña {editingUser ? '(Opcional)' : ''}</label>
-                                            <input
-                                                type="text"
-                                                value={userForm.password}
-                                                onChange={e => setUserForm({ ...userForm, password: e.target.value })}
-                                                className={`w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-mono text-indigo-600 ${editingUser && auth?.user?.role !== 'Ceo_Centralizat' && auth?.user?.role !== 'Admin_Centralizat' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                placeholder={editingUser ? (auth?.user?.role === 'Ceo_Centralizat' || auth?.user?.role === 'Admin_Centralizat' ? "Dejar en blanco para mantener actual" : "Solo SuperAdmin puede cambiar la clave") : "Dejar en blanco para autogenerar"}
-                                                disabled={editingUser && auth?.user?.role !== 'Ceo_Centralizat' && auth?.user?.role !== 'Admin_Centralizat'}
-                                            />
+                                            <div className="relative">
+                                                <input
+                                                    type={showPassword ? "text" : "password"}
+                                                    value={userForm.password}
+                                                    onChange={e => setUserForm({ ...userForm, password: e.target.value })}
+                                                    className={`w-full pl-5 pr-24 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-mono text-indigo-600 ${editingUser && auth?.user?.role !== 'Ceo_Centralizat' && auth?.user?.role !== 'Admin_Centralizat' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    placeholder={editingUser ? (auth?.user?.role === 'Ceo_Centralizat' || auth?.user?.role === 'Admin_Centralizat' ? "Dejar en blanco para mantener actual" : "Solo SuperAdmin puede cambiar la clave") : "Dejar en blanco para autogenerar"}
+                                                    disabled={editingUser && auth?.user?.role !== 'Ceo_Centralizat' && auth?.user?.role !== 'Admin_Centralizat'}
+                                                />
+                                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                                        title={showPassword ? "Ocultar Contraseña" : "Ver Contraseña"}
+                                                    >
+                                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                    </button>
+                                                    {(!editingUser || auth?.user?.role === 'Ceo_Centralizat' || auth?.user?.role === 'Admin_Centralizat') && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleGeneratePassword}
+                                                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                                            title="Generar Contraseña Segura"
+                                                        >
+                                                            <Key size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1262,9 +1324,18 @@ const CommandCenter = ({ auth, onLogout }) => {
                                     </p>
                                 </div>
 
-                                <div className="col-span-1 lg:col-span-2 flex gap-4 pt-4 border-t border-slate-100">
-                                    <button type="button" onClick={() => setShowUserModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-200">Cancelar</button>
-                                    <button type="submit" className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-lg shadow-indigo-200">
+                                <div className="col-span-1 lg:col-span-2 flex flex-col md:flex-row gap-4 pt-4 border-t border-slate-100">
+                                    <button type="button" onClick={() => setShowUserModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-200 transition-all">Cancelar</button>
+                                    {editingUser && (auth?.user?.role === 'Ceo_Centralizat' || auth?.user?.role === 'Admin_Centralizat') && (
+                                        <button
+                                            type="button"
+                                            onClick={handleResetAndResend}
+                                            className="flex-1 py-4 bg-emerald-100 text-emerald-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-emerald-200 border border-emerald-200 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <RefreshCw size={16} /> Restablecer y Reenviar
+                                        </button>
+                                    )}
+                                    <button type="submit" className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
                                         {editingUser ? 'Actualizar Usuario' : 'Crear Usuario'}
                                     </button>
                                 </div>
