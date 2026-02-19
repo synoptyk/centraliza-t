@@ -299,7 +299,7 @@ const CommandCenter = ({ auth, onLogout }) => {
     };
 
     const handleTestEmail = async () => {
-        const testEmail = prompt('Ingrese correo de destinatario para la prueba:', auth?.user?.email);
+        const testEmail = prompt('Ingrese correo de destinatario para la prueba:', auth?.email);
         if (!testEmail) return;
 
         try {
@@ -1214,9 +1214,9 @@ const CommandCenter = ({ auth, onLogout }) => {
                                                     type={showPassword ? "text" : "password"}
                                                     value={userForm.password}
                                                     onChange={e => setUserForm({ ...userForm, password: e.target.value })}
-                                                    className={`w-full pl-5 pr-24 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-mono text-indigo-600 ${editingUser && auth?.user?.role !== 'Ceo_Centralizat' && auth?.user?.role !== 'Admin_Centralizat' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                    placeholder={editingUser ? (auth?.user?.role === 'Ceo_Centralizat' || auth?.user?.role === 'Admin_Centralizat' ? "Dejar en blanco para mantener actual" : "Solo SuperAdmin puede cambiar la clave") : "Dejar en blanco para autogenerar"}
-                                                    disabled={editingUser && auth?.user?.role !== 'Ceo_Centralizat' && auth?.user?.role !== 'Admin_Centralizat'}
+                                                    className={`w-full pl-5 pr-24 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-mono text-indigo-600 ${editingUser && !['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase()) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    placeholder={editingUser ? (['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase()) ? "Dejar en blanco para mantener actual" : "Solo SuperAdmin puede cambiar la clave") : "Dejar en blanco para autogenerar"}
+                                                    disabled={editingUser && !['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase())}
                                                 />
                                                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                                                     <button
@@ -1227,7 +1227,7 @@ const CommandCenter = ({ auth, onLogout }) => {
                                                     >
                                                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                                     </button>
-                                                    {(!editingUser || auth?.user?.role === 'Ceo_Centralizat' || auth?.user?.role === 'Admin_Centralizat') && (
+                                                    {(!editingUser || ['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase())) && (
                                                         <button
                                                             type="button"
                                                             onClick={handleGeneratePassword}
@@ -1239,6 +1239,11 @@ const CommandCenter = ({ auth, onLogout }) => {
                                                     )}
                                                 </div>
                                             </div>
+                                            {editingUser && userForm.password === '' && (
+                                                <p className="text-[10px] text-amber-600 font-bold ml-1">
+                                                    * La contraseña actual está oculta por seguridad.
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
@@ -1326,7 +1331,7 @@ const CommandCenter = ({ auth, onLogout }) => {
 
                                 <div className="col-span-1 lg:col-span-2 flex flex-col md:flex-row gap-4 pt-4 border-t border-slate-100">
                                     <button type="button" onClick={() => setShowUserModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-200 transition-all">Cancelar</button>
-                                    {editingUser && (auth?.user?.role === 'Ceo_Centralizat' || auth?.user?.role === 'Admin_Centralizat') && (
+                                    {editingUser && ['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase()) && (
                                         <button
                                             type="button"
                                             onClick={handleResetAndResend}
