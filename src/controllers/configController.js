@@ -43,6 +43,21 @@ const updateConfig = asyncHandler(async (req, res) => {
     res.json(updatedConfig);
 });
 
+// @desc    Reset SMTP configuration to defaults (Clear DB, use Env Vars)
+// @route   POST /api/config/reset-smtp
+const resetSmtp = asyncHandler(async (req, res) => {
+    let config = await Config.findOne();
+
+    if (config) {
+        console.log('--- [SMTP RESET] Clearing Database SMTP Configuration ---');
+        // Clear the SMTP object to force usage of Environment Variables
+        config.smtp = undefined;
+        await config.save();
+    }
+
+    res.json({ message: 'Configuración SMTP restablecida. El sistema usará las variables de entorno del servidor.' });
+});
+
 // @desc    Test Email Configuration
 // @route   POST /api/config/test-email
 const testEmail = asyncHandler(async (req, res) => {
@@ -76,5 +91,6 @@ const testEmail = asyncHandler(async (req, res) => {
 module.exports = {
     getConfig,
     updateConfig,
-    testEmail
+    testEmail,
+    resetSmtp
 };

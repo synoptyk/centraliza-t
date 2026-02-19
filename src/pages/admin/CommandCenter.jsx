@@ -44,7 +44,7 @@ const CommandCenter = ({ auth, onLogout }) => {
     const [showSmtpPassword, setShowSmtpPassword] = useState(false); // New state for SMTP password visibility
     const [configForm, setConfigForm] = useState({
         smtp: {
-            host: 'smtp.zoho.com',
+            host: 'smtppro.zoho.com',
             port: 465,
             email: '',
             password: '',
@@ -312,6 +312,41 @@ const CommandCenter = ({ auth, onLogout }) => {
             toast.dismiss();
             console.error('Test Email Error:', error);
             toast.error(error.response?.data?.message || 'Error al enviar correo de prueba');
+        }
+    }
+
+
+    const handleResetSmtp = async () => {
+        if (!window.confirm('¿Está seguro de restablecer la configuración SMTP?\n\nEsto BORRARÁ la configuración personalizada de la base de datos y forzará al sistema a usar las variables de entorno del servidor (Render).\n\nÚselo si sospecha que la configuración guardada es incorrecta.')) {
+            return;
+        }
+
+        try {
+            toast.loading('Restableciendo configuración SMTP...');
+            await api.post('/config/reset-smtp');
+
+            // Refetch config to see empty values (or defaults)
+            await fetchConfig();
+
+            // Manually reset form defaults just in case
+            setConfigForm(prev => ({
+                ...prev,
+                smtp: {
+                    host: 'smtppro.zoho.com',
+                    port: 465,
+                    email: '',
+                    password: '',
+                    fromName: 'Soporte Centraliza-T'
+                }
+            }));
+            setShowSmtpPassword(false);
+
+            toast.dismiss();
+            toast.success('Configuración SMTP restablecida a valores del servidor.');
+        } catch (error) {
+            toast.dismiss();
+            console.error('Reset SMTP Error:', error);
+            toast.error(error.response?.data?.message || 'Error al restablecer configuración');
         }
     };
 
@@ -891,6 +926,14 @@ const CommandCenter = ({ auth, onLogout }) => {
                                     </div>
                                 </div>
                                 <div className="pt-4 flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={handleResetSmtp}
+                                        className="mr-auto px-6 py-4 bg-red-100 text-red-600 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-red-200 transition-all flex items-center gap-2"
+                                        title="Borrar configuración de BD y usar valores del servidor"
+                                    >
+                                        <RefreshCw size={18} /> Restablecer
+                                    </button>
                                     <button
                                         type="button"
                                         onClick={handleTestEmail}
