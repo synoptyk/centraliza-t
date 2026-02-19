@@ -4,7 +4,7 @@ const sendEmail = async (options) => {
     // 1. Use strictly Environment Variables
     let smtpConfig = {
         host: process.env.SMTP_HOST || 'smtp.zoho.com',
-        port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 465,
+        port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
         user: (process.env.SMTP_USER || process.env.SMTP_EMAIL || '').trim(),
         pass: (process.env.SMTP_PASS || process.env.SMTP_PASSWORD || ''),
         fromName: process.env.FROM_NAME || 'Centraliza-T'
@@ -20,7 +20,7 @@ const sendEmail = async (options) => {
     const transporter = nodemailer.createTransport({
         host: smtpConfig.host,
         port: smtpConfig.port,
-        secure: Number(smtpConfig.port) === 465, // true for 465, false for 587
+        secure: Number(smtpConfig.port) === 465, // true for 465, false for 587 (STARTTLS)
         auth: {
             user: smtpConfig.user,
             pass: smtpConfig.pass
