@@ -41,6 +41,7 @@ const CommandCenter = ({ auth, onLogout }) => {
     const [bulkType, setBulkType] = useState('companies'); // 'companies' or 'users'
     const [bulkLoading, setBulkLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false); // New state for password visibility
+    const [showSmtpPassword, setShowSmtpPassword] = useState(false); // New state for SMTP password visibility
     const [configForm, setConfigForm] = useState({
         smtp: {
             host: 'smtp.zoho.com',
@@ -860,13 +861,23 @@ const CommandCenter = ({ auth, onLogout }) => {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Contraseña (App Password)</label>
-                                        <input
-                                            type="password"
-                                            value={configForm.smtp.password}
-                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, password: e.target.value } })}
-                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
-                                            placeholder="••••••••••••"
-                                        />
+                                        <div className="relative">
+                                            <input
+                                                type={showSmtpPassword ? "text" : "password"}
+                                                value={configForm.smtp.password || ''}
+                                                onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, password: e.target.value } })}
+                                                className="w-full pl-5 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700 font-mono"
+                                                placeholder="••••••••••••"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowSmtpPassword(!showSmtpPassword)}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                                title={showSmtpPassword ? "Ocultar Contraseña" : "Ver Contraseña"}
+                                            >
+                                                {showSmtpPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Nombre del Remitente</label>
