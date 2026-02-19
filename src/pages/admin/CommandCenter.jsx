@@ -40,8 +40,7 @@ const CommandCenter = ({ auth, onLogout }) => {
     const [showBulkModal, setShowBulkModal] = useState(false);
     const [bulkType, setBulkType] = useState('companies'); // 'companies' or 'users'
     const [bulkLoading, setBulkLoading] = useState(false);
-    const [bulkType, setBulkType] = useState('companies'); // 'companies' or 'users'
-    const [bulkLoading, setBulkLoading] = useState(false);
+
     const [showPassword, setShowPassword] = useState(false); // New state for password visibility
     const [showCredentialsModal, setShowCredentialsModal] = useState(false);
     const [createdCredentials, setCreatedCredentials] = useState(null);
