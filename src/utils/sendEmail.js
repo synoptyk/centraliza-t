@@ -40,7 +40,10 @@ const sendEmail = async (options) => {
         },
         tls: {
             rejectUnauthorized: false // Helps with some hosting environments
-        }
+        },
+        connectionTimeout: 10000, // 10 seconds
+        greetingTimeout: 10000,   // 10 seconds
+        socketTimeout: 20000      // 20 seconds
     });
 
     const message = {
