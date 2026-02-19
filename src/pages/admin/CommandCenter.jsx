@@ -1397,8 +1397,8 @@ const CommandCenter = ({ auth, onLogout }) => {
                                             toast.success('Correo enviado exitosamente');
                                         } catch (error) {
                                             toast.dismiss();
-                                            toast.error('Error al enviar correo');
-                                            console.error(error);
+                                            console.error('Resend Error:', error);
+                                            toast.error(error.response?.data?.message || 'Error al enviar correo');
                                         }
                                     }}
                                     className="w-full py-4 bg-purple-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-purple-700 transition-all shadow-lg shadow-purple-200"
