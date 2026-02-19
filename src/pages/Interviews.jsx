@@ -9,7 +9,7 @@ import InterviewCard from '../components/InterviewCard';
 import InterviewActionModal from '../components/InterviewActionModal';
 import InterviewCalendar from '../components/InterviewCalendar';
 
-const Interviews = ({ onOpenRECLUTANDO, auth, onLogout }) => {
+const Interviews = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const { canCreate, canUpdate, canDelete } = usePermissions('entrevista');

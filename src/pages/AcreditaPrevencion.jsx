@@ -5,7 +5,7 @@ import api from '../utils/api';
 import PageWrapper from '../components/PageWrapper';
 import usePermissions from '../hooks/usePermissions';
 
-const AcreditaPrevencion = ({ onOpenRECLUTANDO, auth, onLogout }) => {
+const AcreditaPrevencion = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const { canUpdate } = usePermissions('acreditacion-prevencion');
@@ -236,7 +236,7 @@ const AcreditaPrevencion = ({ onOpenRECLUTANDO, auth, onLogout }) => {
                                     </div>
                                 </button>
                                 <button
-                                    onClick={() => onOpenRECLUTANDO(app)}
+                                    onClick={() => onOpenCENTRALIZAT(app)}
                                     className="p-2 bg-white text-slate-400 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm opacity-0 group-hover:opacity-100"
                                 >
                                     <ExternalLink size={14} />

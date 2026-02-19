@@ -213,7 +213,7 @@ const MasterProfileModal = ({ applicant, onClose }) => {
                         <FileText size={16} /> Ver Expediente Maestro
                     </button>
                     <button onClick={onClose} className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-all">
-                        Cerrar RECLUTANDO View
+                        Cerrar CENTRALIZAT View
                     </button>
                 </div>
             </div>

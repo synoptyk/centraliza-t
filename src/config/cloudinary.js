@@ -11,7 +11,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'reclutando',
+        folder: 'centralizat',
         allowed_formats: ['jpg', 'png', 'pdf'],
     },
 });

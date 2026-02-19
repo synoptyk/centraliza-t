@@ -30,7 +30,7 @@ import api from '../utils/api';
 import toast from 'react-hot-toast';
 import PageWrapper from '../components/PageWrapper';
 
-const Dashboard = ({ onOpenRECLUTANDO, auth, onLogout }) => {
+const Dashboard = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [data, setData] = useState({
         projects: [],
         applicants: [],
@@ -321,7 +321,7 @@ const Dashboard = ({ onOpenRECLUTANDO, auth, onLogout }) => {
                             {recentApplicants.map((app, i) => (
                                 <button
                                     key={app._id}
-                                    onClick={() => onOpenRECLUTANDO(app)}
+                                    onClick={() => onOpenCENTRALIZAT(app)}
                                     className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all text-left border border-transparent hover:border-slate-200 group"
                                 >
                                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center text-sm font-black shrink-0 transition-all group-hover:scale-105 shadow-md">

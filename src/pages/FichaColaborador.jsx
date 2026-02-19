@@ -159,7 +159,7 @@ const SolicitudContratacion = ({ applicant, formData }) => {
     );
 };
 
-const FichaColaborador = ({ onOpenRECLUTANDO, auth, onLogout }) => {
+const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
     const [selectedId, setSelectedId] = useState('');
     const [loading, setLoading] = useState(false);
@@ -325,13 +325,13 @@ const FichaColaborador = ({ onOpenRECLUTANDO, auth, onLogout }) => {
                         <button
                             onClick={() => {
                                 const app = applicants.find(a => a._id === selectedId);
-                                if (app) onOpenRECLUTANDO(app);
+                                if (app) onOpenCENTRALIZAT(app);
                             }}
                             className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2 text-xs font-bold text-white uppercase tracking-widest"
-                            title="Ver RECLUTANDO"
+                            title="Ver CENTRALIZAT"
                         >
                             <ExternalLink size={16} />
-                            RECLUTANDO
+                            CENTRALIZAT
                         </button>
                     )}
                     <div className="relative w-64">

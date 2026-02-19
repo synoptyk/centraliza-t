@@ -10,7 +10,7 @@ const api = axios.create({
 // Interceptor de Peticiones: Inyecta el token en cada llamada
 api.interceptors.request.use(
     (config) => {
-        const userData = localStorage.getItem('reclutando_user') || sessionStorage.getItem('reclutando_user');
+        const userData = localStorage.getItem('centralizat_user') || sessionStorage.getItem('centralizat_user');
         if (userData) {
             const { token } = JSON.parse(userData);
             if (token) {
@@ -31,7 +31,7 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             console.error('Sesión expirada o no autorizada. Redirigiendo a login...');
             // Opcional: Limpiar almacenamiento y redirigir
-            // localStorage.removeItem('reclutando_user');
+            // localStorage.removeItem('centralizat_user');
             // window.location.href = '/login';
         }
         return Promise.reject(error);

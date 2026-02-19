@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import usePermissions from '../hooks/usePermissions';
 import PageWrapper from '../components/PageWrapper';
 
-const HiringApproval = ({ onOpenRECLUTANDO, auth, onLogout }) => {
+const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -173,7 +173,7 @@ const HiringApproval = ({ onOpenRECLUTANDO, auth, onLogout }) => {
                                     )}
                                 </div>
                                 <button
-                                    onClick={() => onOpenRECLUTANDO(app)}
+                                    onClick={() => onOpenCENTRALIZAT(app)}
                                     className="p-2 bg-white text-slate-300 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm opacity-0 group-hover:opacity-100 shrink-0"
                                 >
                                     <ExternalLink size={14} />

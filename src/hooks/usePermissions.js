@@ -9,7 +9,7 @@ const usePermissions = (moduleId) => {
     });
 
     useEffect(() => {
-        const userStr = localStorage.getItem('reclutando_user') || sessionStorage.getItem('reclutando_user');
+        const userStr = localStorage.getItem('centralizat_user') || sessionStorage.getItem('centralizat_user');
         if (userStr) {
             const user = JSON.parse(userStr);
 

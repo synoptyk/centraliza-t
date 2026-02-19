@@ -40,25 +40,25 @@ const ProtectedRoute = ({ children, allowedRoles, auth }) => {
 function AppContent() {
     const [auth, setAuth] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [selectedRECLUTANDOApplicant, setSelectedRECLUTANDOApplicant] = useState(null);
+    const [selectedCENTRALIZATApplicant, setSelectedCENTRALIZATApplicant] = useState(null);
     const location = useLocation();
 
     useEffect(() => {
-        const user = localStorage.getItem('reclutando_user') || sessionStorage.getItem('reclutando_user');
+        const user = localStorage.getItem('centralizat_user') || sessionStorage.getItem('centralizat_user');
         if (user) {
             try {
                 setAuth(JSON.parse(user));
             } catch (e) {
-                localStorage.removeItem('reclutando_user');
-                sessionStorage.removeItem('reclutando_user');
+                localStorage.removeItem('centralizat_user');
+                sessionStorage.removeItem('centralizat_user');
             }
         }
         setLoading(false);
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('reclutando_user');
-        sessionStorage.removeItem('reclutando_user');
+        localStorage.removeItem('centralizat_user');
+        sessionStorage.removeItem('centralizat_user');
         setAuth(null);
     };
 
@@ -66,7 +66,7 @@ function AppContent() {
 
     return (
         <div className="flex bg-slate-50 min-h-screen">
-            {auth && <Sidebar onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} setAuth={setAuth} onLogout={handleLogout} />}
+            {auth && <Sidebar onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} setAuth={setAuth} onLogout={handleLogout} />}
 
             <main className={`flex-1 ${auth ? 'ml-80' : ''} transition-all print:ml-0 print:p-0 overflow-hidden`}>
                 <AnimatePresence mode="wait">
@@ -77,7 +77,7 @@ function AppContent() {
 
                         <Route path="/" element={
                             <ProtectedRoute auth={auth}>
-                                <Dashboard onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} onLogout={handleLogout} />
+                                <Dashboard onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
@@ -101,25 +101,25 @@ function AppContent() {
 
                         <Route path="/entrevista" element={
                             <ProtectedRoute auth={auth}>
-                                <Interviews onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} onLogout={handleLogout} />
+                                <Interviews onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
                         <Route path="/tests" element={
                             <ProtectedRoute auth={auth}>
-                                <Tests onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} onLogout={handleLogout} />
+                                <Tests onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
                         <Route path="/documentos" element={
                             <ProtectedRoute auth={auth}>
-                                <DocumentUpload onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} onLogout={handleLogout} />
+                                <DocumentUpload onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
                         <Route path="/acreditacion-prevencion" element={
                             <ProtectedRoute auth={auth}>
-                                <AcreditaPrevencion onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} onLogout={handleLogout} />
+                                <AcreditaPrevencion onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
@@ -131,25 +131,25 @@ function AppContent() {
 
                         <Route path="/ficha-colaborador" element={
                             <ProtectedRoute auth={auth}>
-                                <FichaColaborador onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} onLogout={handleLogout} />
+                                <FichaColaborador onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
                         <Route path="/contratacion" element={
                             <ProtectedRoute auth={auth}>
-                                <HiringApproval onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} onLogout={handleLogout} />
+                                <HiringApproval onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
                         <Route path="/historial" element={
                             <ProtectedRoute auth={auth}>
-                                <HistoryPage onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} onLogout={handleLogout} />
+                                <HistoryPage onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
                         <Route path="/contratados" element={
                             <ProtectedRoute auth={auth}>
-                                <ContractedPersonal onOpenRECLUTANDO={setSelectedRECLUTANDOApplicant} auth={auth} onLogout={handleLogout} />
+                                <ContractedPersonal onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
@@ -174,10 +174,10 @@ function AppContent() {
             {auth && <ChatBubble auth={auth} />}
             <Toaster position="top-right" />
 
-            {selectedRECLUTANDOApplicant && (
+            {selectedCENTRALIZATApplicant && (
                 <MasterProfileModal
-                    applicant={selectedRECLUTANDOApplicant}
-                    onClose={() => setSelectedRECLUTANDOApplicant(null)}
+                    applicant={selectedCENTRALIZATApplicant}
+                    onClose={() => setSelectedCENTRALIZATApplicant(null)}
                 />
             )}
         </div>

@@ -22,9 +22,9 @@ const LoginPage = ({ setAuth }) => {
         try {
             const { data } = await api.post('/auth/login', { email, password });
             if (rememberMe) {
-                localStorage.setItem('reclutando_user', JSON.stringify(data));
+                localStorage.setItem('centralizat_user', JSON.stringify(data));
             } else {
-                sessionStorage.setItem('reclutando_user', JSON.stringify(data));
+                sessionStorage.setItem('centralizat_user', JSON.stringify(data));
             }
             setAuth(data);
             toast.success(`Bienvenido a CENTRALIZA-T, ${data.name}`);

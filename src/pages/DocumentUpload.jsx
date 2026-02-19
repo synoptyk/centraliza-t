@@ -6,7 +6,7 @@ import PageWrapper from '../components/PageWrapper';
 import usePermissions from '../hooks/usePermissions';
 import CurriculumManager from '../components/CurriculumManager';
 
-const DocumentUpload = ({ onOpenRECLUTANDO, auth, onLogout }) => {
+const DocumentUpload = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const { canUpdate } = usePermissions('documentos');

@@ -7,7 +7,7 @@ import usePermissions from '../hooks/usePermissions';
 import TestCard from '../components/TestCard';
 import TestAnalysisModal from '../components/TestAnalysisModal';
 
-const Tests = ({ onOpenRECLUTANDO, auth, onLogout }) => {
+const Tests = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');

@@ -25,7 +25,7 @@ import {
     FolderOpen
 } from 'lucide-react';
 
-const Sidebar = ({ onOpenRECLUTANDO, auth, setAuth, onLogout }) => {
+const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
     // ... (rest of component)
 
     const [showProfileModal, setShowProfileModal] = useState(false);
@@ -158,7 +158,7 @@ const Sidebar = ({ onOpenRECLUTANDO, auth, setAuth, onLogout }) => {
                             <button
                                 key={app._id}
                                 onClick={() => {
-                                    onOpenRECLUTANDO(app);
+                                    onOpenCENTRALIZAT(app);
                                     setSearchTerm('');
                                 }}
                                 className="w-full p-5 text-left hover:bg-white/[0.03] transition-all flex flex-col gap-1.5 border-b border-white/5 last:border-0 group/result"
@@ -296,7 +296,7 @@ const Sidebar = ({ onOpenRECLUTANDO, auth, setAuth, onLogout }) => {
                     onUpdate={(updatedUser) => {
                         if (setAuth) {
                             setAuth(prev => ({ ...prev, ...updatedUser }));
-                            localStorage.setItem('reclutando_user', JSON.stringify({ ...auth, ...updatedUser }));
+                            localStorage.setItem('centralizat_user', JSON.stringify({ ...auth, ...updatedUser }));
                         } else {
                             window.location.reload();
                         }

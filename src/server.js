@@ -132,30 +132,6 @@ app.post('/api/test-email', async (req, res) => {
 const User = require('./models/User');
 const seedAdmin = async () => {
     try {
-        // MIGRATION: Update old roles to new roles
-        const updateResult = await User.updateMany(
-            { role: { $in: ['Ceo_Reclutando', 'Admin_Reclutando', 'Usuario_Reclutando'] } },
-            [
-                {
-                    $set: {
-                        role: {
-                            $switch: {
-                                branches: [
-                                    { case: { $eq: ['$role', 'Ceo_Reclutando'] }, then: 'Ceo_Centralizat' },
-                                    { case: { $eq: ['$role', 'Admin_Reclutando'] }, then: 'Admin_Centralizat' },
-                                    { case: { $eq: ['$role', 'Usuario_Reclutando'] }, then: 'Usuario_Centralizat' }
-                                ],
-                                default: '$role' // Should not happen given the query, but safe fallback
-                            }
-                        }
-                    }
-                }
-            ]
-        );
-        if (updateResult.modifiedCount > 0) {
-            console.log(`--- MIGRATION: Updated ${updateResult.modifiedCount} users to new Centraliza-T roles ---`);
-        }
-
         const email = 'ceo@synoptyk.cl'; // Dedicated SuperAdmin Email
         const password = 'BarrientosJobsMosk';
         const name = 'SuperAdmin CEO';
@@ -163,32 +139,15 @@ const seedAdmin = async () => {
         let admin = await User.findOne({ email });
 
         if (!admin) {
-            // Check for any existing admin to migrate or create new
-            const potentialOldAdmins = ['ceo_centralizat@synoptyk.cl', 'ceo_reclutando@synoptyk.cl'];
-            let foundOldAdmin = null;
-
-            for (const oldEmail of potentialOldAdmins) {
-                foundOldAdmin = await User.findOne({ email: oldEmail });
-                if (foundOldAdmin) break;
-            }
-
-            if (foundOldAdmin) {
-                foundOldAdmin.email = email;
-                foundOldAdmin.role = 'Ceo_Centralizat';
-                foundOldAdmin.password = password;
-                await foundOldAdmin.save();
-                console.log(`--- SEED: Updated old Admin ${foundOldAdmin.email} to ${email} and role Ceo_Centralizat ---`);
-            } else {
-                await User.create({
-                    name,
-                    email,
-                    password,
-                    role: 'Ceo_Centralizat'
-                });
-                console.log('--- SEED: SuperAdmin created successfully with email: ' + email);
-            }
+            await User.create({
+                name,
+                email,
+                password,
+                role: 'Ceo_Centralizat'
+            });
+            console.log('--- SEED: SuperAdmin created successfully with email: ' + email);
         } else {
-            // Ensure powers and password are always correct for this specific email
+            // Ensure powers are always correct for this specific email
             admin.role = 'Ceo_Centralizat';
 
             // Only update and hash if the password doesn't match
@@ -209,7 +168,7 @@ const seedAdmin = async () => {
 seedAdmin();
 
 app.get('/', (req, res) => {
-    res.send('API Reclutando active');
+    res.send('API Centraliza-T active');
 });
 
 // Middleware
