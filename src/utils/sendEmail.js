@@ -1,42 +1,14 @@
 const nodemailer = require('nodemailer');
-const Config = require('../models/Config');
 
 const sendEmail = async (options) => {
-    // 1. Try to fetch Dynamic Config from DB
+    // 1. Use strictly Environment Variables
     let smtpConfig = {
-        host: process.env.SMTP_HOST || 'smtp.zoho.com',
+        host: process.env.SMTP_HOST || 'smtppro.zoho.com',
         port: process.env.SMTP_PORT || 465,
         user: process.env.SMTP_USER || process.env.SMTP_EMAIL,
         pass: process.env.SMTP_PASS || process.env.SMTP_PASSWORD,
         fromName: process.env.FROM_NAME || 'Centraliza-T'
     };
-
-    try {
-        const dbConfig = await Config.findOne();
-        if (dbConfig && dbConfig.smtp && dbConfig.smtp.email) {
-            console.log('--- SMTP: Found Database Configuration ---');
-            console.log(`--- SMTP: DB User: ${dbConfig.smtp.email}`);
-            console.log(`--- SMTP: DB Pass Length: ${dbConfig.smtp.password ? dbConfig.smtp.password.length : 0}`);
-
-            // Only use DB config if password is strictly present
-            if (dbConfig.smtp.password && dbConfig.smtp.password.trim() !== '') {
-                smtpConfig = {
-                    host: dbConfig.smtp.host || 'smtp.zoho.com',
-                    port: dbConfig.smtp.port || 465,
-                    user: dbConfig.smtp.email,
-                    pass: dbConfig.smtp.password,
-                    fromName: dbConfig.smtp.fromName || 'Soporte Centraliza-T'
-                };
-            } else {
-                console.log('--- SMTP WARNING: DB Password empty, falling back to ENV variables ---');
-            }
-        } else {
-            console.log('--- SMTP: No Database Configuration found, using Environment Variables ---');
-        }
-    } catch (err) {
-        console.error('--- SMTP CONFIG ERROR:', err.message);
-        // Fallback to env vars is already set
-    }
 
     if (!smtpConfig.user || !smtpConfig.pass) {
         console.error('--- SMTP ERROR: Missing Credentials ---');

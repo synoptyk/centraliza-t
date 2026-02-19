@@ -184,7 +184,7 @@ connectDB().then(() => {
     // Verify SMTP Connection on Startup
     const nodemailer = require('nodemailer');
     const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.zoho.com',
+        host: process.env.SMTP_HOST || 'smtppro.zoho.com',
         port: process.env.SMTP_PORT || 465,
         secure: Number(process.env.SMTP_PORT) === 465,
         auth: {
