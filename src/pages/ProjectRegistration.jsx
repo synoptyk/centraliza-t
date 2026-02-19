@@ -25,6 +25,7 @@ const areas = ["MO Tecnica", "MO Supervision", "MO Jefatura", "MO Estructura"];
 
 const ProjectRegistration = ({ auth, onLogout }) => {
     const [viewMode, setViewMode] = useState('list'); // 'list' or 'form'
+    const [editingProject, setEditingProject] = useState(null);
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(false);
 
