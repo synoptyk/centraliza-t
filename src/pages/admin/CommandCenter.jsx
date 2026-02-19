@@ -21,7 +21,7 @@ const MODULES_LIST = [
     { id: 'contratacion', name: 'Aprobación de Contrato' },
     { id: 'historial', name: 'Expediente Maestro' },
     { id: 'contratados', name: 'Nómina de Contratados' },
-    { id: 'configuracion', name: 'Ajustes del Sistema' },
+    { id: 'contratados', name: 'Nómina de Contratados' },
 ];
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -40,17 +40,9 @@ const CommandCenter = ({ auth, onLogout }) => {
     const [showBulkModal, setShowBulkModal] = useState(false);
     const [bulkType, setBulkType] = useState('companies'); // 'companies' or 'users'
     const [bulkLoading, setBulkLoading] = useState(false);
+    const [bulkType, setBulkType] = useState('companies'); // 'companies' or 'users'
+    const [bulkLoading, setBulkLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false); // New state for password visibility
-    const [showSmtpPassword, setShowSmtpPassword] = useState(false); // New state for SMTP password visibility
-    const [configForm, setConfigForm] = useState({
-        smtp: {
-            host: 'smtppro.zoho.com',
-            port: 465,
-            email: '',
-            password: '',
-            fromName: 'Soporte Centraliza-T'
-        }
-    });
     const [showCredentialsModal, setShowCredentialsModal] = useState(false);
     const [createdCredentials, setCreatedCredentials] = useState(null);
 
@@ -87,19 +79,9 @@ const CommandCenter = ({ auth, onLogout }) => {
     // Fetch data on mount
     useEffect(() => {
         fetchData();
-        fetchConfig();
     }, []);
 
-    const fetchConfig = async () => {
-        try {
-            const { data } = await api.get('/config');
-            if (data && data.smtp) {
-                setConfigForm(prev => ({ ...prev, smtp: { ...prev.smtp, ...data.smtp } }));
-            }
-        } catch (error) {
-            console.error('Error fetching config:', error);
-        }
-    };
+
 
 
     // KPI Data
@@ -288,67 +270,7 @@ const CommandCenter = ({ auth, onLogout }) => {
         }
     };
 
-    const handleSubmitConfig = async (e) => {
-        e.preventDefault();
-        try {
-            await api.put('/config', configForm);
-            toast.success('Configuración del sistema actualizada');
-        } catch (error) {
-            console.error('Error updating config:', error);
-            toast.error('Error al guardar configuración');
-        }
-    };
 
-    const handleTestEmail = async () => {
-        const testEmail = prompt('Ingrese correo de destinatario para la prueba:', auth?.email);
-        if (!testEmail) return;
-
-        try {
-            toast.loading('Enviando correo de prueba...');
-            await api.post('/config/test-email', { email: testEmail });
-            toast.dismiss();
-            toast.success(`Correo de prueba enviado a ${testEmail}`);
-        } catch (error) {
-            toast.dismiss();
-            console.error('Test Email Error:', error);
-            toast.error(error.response?.data?.message || 'Error al enviar correo de prueba');
-        }
-    }
-
-
-    const handleResetSmtp = async () => {
-        if (!window.confirm('¿Está seguro de restablecer la configuración SMTP?\n\nEsto BORRARÁ la configuración personalizada de la base de datos y forzará al sistema a usar las variables de entorno del servidor (Render).\n\nÚselo si sospecha que la configuración guardada es incorrecta.')) {
-            return;
-        }
-
-        try {
-            toast.loading('Restableciendo configuración SMTP...');
-            await api.post('/config/reset-smtp');
-
-            // Refetch config to see empty values (or defaults)
-            await fetchConfig();
-
-            // Manually reset form defaults just in case
-            setConfigForm(prev => ({
-                ...prev,
-                smtp: {
-                    host: 'smtppro.zoho.com',
-                    port: 465,
-                    email: '',
-                    password: '',
-                    fromName: 'Soporte Centraliza-T'
-                }
-            }));
-            setShowSmtpPassword(false);
-
-            toast.dismiss();
-            toast.success('Configuración SMTP restablecida a valores del servidor.');
-        } catch (error) {
-            toast.dismiss();
-            console.error('Reset SMTP Error:', error);
-            toast.error(error.response?.data?.message || 'Error al restablecer configuración');
-        }
-    };
 
     const handleExportExcel = () => {
         if (activeTab === 'dashboard') {
@@ -597,14 +519,14 @@ const CommandCenter = ({ auth, onLogout }) => {
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-100 pb-4">
                 <div className="flex gap-6">
-                    {['dashboard', 'companies', 'users', 'configuracion'].map((tab) => (
+                    {['dashboard', 'companies', 'users'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`pb-4 px-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative flex items-center gap-3 ${activeTab === tab ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
                         >
-                            {tab === 'dashboard' ? 'Panel' : tab === 'companies' ? 'Empresas' : tab === 'users' ? 'Usuarios' : 'Configuración'}
-                            {tab !== 'configuracion' && (
+                            {tab === 'dashboard' ? 'Panel' : tab === 'companies' ? 'Empresas' : 'Usuarios'}
+                            {(
                                 <span className={`px-2 py-0.5 rounded-full text-[9px] ${activeTab === tab ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
                                     {tab === 'dashboard' ? '' : tab === 'companies' ? companies.length : users.length}
                                 </span>
@@ -856,668 +778,585 @@ const CommandCenter = ({ auth, onLogout }) => {
                     ) : (
                         <NoDataMessage icon={Users} tab="usuarios" />
                     )
-                ) : activeTab === 'configuracion' ? (
-                    <div className="p-10 max-w-4xl mx-auto">
-                        <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
-                            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
-                                <ShieldCheck size={20} className="text-indigo-600" /> Configuración de Correo (SMTP)
-                            </h3>
-                            <form onSubmit={handleSubmitConfig} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Servidor SMTP</label>
-                                        <input
-                                            type="text"
-                                            value={configForm.smtp.host}
-                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, host: e.target.value } })}
-                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
-                                            placeholder="smtp.zoho.com"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Puerto</label>
-                                        <input
-                                            type="number"
-                                            value={configForm.smtp.port}
-                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, port: Number(e.target.value) } })}
-                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
-                                            placeholder="465"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Email de Soporte (Remitente)</label>
-                                        <input
-                                            type="email"
-                                            value={configForm.smtp.email}
-                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, email: e.target.value } })}
-                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
-                                            placeholder="soporte@empresa.com"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Contraseña (App Password)</label>
-                                        <div className="relative">
-                                            <input
-                                                type={showSmtpPassword ? "text" : "password"}
-                                                value={configForm.smtp.password || ''}
-                                                onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, password: e.target.value } })}
-                                                className="w-full pl-5 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700 font-mono"
-                                                placeholder="••••••••••••"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowSmtpPassword(!showSmtpPassword)}
-                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                                title={showSmtpPassword ? "Ocultar Contraseña" : "Ver Contraseña"}
-                                            >
-                                                {showSmtpPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2 md:col-span-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Nombre del Remitente</label>
-                                        <input
-                                            type="text"
-                                            value={configForm.smtp.fromName}
-                                            onChange={e => setConfigForm({ ...configForm, smtp: { ...configForm.smtp, fromName: e.target.value } })}
-                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm text-slate-700"
-                                            placeholder="Soporte Centraliza-T"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="pt-4 flex justify-end gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={handleResetSmtp}
-                                        className="mr-auto px-6 py-4 bg-red-100 text-red-600 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-red-200 transition-all flex items-center gap-2"
-                                        title="Borrar configuración de BD y usar valores del servidor"
-                                    >
-                                        <RefreshCw size={18} /> Restablecer
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleTestEmail}
-                                        className="px-6 py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center gap-2"
-                                    >
-                                        <Zap size={18} /> Probar Correo
-                                    </button>
-                                    <button type="submit" className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
-                                        Guardar Configuración
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
                 ) : null}
             </div>
+        </div>
 
-            {/* Company Modal */}
-            {showCompanyModal && (
-                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-                    <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar">
-                        <div className="p-10">
-                            <div className="flex justify-between items-center mb-8">
-                                <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">
-                                    {editingCompany ? 'Editar Empresa' : 'Nueva Empresa'}
-                                </h2>
-                                <button onClick={() => setShowCompanyModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                                    <CloseIcon size={24} className="text-slate-400" />
-                                </button>
+            {/* Company Modal */ }
+    {
+        showCompanyModal && (
+            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+                <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar">
+                    <div className="p-10">
+                        <div className="flex justify-between items-center mb-8">
+                            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">
+                                {editingCompany ? 'Editar Empresa' : 'Nueva Empresa'}
+                            </h2>
+                            <button onClick={() => setShowCompanyModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                                <CloseIcon size={24} className="text-slate-400" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmitCompany} className="space-y-8">
+
+                            {/* SECTION 1: DATOS EMPRESA */}
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Información Corporativa</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Razón Social / Nombre</label>
+                                        <input type="text" required value={companyForm.name} onChange={e => setCompanyForm({ ...companyForm, name: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">RUT Empresa</label>
+                                        <input type="text" required value={companyForm.rut} onChange={e => setCompanyForm({ ...companyForm, rut: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Giro Comercial</label>
+                                        <input type="text" value={companyForm.businessLine} onChange={e => setCompanyForm({ ...companyForm, businessLine: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                    <div className="col-span-2 space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Dirección Comercial</label>
+                                        <input type="text" value={companyForm.address} onChange={e => setCompanyForm({ ...companyForm, address: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Sitio Web</label>
+                                        <input type="text" value={companyForm.web} onChange={e => setCompanyForm({ ...companyForm, web: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Email General</label>
+                                        <input type="email" value={companyForm.email} onChange={e => setCompanyForm({ ...companyForm, email: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Teléfono</label>
+                                        <input type="text" value={companyForm.phone} onChange={e => setCompanyForm({ ...companyForm, phone: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Industria</label>
+                                        <input type="text" value={companyForm.industry} onChange={e => setCompanyForm({ ...companyForm, industry: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                </div>
                             </div>
 
-                            <form onSubmit={handleSubmitCompany} className="space-y-8">
-
-                                {/* SECTION 1: DATOS EMPRESA */}
-                                <div className="space-y-4">
-                                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Información Corporativa</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Razón Social / Nombre</label>
-                                            <input type="text" required value={companyForm.name} onChange={e => setCompanyForm({ ...companyForm, name: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">RUT Empresa</label>
-                                            <input type="text" required value={companyForm.rut} onChange={e => setCompanyForm({ ...companyForm, rut: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Giro Comercial</label>
-                                            <input type="text" value={companyForm.businessLine} onChange={e => setCompanyForm({ ...companyForm, businessLine: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                        <div className="col-span-2 space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Dirección Comercial</label>
-                                            <input type="text" value={companyForm.address} onChange={e => setCompanyForm({ ...companyForm, address: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Sitio Web</label>
-                                            <input type="text" value={companyForm.web} onChange={e => setCompanyForm({ ...companyForm, web: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Email General</label>
-                                            <input type="email" value={companyForm.email} onChange={e => setCompanyForm({ ...companyForm, email: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Teléfono</label>
-                                            <input type="text" value={companyForm.phone} onChange={e => setCompanyForm({ ...companyForm, phone: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Industria</label>
-                                            <input type="text" value={companyForm.industry} onChange={e => setCompanyForm({ ...companyForm, industry: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* SECTION 2: REPRESENTANTES LEGALES */}
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center border-b border-indigo-100 pb-2">
-                                        <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest">Representantes Legales</h3>
-                                        <button
-                                            type="button"
-                                            onClick={() => setCompanyForm(prev => ({
-                                                ...prev,
-                                                legalRepresentatives: [...prev.legalRepresentatives, { rut: '', name: '', email: '', phone: '' }]
-                                            }))}
-                                            className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-indigo-100 transition-all flex items-center gap-1"
-                                        >
-                                            <Plus size={12} /> Agregar Rep.
-                                        </button>
-                                    </div>
-
-                                    {companyForm.legalRepresentatives.length === 0 && (
-                                        <p className="text-xs text-slate-400 italic">No hay representantes legales registrados.</p>
-                                    )}
-
-                                    {companyForm.legalRepresentatives.map((rep, index) => (
-                                        <div key={index} className="bg-slate-50 p-4 rounded-2xl border border-slate-100 relative group">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const newReps = companyForm.legalRepresentatives.filter((_, i) => i !== index);
-                                                    setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
-                                                }}
-                                                className="absolute top-2 right-2 p-1.5 bg-white text-slate-400 hover:text-red-500 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all"
-                                                title="Eliminar"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">RUT</label>
-                                                    <input
-                                                        type="text"
-                                                        value={rep.rut}
-                                                        onChange={e => {
-                                                            const newReps = [...companyForm.legalRepresentatives];
-                                                            newReps[index].rut = e.target.value;
-                                                            setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
-                                                        }}
-                                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
-                                                        placeholder="12.345.678-9"
-                                                    />
-                                                </div>
-                                                <div className="md:col-span-2 space-y-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Nombre Completo</label>
-                                                    <input
-                                                        type="text"
-                                                        value={rep.name}
-                                                        onChange={e => {
-                                                            const newReps = [...companyForm.legalRepresentatives];
-                                                            newReps[index].name = e.target.value;
-                                                            setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
-                                                        }}
-                                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
-                                                        placeholder="Nombre Apellido"
-                                                    />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Email</label>
-                                                    <input
-                                                        type="email"
-                                                        value={rep.email}
-                                                        onChange={e => {
-                                                            const newReps = [...companyForm.legalRepresentatives];
-                                                            newReps[index].email = e.target.value;
-                                                            setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
-                                                        }}
-                                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
-                                                        placeholder="nombre@empresa.com"
-                                                    />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Teléfono</label>
-                                                    <input
-                                                        type="text"
-                                                        value={rep.phone}
-                                                        onChange={e => {
-                                                            const newReps = [...companyForm.legalRepresentatives];
-                                                            newReps[index].phone = e.target.value;
-                                                            setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
-                                                        }}
-                                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
-                                                        placeholder="+569..."
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* SECTION 3: CONTACTOS COMERCIALES */}
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center border-b border-indigo-100 pb-2">
-                                        <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest">Contactos Comerciales</h3>
-                                        <button
-                                            type="button"
-                                            onClick={() => setCompanyForm(prev => ({
-                                                ...prev,
-                                                commercialContacts: [...prev.commercialContacts, { name: '', phone: '', email: '' }]
-                                            }))}
-                                            className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-indigo-100 transition-all flex items-center gap-1"
-                                        >
-                                            <Plus size={12} /> Agregar Contacto
-                                        </button>
-                                    </div>
-
-                                    {companyForm.commercialContacts.length === 0 && (
-                                        <p className="text-xs text-slate-400 italic">No hay contactos comerciales registrados.</p>
-                                    )}
-
-                                    {companyForm.commercialContacts.map((contact, index) => (
-                                        <div key={index} className="bg-slate-50 p-4 rounded-2xl border border-slate-100 relative group">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const newContacts = companyForm.commercialContacts.filter((_, i) => i !== index);
-                                                    setCompanyForm({ ...companyForm, commercialContacts: newContacts });
-                                                }}
-                                                className="absolute top-2 right-2 p-1.5 bg-white text-slate-400 hover:text-red-500 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all"
-                                                title="Eliminar"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Nombre</label>
-                                                    <input
-                                                        type="text"
-                                                        value={contact.name}
-                                                        onChange={e => {
-                                                            const newContacts = [...companyForm.commercialContacts];
-                                                            newContacts[index].name = e.target.value;
-                                                            setCompanyForm({ ...companyForm, commercialContacts: newContacts });
-                                                        }}
-                                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
-                                                        placeholder="Nombre Apellido"
-                                                    />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Celular</label>
-                                                    <input
-                                                        type="text"
-                                                        value={contact.phone}
-                                                        onChange={e => {
-                                                            const newContacts = [...companyForm.commercialContacts];
-                                                            newContacts[index].phone = e.target.value;
-                                                            setCompanyForm({ ...companyForm, commercialContacts: newContacts });
-                                                        }}
-                                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
-                                                        placeholder="+569..."
-                                                    />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Email</label>
-                                                    <input
-                                                        type="email"
-                                                        value={contact.email}
-                                                        onChange={e => {
-                                                            const newContacts = [...companyForm.commercialContacts];
-                                                            newContacts[index].email = e.target.value;
-                                                            setCompanyForm({ ...companyForm, commercialContacts: newContacts });
-                                                        }}
-                                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
-                                                        placeholder="contacto@empresa.com"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* SECTION 4: CONTRATO */}
-                                <div className="space-y-4">
-                                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Detalles del Contrato</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Inicio Contrato</label>
-                                            <input type="date" value={companyForm.contractStartDate ? companyForm.contractStartDate.split('T')[0] : ''} onChange={e => setCompanyForm({ ...companyForm, contractStartDate: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Duración (Meses)</label>
-                                            <input type="number" min="1" value={companyForm.contractDurationMonths} onChange={e => setCompanyForm({ ...companyForm, contractDurationMonths: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" placeholder="Ej. 12" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Término / Renovación</label>
-                                            <input type="date" disabled value={companyForm.contractEndDate ? companyForm.contractEndDate.split('T')[0] : ''} className="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed text-xs font-bold" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Límite Usuarios</label>
-                                            <input type="number" min="1" value={companyForm.contractedUsersLimit} onChange={e => setCompanyForm({ ...companyForm, contractedUsersLimit: e.target.value })} className="w-full px-4 py-2 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold text-indigo-700" title="Solo editable por SuperAdmin" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Valor Usuario (UF)</label>
-                                            <input type="number" step="0.01" value={companyForm.userValueUF} onChange={e => setCompanyForm({ ...companyForm, userValueUF: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Total Mensual (UF)</label>
-                                            <input type="number" step="0.01" value={companyForm.monthlyTotalUF} onChange={e => setCompanyForm({ ...companyForm, monthlyTotalUF: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-4 pt-4 border-t border-slate-100 mt-8">
-                                    <button type="button" onClick={() => setShowCompanyModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-200 transition-all">Cancelar</button>
-                                    <button type="submit" className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
-                                        {editingCompany ? 'Actualizar Contrato' : 'Generar Contrato'}
+                            {/* SECTION 2: REPRESENTANTES LEGALES */}
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center border-b border-indigo-100 pb-2">
+                                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest">Representantes Legales</h3>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCompanyForm(prev => ({
+                                            ...prev,
+                                            legalRepresentatives: [...prev.legalRepresentatives, { rut: '', name: '', email: '', phone: '' }]
+                                        }))}
+                                        className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-indigo-100 transition-all flex items-center gap-1"
+                                    >
+                                        <Plus size={12} /> Agregar Rep.
                                     </button>
                                 </div>
-                            </form>
-                        </div>
+
+                                {companyForm.legalRepresentatives.length === 0 && (
+                                    <p className="text-xs text-slate-400 italic">No hay representantes legales registrados.</p>
+                                )}
+
+                                {companyForm.legalRepresentatives.map((rep, index) => (
+                                    <div key={index} className="bg-slate-50 p-4 rounded-2xl border border-slate-100 relative group">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const newReps = companyForm.legalRepresentatives.filter((_, i) => i !== index);
+                                                setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
+                                            }}
+                                            className="absolute top-2 right-2 p-1.5 bg-white text-slate-400 hover:text-red-500 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all"
+                                            title="Eliminar"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">RUT</label>
+                                                <input
+                                                    type="text"
+                                                    value={rep.rut}
+                                                    onChange={e => {
+                                                        const newReps = [...companyForm.legalRepresentatives];
+                                                        newReps[index].rut = e.target.value;
+                                                        setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
+                                                    placeholder="12.345.678-9"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2 space-y-1">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Nombre Completo</label>
+                                                <input
+                                                    type="text"
+                                                    value={rep.name}
+                                                    onChange={e => {
+                                                        const newReps = [...companyForm.legalRepresentatives];
+                                                        newReps[index].name = e.target.value;
+                                                        setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
+                                                    placeholder="Nombre Apellido"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Email</label>
+                                                <input
+                                                    type="email"
+                                                    value={rep.email}
+                                                    onChange={e => {
+                                                        const newReps = [...companyForm.legalRepresentatives];
+                                                        newReps[index].email = e.target.value;
+                                                        setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
+                                                    placeholder="nombre@empresa.com"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Teléfono</label>
+                                                <input
+                                                    type="text"
+                                                    value={rep.phone}
+                                                    onChange={e => {
+                                                        const newReps = [...companyForm.legalRepresentatives];
+                                                        newReps[index].phone = e.target.value;
+                                                        setCompanyForm({ ...companyForm, legalRepresentatives: newReps });
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
+                                                    placeholder="+569..."
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* SECTION 3: CONTACTOS COMERCIALES */}
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center border-b border-indigo-100 pb-2">
+                                    <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest">Contactos Comerciales</h3>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCompanyForm(prev => ({
+                                            ...prev,
+                                            commercialContacts: [...prev.commercialContacts, { name: '', phone: '', email: '' }]
+                                        }))}
+                                        className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-indigo-100 transition-all flex items-center gap-1"
+                                    >
+                                        <Plus size={12} /> Agregar Contacto
+                                    </button>
+                                </div>
+
+                                {companyForm.commercialContacts.length === 0 && (
+                                    <p className="text-xs text-slate-400 italic">No hay contactos comerciales registrados.</p>
+                                )}
+
+                                {companyForm.commercialContacts.map((contact, index) => (
+                                    <div key={index} className="bg-slate-50 p-4 rounded-2xl border border-slate-100 relative group">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const newContacts = companyForm.commercialContacts.filter((_, i) => i !== index);
+                                                setCompanyForm({ ...companyForm, commercialContacts: newContacts });
+                                            }}
+                                            className="absolute top-2 right-2 p-1.5 bg-white text-slate-400 hover:text-red-500 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all"
+                                            title="Eliminar"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Nombre</label>
+                                                <input
+                                                    type="text"
+                                                    value={contact.name}
+                                                    onChange={e => {
+                                                        const newContacts = [...companyForm.commercialContacts];
+                                                        newContacts[index].name = e.target.value;
+                                                        setCompanyForm({ ...companyForm, commercialContacts: newContacts });
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
+                                                    placeholder="Nombre Apellido"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Celular</label>
+                                                <input
+                                                    type="text"
+                                                    value={contact.phone}
+                                                    onChange={e => {
+                                                        const newContacts = [...companyForm.commercialContacts];
+                                                        newContacts[index].phone = e.target.value;
+                                                        setCompanyForm({ ...companyForm, commercialContacts: newContacts });
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
+                                                    placeholder="+569..."
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Email</label>
+                                                <input
+                                                    type="email"
+                                                    value={contact.email}
+                                                    onChange={e => {
+                                                        const newContacts = [...companyForm.commercialContacts];
+                                                        newContacts[index].email = e.target.value;
+                                                        setCompanyForm({ ...companyForm, commercialContacts: newContacts });
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-xs font-bold"
+                                                    placeholder="contacto@empresa.com"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* SECTION 4: CONTRATO */}
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Detalles del Contrato</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Inicio Contrato</label>
+                                        <input type="date" value={companyForm.contractStartDate ? companyForm.contractStartDate.split('T')[0] : ''} onChange={e => setCompanyForm({ ...companyForm, contractStartDate: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Duración (Meses)</label>
+                                        <input type="number" min="1" value={companyForm.contractDurationMonths} onChange={e => setCompanyForm({ ...companyForm, contractDurationMonths: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" placeholder="Ej. 12" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Término / Renovación</label>
+                                        <input type="date" disabled value={companyForm.contractEndDate ? companyForm.contractEndDate.split('T')[0] : ''} className="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed text-xs font-bold" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Límite Usuarios</label>
+                                        <input type="number" min="1" value={companyForm.contractedUsersLimit} onChange={e => setCompanyForm({ ...companyForm, contractedUsersLimit: e.target.value })} className="w-full px-4 py-2 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold text-indigo-700" title="Solo editable por SuperAdmin" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Valor Usuario (UF)</label>
+                                        <input type="number" step="0.01" value={companyForm.userValueUF} onChange={e => setCompanyForm({ ...companyForm, userValueUF: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Total Mensual (UF)</label>
+                                        <input type="number" step="0.01" value={companyForm.monthlyTotalUF} onChange={e => setCompanyForm({ ...companyForm, monthlyTotalUF: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 pt-4 border-t border-slate-100 mt-8">
+                                <button type="button" onClick={() => setShowCompanyModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-200 transition-all">Cancelar</button>
+                                <button type="submit" className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
+                                    {editingCompany ? 'Actualizar Contrato' : 'Generar Contrato'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            )}
+            </div>
+        )
+    }
 
-            {/* User Modal */}
-            {showUserModal && (
-                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="p-10">
-                            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-8">
-                                {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
-                            </h2>
-                            <form onSubmit={handleSubmitUser} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                {/* Column 1: Personal info */}
-                                <div className="space-y-6">
-                                    <h3 className="text-sm font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Información Personal</h3>
+    {/* User Modal */ }
+    {
+        showUserModal && (
+            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="p-10">
+                        <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-8">
+                            {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+                        </h2>
+                        <form onSubmit={handleSubmitUser} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Column 1: Personal info */}
+                            <div className="space-y-6">
+                                <h3 className="text-sm font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Información Personal</h3>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="col-span-2 space-y-2">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Nombre Completo</label>
-                                            <input type="text" required value={userForm.name} onChange={e => setUserForm({ ...userForm, name: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">RUT</label>
-                                            <input type="text" value={userForm.rut} onChange={e => setUserForm({ ...userForm, rut: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Celular</label>
-                                            <input type="text" value={userForm.cellphone} onChange={e => setUserForm({ ...userForm, cellphone: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
-                                        </div>
-                                        <div className="col-span-2 space-y-2">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Email Corporativo</label>
-                                            <input type="email" required value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Cargo</label>
-                                            <input type="text" value={userForm.position} onChange={e => setUserForm({ ...userForm, position: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
-                                        </div>
-                                        <div className="col-span-2 space-y-2">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Contraseña {editingUser ? '(Opcional)' : ''}</label>
-                                            <div className="relative">
-                                                <input
-                                                    type={showPassword ? "text" : "password"}
-                                                    value={userForm.password}
-                                                    onChange={e => setUserForm({ ...userForm, password: e.target.value })}
-                                                    className={`w-full pl-5 pr-24 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-mono text-indigo-600 ${editingUser && !['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase()) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                    placeholder={editingUser ? (['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase()) ? "Dejar en blanco para mantener actual" : "Solo SuperAdmin puede cambiar la clave") : "Dejar en blanco para autogenerar"}
-                                                    disabled={editingUser && !['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase())}
-                                                />
-                                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="col-span-2 space-y-2">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Nombre Completo</label>
+                                        <input type="text" required value={userForm.name} onChange={e => setUserForm({ ...userForm, name: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">RUT</label>
+                                        <input type="text" value={userForm.rut} onChange={e => setUserForm({ ...userForm, rut: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Celular</label>
+                                        <input type="text" value={userForm.cellphone} onChange={e => setUserForm({ ...userForm, cellphone: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
+                                    </div>
+                                    <div className="col-span-2 space-y-2">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Email Corporativo</label>
+                                        <input type="email" required value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Cargo</label>
+                                        <input type="text" value={userForm.position} onChange={e => setUserForm({ ...userForm, position: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
+                                    </div>
+                                    <div className="col-span-2 space-y-2">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Contraseña {editingUser ? '(Opcional)' : ''}</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                value={userForm.password}
+                                                onChange={e => setUserForm({ ...userForm, password: e.target.value })}
+                                                className={`w-full pl-5 pr-24 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none font-mono text-indigo-600 ${editingUser && !['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase()) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                placeholder={editingUser ? (['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase()) ? "Dejar en blanco para mantener actual" : "Solo SuperAdmin puede cambiar la clave") : "Dejar en blanco para autogenerar"}
+                                                disabled={editingUser && !['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase())}
+                                            />
+                                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                                    title={showPassword ? "Ocultar Contraseña" : "Ver Contraseña"}
+                                                >
+                                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                </button>
+                                                {(!editingUser || ['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase())) && (
                                                     <button
                                                         type="button"
-                                                        onClick={() => setShowPassword(!showPassword)}
-                                                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                                        title={showPassword ? "Ocultar Contraseña" : "Ver Contraseña"}
+                                                        onClick={handleGeneratePassword}
+                                                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                                        title="Generar Contraseña Segura"
                                                     >
-                                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                        <Key size={16} />
                                                     </button>
-                                                    {(!editingUser || ['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase())) && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={handleGeneratePassword}
-                                                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                                                            title="Generar Contraseña Segura"
+                                                )}
+                                            </div>
+                                        </div>
+                                        {editingUser && userForm.password === '' && (
+                                            <p className="text-[10px] text-amber-600 font-bold ml-1">
+                                                * La contraseña actual está oculta por seguridad.
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <h3 className="text-sm font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2 mt-6">Vinculación Empresarial</h3>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Empresa</label>
+                                        <select
+                                            value={userForm.companyId}
+                                            onChange={e => {
+                                                const newCompanyId = e.target.value;
+                                                setUserForm(prev => ({
+                                                    ...prev,
+                                                    companyId: newCompanyId,
+                                                    role: newCompanyId ? 'Usuario_Empresa' : 'Usuario_Centralizat'
+                                                }));
+                                            }}
+                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none"
+                                        >
+                                            <option value="">Empresa CENTRALIZA-T (Interno)</option>
+                                            {companies.map(c => (
+                                                <option key={c._id} value={c._id}>{c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Rol en Sistema</label>
+                                        <select
+                                            value={userForm.role}
+                                            onChange={e => setUserForm({ ...userForm, role: e.target.value })}
+                                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none"
+                                        >
+                                            <option value="Usuario_Empresa">Usuario_Empresa</option>
+                                            <option value="Admin_Empresa">Admin_Empresa</option>
+                                            <option value="Usuario_Centralizat">Usuario_Centralizat</option>
+                                            <option value="Admin_Centralizat">Admin_Centralizat</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Column 2: Permissions */}
+                            <div className="space-y-6">
+                                <h3 className="text-sm font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Permisos de Módulos</h3>
+                                <div className="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {MODULES_LIST.map(module => {
+                                        const perm = userForm.permissions.find(p => p.module === module.id) || { actions: { create: false, read: false, update: false, delete: false } };
+                                        const actions = perm.actions || { create: false, read: false, update: false, delete: false };
+
+                                        return (
+                                            <div key={module.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50 hover:border-indigo-200 transition-all">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <span className="text-xs font-black uppercase tracking-wider text-slate-700">{module.name}</span>
+                                                </div>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {[
+                                                        { id: 'read', label: 'Ver', icon: Square },
+                                                        { id: 'create', label: 'Crear', icon: Plus },
+                                                        { id: 'update', label: 'Editar', icon: Pencil },
+                                                        { id: 'delete', label: 'Eliminar', icon: Trash2 }
+                                                    ].map(actionType => (
+                                                        <div
+                                                            key={actionType.id}
+                                                            onClick={() => togglePermission(module.id, actionType.id)}
+                                                            className={`cursor-pointer p-2 rounded-lg border text-center transition-all ${actions[actionType.id]
+                                                                ? 'bg-indigo-100 border-indigo-200 text-indigo-700'
+                                                                : 'bg-white border-slate-200 text-slate-400 hover:border-indigo-200'
+                                                                }`}
                                                         >
-                                                            <Key size={16} />
-                                                        </button>
-                                                    )}
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <actionType.icon size={14} />
+                                                                <span className="text-[9px] font-bold uppercase">{actionType.label}</span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
-                                            {editingUser && userForm.password === '' && (
-                                                <p className="text-[10px] text-amber-600 font-bold ml-1">
-                                                    * La contraseña actual está oculta por seguridad.
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <h3 className="text-sm font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2 mt-6">Vinculación Empresarial</h3>
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Empresa</label>
-                                            <select
-                                                value={userForm.companyId}
-                                                onChange={e => {
-                                                    const newCompanyId = e.target.value;
-                                                    setUserForm(prev => ({
-                                                        ...prev,
-                                                        companyId: newCompanyId,
-                                                        role: newCompanyId ? 'Usuario_Empresa' : 'Usuario_Centralizat'
-                                                    }));
-                                                }}
-                                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none"
-                                            >
-                                                <option value="">Empresa CENTRALIZA-T (Interno)</option>
-                                                {companies.map(c => (
-                                                    <option key={c._id} value={c._id}>{c.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Rol en Sistema</label>
-                                            <select
-                                                value={userForm.role}
-                                                onChange={e => setUserForm({ ...userForm, role: e.target.value })}
-                                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none"
-                                            >
-                                                <option value="Usuario_Empresa">Usuario_Empresa</option>
-                                                <option value="Admin_Empresa">Admin_Empresa</option>
-                                                <option value="Usuario_Centralizat">Usuario_Centralizat</option>
-                                                <option value="Admin_Centralizat">Admin_Centralizat</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                        );
+                                    })}
                                 </div>
+                                <p className="text-[10px] text-slate-400 font-bold text-center">
+                                    * Selecciona los módulos a los que este usuario tendrá acceso.
+                                </p>
+                            </div>
 
-                                {/* Column 2: Permissions */}
-                                <div className="space-y-6">
-                                    <h3 className="text-sm font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Permisos de Módulos</h3>
-                                    <div className="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                        {MODULES_LIST.map(module => {
-                                            const perm = userForm.permissions.find(p => p.module === module.id) || { actions: { create: false, read: false, update: false, delete: false } };
-                                            const actions = perm.actions || { create: false, read: false, update: false, delete: false };
-
-                                            return (
-                                                <div key={module.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50 hover:border-indigo-200 transition-all">
-                                                    <div className="flex items-center justify-between mb-3">
-                                                        <span className="text-xs font-black uppercase tracking-wider text-slate-700">{module.name}</span>
-                                                    </div>
-                                                    <div className="grid grid-cols-4 gap-2">
-                                                        {[
-                                                            { id: 'read', label: 'Ver', icon: Square },
-                                                            { id: 'create', label: 'Crear', icon: Plus },
-                                                            { id: 'update', label: 'Editar', icon: Pencil },
-                                                            { id: 'delete', label: 'Eliminar', icon: Trash2 }
-                                                        ].map(actionType => (
-                                                            <div
-                                                                key={actionType.id}
-                                                                onClick={() => togglePermission(module.id, actionType.id)}
-                                                                className={`cursor-pointer p-2 rounded-lg border text-center transition-all ${actions[actionType.id]
-                                                                    ? 'bg-indigo-100 border-indigo-200 text-indigo-700'
-                                                                    : 'bg-white border-slate-200 text-slate-400 hover:border-indigo-200'
-                                                                    }`}
-                                                            >
-                                                                <div className="flex flex-col items-center gap-1">
-                                                                    <actionType.icon size={14} />
-                                                                    <span className="text-[9px] font-bold uppercase">{actionType.label}</span>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                    <p className="text-[10px] text-slate-400 font-bold text-center">
-                                        * Selecciona los módulos a los que este usuario tendrá acceso.
-                                    </p>
-                                </div>
-
-                                <div className="col-span-1 lg:col-span-2 flex flex-col md:flex-row gap-4 pt-4 border-t border-slate-100">
-                                    <button type="button" onClick={() => setShowUserModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-200 transition-all">Cancelar</button>
-                                    {editingUser && ['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase()) && (
-                                        <button
-                                            type="button"
-                                            onClick={handleResetAndResend}
-                                            className="flex-1 py-4 bg-emerald-100 text-emerald-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-emerald-200 border border-emerald-200 transition-all flex items-center justify-center gap-2"
-                                        >
-                                            <RefreshCw size={16} /> Restablecer y Reenviar
-                                        </button>
-                                    )}
-                                    <button type="submit" className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
-                                        {editingUser ? 'Actualizar Usuario' : 'Crear Usuario'}
+                            <div className="col-span-1 lg:col-span-2 flex flex-col md:flex-row gap-4 pt-4 border-t border-slate-100">
+                                <button type="button" onClick={() => setShowUserModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-200 transition-all">Cancelar</button>
+                                {editingUser && ['CEO_CENTRALIZAT', 'ADMIN_CENTRALIZAT'].includes(auth?.role?.toUpperCase()) && (
+                                    <button
+                                        type="button"
+                                        onClick={handleResetAndResend}
+                                        className="flex-1 py-4 bg-emerald-100 text-emerald-700 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-emerald-200 border border-emerald-200 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <RefreshCw size={16} /> Restablecer y Reenviar
                                     </button>
-                                </div>
-                            </form>
-                        </div>
+                                )}
+                                <button type="submit" className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
+                                    {editingUser ? 'Actualizar Usuario' : 'Crear Usuario'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            )}
+            </div>
+        )
+    }
 
-            {/* Credentials Modal */}
-            {showCredentialsModal && createdCredentials && (
-                <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-[70] p-4 animate-in fade-in duration-300">
-                    <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-300">
-                        <div className="p-8 text-center space-y-6">
-                            <div className="w-20 h-20 bg-emerald-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                                <CheckSquare size={40} className="text-emerald-600" />
+    {/* Credentials Modal */ }
+    {
+        showCredentialsModal && createdCredentials && (
+            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-[70] p-4 animate-in fade-in duration-300">
+                <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-300">
+                    <div className="p-8 text-center space-y-6">
+                        <div className="w-20 h-20 bg-emerald-100 rounded-full mx-auto flex items-center justify-center mb-4">
+                            <CheckSquare size={40} className="text-emerald-600" />
+                        </div>
+                        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Usuario Creado Exitosamente</h2>
+                        <p className="text-slate-500 text-xs font-bold leading-relaxed">
+                            El usuario ha sido registrado. Aquí tienes sus credenciales de acceso iniciales.
+                        </p>
+
+                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-left space-y-4">
+                            <div>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email</p>
+                                <p className="text-sm font-bold text-slate-800 break-all select-all">{createdCredentials.email}</p>
                             </div>
-                            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Usuario Creado Exitosamente</h2>
-                            <p className="text-slate-500 text-xs font-bold leading-relaxed">
-                                El usuario ha sido registrado. Aquí tienes sus credenciales de acceso iniciales.
-                            </p>
-
-                            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-left space-y-4">
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email</p>
-                                    <p className="text-sm font-bold text-slate-800 break-all select-all">{createdCredentials.email}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contraseña</p>
-                                    <p className="text-xl font-mono font-black text-indigo-600 select-all">{createdCredentials.password}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-3">
-                                <button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(`Credenciales Centraliza-T:\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}\nURL: https://centraliza-t.synoptyk.cl`);
-                                        toast.success('Copiado al portapapeles');
-                                    }}
-                                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
-                                >
-                                    Copiar Credenciales
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        try {
-                                            toast.loading('Enviando correo...');
-                                            await api.post('/users/resend-credentials', {
-                                                name: createdCredentials.name,
-                                                email: createdCredentials.email,
-                                                password: createdCredentials.password
-                                            }, { timeout: 45000 });
-                                            toast.dismiss();
-                                            toast.success('Correo enviado exitosamente');
-                                        } catch (error) {
-                                            toast.dismiss();
-                                            console.error('Resend Error:', error);
-                                            toast.error(error.response?.data?.message || 'Error al enviar correo');
-                                        }
-                                    }}
-                                    className="w-full py-4 bg-purple-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-purple-700 transition-all shadow-lg shadow-purple-200"
-                                >
-                                    Reenviar Correo
-                                </button>
-                                <button
-                                    onClick={() => setShowCredentialsModal(false)}
-                                    className="w-full py-4 bg-white text-slate-500 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-50 transition-all border border-slate-100"
-                                >
-                                    Cerrar
-                                </button>
+                            <div>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contraseña</p>
+                                <p className="text-xl font-mono font-black text-indigo-600 select-all">{createdCredentials.password}</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            )}
 
-            {/* Bulk Upload Modal */}
-            {showBulkModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[60] p-4">
-                    <div className="bg-white rounded-[3rem] shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-300">
-                        <div className="p-10 text-center space-y-8">
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Carga Masiva {bulkType === 'companies' ? 'Empresas' : 'Usuarios'}</h2>
-                                <button onClick={() => setShowBulkModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
-                                    <CloseIcon size={20} className="text-slate-400" />
-                                </button>
-                            </div>
-
-                            <div className="p-10 border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-slate-50 flex flex-col items-center gap-6 group hover:border-indigo-400 transition-all">
-                                <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-all">
-                                    <FileSpreadsheet size={40} className="text-indigo-600" />
-                                </div>
-                                <div className="space-y-2">
-                                    <p className="text-xs font-black text-slate-900 uppercase tracking-widest">Sube tu archivo Excel o CSV</p>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Formatos admitidos: .xlsx, .xls, .csv</p>
-                                </div>
-                                <label className="w-full">
-                                    <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleBulkUpload} disabled={bulkLoading} />
-                                    <div className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] cursor-pointer hover:bg-indigo-500 transition-all flex items-center justify-center gap-3">
-                                        {bulkLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><Upload size={16} /> Seleccionar Archivo</>}
-                                    </div>
-                                </label>
-                            </div>
-
-                            <div className="bg-amber-50 rounded-2xl p-6 border border-amber-100 flex gap-4 text-left">
-                                <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest">Asegúrate de usar la plantilla correcta</p>
-                                    <p className="text-[9px] text-amber-700 font-bold leading-relaxed">Los nombres de las columnas deben coincidir exactamente para que la carga sea exitosa.</p>
-                                </div>
-                            </div>
-
+                        <div className="flex flex-col gap-3">
                             <button
-                                onClick={() => handleDownloadTemplate(bulkType)}
-                                className="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 transition-all flex items-center justify-center gap-3"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(`Credenciales Centraliza-T:\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}\nURL: https://centraliza-t.synoptyk.cl`);
+                                    toast.success('Copiado al portapapeles');
+                                }}
+                                className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
                             >
-                                <Download size={16} /> Descargar Plantilla .XLSX
+                                Copiar Credenciales
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        toast.loading('Enviando correo...');
+                                        await api.post('/users/resend-credentials', {
+                                            name: createdCredentials.name,
+                                            email: createdCredentials.email,
+                                            password: createdCredentials.password
+                                        }, { timeout: 45000 });
+                                        toast.dismiss();
+                                        toast.success('Correo enviado exitosamente');
+                                    } catch (error) {
+                                        toast.dismiss();
+                                        console.error('Resend Error:', error);
+                                        toast.error(error.response?.data?.message || 'Error al enviar correo');
+                                    }
+                                }}
+                                className="w-full py-4 bg-purple-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-purple-700 transition-all shadow-lg shadow-purple-200"
+                            >
+                                Reenviar Correo
+                            </button>
+                            <button
+                                onClick={() => setShowCredentialsModal(false)}
+                                className="w-full py-4 bg-white text-slate-500 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-slate-50 transition-all border border-slate-100"
+                            >
+                                Cerrar
                             </button>
                         </div>
                     </div>
                 </div>
-            )}
-        </PageWrapper>
+            </div>
+        )
+    }
+
+    {/* Bulk Upload Modal */ }
+    {
+        showBulkModal && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+                <div className="bg-white rounded-[3rem] shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-300">
+                    <div className="p-10 text-center space-y-8">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Carga Masiva {bulkType === 'companies' ? 'Empresas' : 'Usuarios'}</h2>
+                            <button onClick={() => setShowBulkModal(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
+                                <CloseIcon size={20} className="text-slate-400" />
+                            </button>
+                        </div>
+
+                        <div className="p-10 border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-slate-50 flex flex-col items-center gap-6 group hover:border-indigo-400 transition-all">
+                            <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-all">
+                                <FileSpreadsheet size={40} className="text-indigo-600" />
+                            </div>
+                            <div className="space-y-2">
+                                <p className="text-xs font-black text-slate-900 uppercase tracking-widest">Sube tu archivo Excel o CSV</p>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Formatos admitidos: .xlsx, .xls, .csv</p>
+                            </div>
+                            <label className="w-full">
+                                <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleBulkUpload} disabled={bulkLoading} />
+                                <div className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] cursor-pointer hover:bg-indigo-500 transition-all flex items-center justify-center gap-3">
+                                    {bulkLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><Upload size={16} /> Seleccionar Archivo</>}
+                                </div>
+                            </label>
+                        </div>
+
+                        <div className="bg-amber-50 rounded-2xl p-6 border border-amber-100 flex gap-4 text-left">
+                            <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest">Asegúrate de usar la plantilla correcta</p>
+                                <p className="text-[9px] text-amber-700 font-bold leading-relaxed">Los nombres de las columnas deben coincidir exactamente para que la carga sea exitosa.</p>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => handleDownloadTemplate(bulkType)}
+                            className="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 transition-all flex items-center justify-center gap-3"
+                        >
+                            <Download size={16} /> Descargar Plantilla .XLSX
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+        </PageWrapper >
     );
 };
 

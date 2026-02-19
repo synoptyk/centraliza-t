@@ -94,7 +94,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/applicants', require('./routes/applicantRoutes'));
 app.use('/api/curriculum', require('./routes/curriculumRoutes'));
-app.use('/api/config', require('./routes/configRoutes'));
+
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/companies', require('./routes/companyRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
