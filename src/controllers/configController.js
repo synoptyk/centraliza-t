@@ -26,7 +26,14 @@ const updateConfig = asyncHandler(async (req, res) => {
     } else {
         if (managers) config.managers = managers;
         if (admins) config.admins = admins;
-        if (req.body.smtp) config.smtp = req.body.smtp;
+        if (req.body.smtp) {
+            const newSmtp = req.body.smtp;
+            // If new password is empty or placeholder, keep existing password
+            if ((!newSmtp.password || newSmtp.password.trim() === '') && config.smtp && config.smtp.password) {
+                newSmtp.password = config.smtp.password;
+            }
+            config.smtp = newSmtp;
+        }
     }
 
     const updatedConfig = await config.save();
