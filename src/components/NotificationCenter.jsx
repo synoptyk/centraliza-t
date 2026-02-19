@@ -18,7 +18,7 @@ const NotificationCenter = ({ auth }) => {
     const fetchNotifications = async () => {
         try {
             setLoading(true);
-            const res = await api.get('/api/notifications');
+            const res = await api.get('/notifications');
             setNotifications(res.data);
         } catch (error) {
             console.error('Error fetching notifications:', error);

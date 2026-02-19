@@ -99,11 +99,36 @@ const ProjectRegistration = ({ auth, onLogout }) => {
         setProject({ ...project, requirements: newReqs });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Project submitted:', project);
-        toast.success('Proyecto registrado exitosamente');
-        // Reset or redirect
+        try {
+            await api.post('/projects', project);
+            toast.success('Proyecto registrado exitosamente');
+            // Reset form
+            setProject({
+                clientB2BName: '',
+                clientB2BRut: '',
+                mainMandante: '',
+                name: '',
+                durationMonths: 1,
+                startDate: '',
+                regions: [],
+                locations: [''],
+                requirements: [{
+                    position: '',
+                    area: 'MO Tecnica',
+                    quantity: 1,
+                    netSalary: 0,
+                    assignedRegion: '',
+                    academicRequirement: 'Enseñanza Media Completa',
+                    yearsOfExperience: 0,
+                    description: ''
+                }]
+            });
+        } catch (error) {
+            console.error('Error creating project:', error);
+            toast.error(error.response?.data?.message || 'Error al guardar proyecto');
+        }
     };
 
     return (
