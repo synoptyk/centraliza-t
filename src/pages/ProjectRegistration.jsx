@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../utils/api';
 import { Plus, Trash2, Save, ClipboardList, MapPin, Building2, UserCircle, Calendar, Clock, GraduationCap, Briefcase } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PageWrapper from '../components/PageWrapper';
