@@ -64,8 +64,49 @@ const getProjectById = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Update project
+// @route   PUT /api/projects/:id
+const updateProject = asyncHandler(async (req, res) => {
+    const project = await Project.findById(req.params.id);
+
+    if (project) {
+        project.name = req.body.name || project.name;
+        project.clientB2BName = req.body.clientB2BName || project.clientB2BName;
+        project.clientB2BRut = req.body.clientB2BRut || project.clientB2BRut;
+        project.mainMandante = req.body.mainMandante || project.mainMandante;
+        project.durationMonths = req.body.durationMonths || project.durationMonths;
+        project.startDate = req.body.startDate || project.startDate;
+        project.regions = req.body.regions || project.regions;
+        project.locations = req.body.locations || project.locations;
+        project.requirements = req.body.requirements || project.requirements;
+        project.status = req.body.status || project.status;
+
+        const updatedProject = await project.save();
+        res.json(updatedProject);
+    } else {
+        res.status(404);
+        throw new Error('Project not found');
+    }
+});
+
+// @desc    Delete project
+// @route   DELETE /api/projects/:id
+const deleteProject = asyncHandler(async (req, res) => {
+    const project = await Project.findById(req.params.id);
+
+    if (project) {
+        await project.deleteOne();
+        res.json({ message: 'Project removed' });
+    } else {
+        res.status(404);
+        throw new Error('Project not found');
+    }
+});
+
 module.exports = {
     createProject,
     getProjects,
-    getProjectById
+    getProjectById,
+    updateProject,
+    deleteProject
 };
