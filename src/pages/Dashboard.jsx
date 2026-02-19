@@ -131,7 +131,7 @@ const Dashboard = ({ onOpenRECLUTANDO, auth, onLogout }) => {
         const hiredCount = projectApplicants.filter(a => a.status === 'Contratado').length;
         const totalRequired = (project.hrRequirement || 0) + (project.logisticsRequirement || 0) + (project.preventionRequirement || 0) + (project.generalServicesRequirement || 0);
         return {
-            name: project.projectName.split(' ')[0].substring(0, 10),
+            name: (project.projectName || 'Sin Nombre').split(' ')[0].substring(0, 10),
             fullName: project.projectName,
             req: totalRequired || 1,
             hired: hiredCount,
