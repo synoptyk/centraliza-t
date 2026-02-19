@@ -16,24 +16,25 @@ const createProject = asyncHandler(async (req, res) => {
         requirements
     } = req.body;
 
-    const project = await Project.create({
-        clientB2BName,
-        clientB2BRut,
-        mainMandante,
-        name,
-        durationMonths,
-        startDate,
-        regions,
-        locations,
-        requirements,
-        companyId: req.user.companyId
-    });
+    try {
+        const project = await Project.create({
+            clientB2BName,
+            clientB2BRut,
+            mainMandante,
+            name,
+            durationMonths,
+            startDate,
+            regions,
+            locations,
+            requirements,
+            companyId: req.user.companyId || null // Handle potential null
+        });
 
-    if (project) {
         res.status(201).json(project);
-    } else {
+    } catch (error) {
+        console.error('Project Creation Error:', error);
         res.status(400);
-        throw new Error('Invalid project data');
+        throw new Error(error.message);
     }
 });
 
