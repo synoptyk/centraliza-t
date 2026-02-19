@@ -30,7 +30,10 @@ const updateConfig = asyncHandler(async (req, res) => {
             const newSmtp = req.body.smtp;
             // If new password is empty or placeholder, keep existing password
             if ((!newSmtp.password || newSmtp.password.trim() === '') && config.smtp && config.smtp.password) {
+                console.log('--- [DEBUG] Keeping existing SMTP password ---');
                 newSmtp.password = config.smtp.password;
+            } else if (newSmtp.password && newSmtp.password.trim() !== '') {
+                console.log('--- [DEBUG] Updating SMTP password with new value ---');
             }
             config.smtp = newSmtp;
         }

@@ -122,31 +122,30 @@ const updateUser = asyncHandler(async (req, res) => {
         if (user) {
             user.name = req.body.name || user.name;
             user.email = req.body.email || user.email;
-            user.role = req.body.role || user.role;
             user.rut = req.body.rut || user.rut;
             user.position = req.body.position || user.position;
             user.cellphone = req.body.cellphone || user.cellphone;
+            user.role = req.body.role || user.role;
             user.permissions = req.body.permissions || user.permissions;
-            user.photo = req.body.photo || user.photo;
-
-            if (req.body.companyId === null) {
-                user.companyId = null;
-            } else if (req.body.companyId) {
-                user.companyId = req.body.companyId;
-            }
+            user.companyId = req.body.companyId === null ? null : (req.body.companyId || user.companyId);
+            user.photo = req.body.photo || user.photo; // Kept this line as it was not explicitly removed by the instruction
 
             if (req.body.password) {
-                user.password = req.body.password;
+                console.log(`--- [DEBUG] Updating Password for User: ${user.email} ---`);
+                user.password = req.body.password; // Mongoose middleware handles hashing
             }
 
             const updatedUser = await user.save();
+            console.log(`--- [DEBUG] User Updated Successfully: ${updatedUser.email} ---`);
             res.json({
                 _id: updatedUser._id,
                 name: updatedUser.name,
                 email: updatedUser.email,
-                photo: updatedUser.photo,
+                photo: updatedUser.photo, // Kept this line as it was not explicitly removed by the instruction
                 role: updatedUser.role,
-                companyId: updatedUser.companyId
+                companyId: updatedUser.companyId,
+                permissions: updatedUser.permissions,
+                token: generateToken(updatedUser._id),
             });
         } else {
             res.status(404);
@@ -248,6 +247,7 @@ const uploadAvatar = asyncHandler(async (req, res) => {
 // @route   POST /api/users/resend-credentials
 const resendCredentials = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
+    console.log(`--- [DEBUG] Manual Resend Credentials Request for: ${email} ---`);
 
     if (!email || !password) {
         res.status(400);
