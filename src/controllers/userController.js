@@ -144,8 +144,7 @@ const updateUser = asyncHandler(async (req, res) => {
                 photo: updatedUser.photo, // Kept this line as it was not explicitly removed by the instruction
                 role: updatedUser.role,
                 companyId: updatedUser.companyId,
-                permissions: updatedUser.permissions,
-                token: generateToken(updatedUser._id),
+                permissions: updatedUser.permissions
             });
         } else {
             res.status(404);
