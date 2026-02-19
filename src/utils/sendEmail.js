@@ -3,10 +3,10 @@ const nodemailer = require('nodemailer');
 const sendEmail = async (options) => {
     // 1. Use strictly Environment Variables
     let smtpConfig = {
-        host: process.env.SMTP_HOST || 'smtppro.zoho.com',
-        port: process.env.SMTP_PORT || 465,
-        user: process.env.SMTP_USER || process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PASS || process.env.SMTP_PASSWORD,
+        host: process.env.SMTP_HOST || 'smtp.zoho.com',
+        port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 465,
+        user: (process.env.SMTP_USER || process.env.SMTP_EMAIL || '').trim(),
+        pass: (process.env.SMTP_PASS || process.env.SMTP_PASSWORD || ''),
         fromName: process.env.FROM_NAME || 'Centraliza-T'
     };
 
@@ -28,9 +28,9 @@ const sendEmail = async (options) => {
         tls: {
             rejectUnauthorized: false // Helps with some hosting environments
         },
-        connectionTimeout: 30000, // 30 seconds
-        greetingTimeout: 30000,   // 30 seconds
-        socketTimeout: 40000      // 40 seconds
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        socketTimeout: 15000
     });
 
     const message = {
@@ -49,7 +49,7 @@ const sendEmail = async (options) => {
     } catch (error) {
         console.error('--- NODEMAILER ERROR:', error.message);
         console.error('Stack:', error.stack);
-        throw new Error(`Email sending failed: ${error.message}`);
+        throw new Error(`Email sending failed (${smtpConfig.host}:${smtpConfig.port}): ${error.message} (User: ${smtpConfig.user ? 'OK' : 'MISSING'})`);
     }
 };
 

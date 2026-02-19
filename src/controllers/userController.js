@@ -289,7 +289,7 @@ const resendCredentials = asyncHandler(async (req, res) => {
         res.json({ message: 'Credenciales reenviadas exitosamente' });
     } catch (error) {
         console.error('Error resending credentials:', error);
-        res.status(400); // 400 Bad Request to show message in frontend
+        res.status(500); // 500 Internal Server Error for SMTP failures
         throw new Error(error.message);
     }
 });

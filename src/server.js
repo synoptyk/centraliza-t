@@ -184,13 +184,16 @@ connectDB().then(() => {
     // Verify SMTP Connection on Startup
     const nodemailer = require('nodemailer');
     const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtppro.zoho.com',
-        port: process.env.SMTP_PORT || 465,
-        secure: Number(process.env.SMTP_PORT) === 465,
+        host: process.env.SMTP_HOST || 'smtp.zoho.com',
+        port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 465,
+        secure: Number(process.env.SMTP_PORT || 465) === 465,
         auth: {
-            user: process.env.SMTP_USER || process.env.SMTP_EMAIL,
-            pass: process.env.SMTP_PASS || process.env.SMTP_PASSWORD
-        }
+            user: (process.env.SMTP_USER || process.env.SMTP_EMAIL || '').trim(),
+            pass: (process.env.SMTP_PASS || process.env.SMTP_PASSWORD || '')
+        },
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        socketTimeout: 15000
     });
 
     transporter.verify((error, success) => {
