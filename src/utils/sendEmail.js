@@ -56,9 +56,9 @@ const sendEmail = async (options) => {
         tls: {
             rejectUnauthorized: false // Helps with some hosting environments
         },
-        connectionTimeout: 10000, // 10 seconds
-        greetingTimeout: 10000,   // 10 seconds
-        socketTimeout: 20000      // 20 seconds
+        connectionTimeout: 30000, // 30 seconds
+        greetingTimeout: 30000,   // 30 seconds
+        socketTimeout: 40000      // 40 seconds
     });
 
     const message = {

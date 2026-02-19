@@ -65,8 +65,11 @@ const testEmail = asyncHandler(async (req, res) => {
         res.json({ message: 'Correo de prueba enviado exitosamente' });
     } catch (error) {
         console.error('Test Email Failed:', error);
-        res.status(400); // Bad Request implies config error
-        throw new Error(error.message);
+        res.status(400).json({
+            message: `Error de envío: ${error.message}`,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+        // throw new Error(error.message); // Commented out to prevent double error response
     }
 });
 
