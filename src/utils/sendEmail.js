@@ -13,17 +13,25 @@ const sendEmail = async (options) => {
 
     try {
         const dbConfig = await Config.findOne();
-        if (dbConfig && dbConfig.smtp && dbConfig.smtp.email && dbConfig.smtp.password) {
-            console.log('--- SMTP: Using Database Configuration ---');
-            smtpConfig = {
-                host: dbConfig.smtp.host,
-                port: dbConfig.smtp.port,
-                user: dbConfig.smtp.email,
-                pass: dbConfig.smtp.password,
-                fromName: dbConfig.smtp.fromName
-            };
+        if (dbConfig && dbConfig.smtp && dbConfig.smtp.email) {
+            console.log('--- SMTP: Found Database Configuration ---');
+            console.log(`--- SMTP: DB User: ${dbConfig.smtp.email}`);
+            console.log(`--- SMTP: DB Pass Length: ${dbConfig.smtp.password ? dbConfig.smtp.password.length : 0}`);
+
+            // Only use DB config if password is strictly present
+            if (dbConfig.smtp.password && dbConfig.smtp.password.trim() !== '') {
+                smtpConfig = {
+                    host: dbConfig.smtp.host || 'smtp.zoho.com',
+                    port: dbConfig.smtp.port || 465,
+                    user: dbConfig.smtp.email,
+                    pass: dbConfig.smtp.password,
+                    fromName: dbConfig.smtp.fromName || 'Soporte Centraliza-T'
+                };
+            } else {
+                console.log('--- SMTP WARNING: DB Password empty, falling back to ENV variables ---');
+            }
         } else {
-            console.log('--- SMTP: Using Environment Variables (DB Config not found/empty) ---');
+            console.log('--- SMTP: No Database Configuration found, using Environment Variables ---');
         }
     } catch (err) {
         console.error('--- SMTP CONFIG ERROR:', err.message);
