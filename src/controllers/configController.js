@@ -33,7 +33,35 @@ const updateConfig = asyncHandler(async (req, res) => {
     res.json(updatedConfig);
 });
 
+// @desc    Test Email Configuration
+// @route   POST /api/config/test-email
+const testEmail = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    const sendEmail = require('../utils/sendEmail');
+
+    try {
+        await sendEmail({
+            email: email,
+            subject: 'Prueba de Configuración SMTP - Centraliza-T',
+            message: 'Si estás leyendo esto, tu configuración de correo funciona correctamente.',
+            html: `
+                <div style="font-family: sans-serif; padding: 20px; text-align: center;">
+                    <h1 style="color: #4f46e5;">Configuración Exitosa</h1>
+                    <p>El sistema de correo está funcionando correctamente.</p>
+                    <p style="font-size: 12px; color: #666;">Enviado desde Centraliza-T Server</p>
+                </div>
+            `
+        });
+        res.json({ message: 'Correo de prueba enviado exitosamente' });
+    } catch (error) {
+        console.error('Test Email Failed:', error);
+        res.status(400); // Bad Request implies config error
+        throw new Error(error.message);
+    }
+});
+
 module.exports = {
     getConfig,
-    updateConfig
+    updateConfig,
+    testEmail
 };

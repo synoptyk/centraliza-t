@@ -258,6 +258,22 @@ const CommandCenter = ({ auth, onLogout }) => {
         }
     };
 
+    const handleTestEmail = async () => {
+        const testEmail = prompt('Ingrese correo de destinatario para la prueba:', auth?.user?.email);
+        if (!testEmail) return;
+
+        try {
+            toast.loading('Enviando correo de prueba...');
+            await api.post('/config/test-email', { email: testEmail });
+            toast.dismiss();
+            toast.success(`Correo de prueba enviado a ${testEmail}`);
+        } catch (error) {
+            toast.dismiss();
+            console.error('Test Email Error:', error);
+            toast.error(error.response?.data?.message || 'Error al enviar correo de prueba');
+        }
+    };
+
     const handleExportExcel = () => {
         if (activeTab === 'dashboard') {
             const wsData = [
@@ -823,7 +839,14 @@ const CommandCenter = ({ auth, onLogout }) => {
                                         />
                                     </div>
                                 </div>
-                                <div className="pt-4 flex justify-end">
+                                <div className="pt-4 flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={handleTestEmail}
+                                        className="px-6 py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center gap-2"
+                                    >
+                                        <Zap size={18} /> Probar Correo
+                                    </button>
                                     <button type="submit" className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
                                         Guardar Configuración
                                     </button>

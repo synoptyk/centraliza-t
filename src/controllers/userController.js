@@ -290,8 +290,8 @@ const resendCredentials = asyncHandler(async (req, res) => {
         res.json({ message: 'Credenciales reenviadas exitosamente' });
     } catch (error) {
         console.error('Error resending credentials:', error);
-        res.status(500);
-        throw new Error('Error al enviar el correo');
+        res.status(400); // 400 Bad Request to show message in frontend
+        throw new Error(error.message);
     }
 });
 
