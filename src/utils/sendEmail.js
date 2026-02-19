@@ -30,6 +30,13 @@ const sendEmail = async (options) => {
         // Fallback to env vars is already set
     }
 
+    if (!smtpConfig.user || !smtpConfig.pass) {
+        console.error('--- SMTP ERROR: Missing Credentials ---');
+        console.error('User:', smtpConfig.user ? 'Set' : 'Missing');
+        console.error('Pass:', smtpConfig.pass ? 'Set' : 'Missing');
+        throw new Error('SMTP Credentials not configured');
+    }
+
     const transporter = nodemailer.createTransport({
         host: smtpConfig.host,
         port: smtpConfig.port,
@@ -55,12 +62,14 @@ const sendEmail = async (options) => {
     };
 
     try {
+        console.log(`--- Attempting to send email to ${options.email} via ${smtpConfig.host}:${smtpConfig.port} ---`);
         const info = await transporter.sendMail(message);
         console.log('Message sent: %s', info.messageId);
         return info;
     } catch (error) {
-        console.error('--- NODEMAILER ERROR:', error);
-        throw error;
+        console.error('--- NODEMAILER ERROR:', error.message);
+        console.error('Stack:', error.stack);
+        throw new Error(`Email sending failed: ${error.message}`);
     }
 };
 
