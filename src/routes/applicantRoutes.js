@@ -27,7 +27,8 @@ const {
 const {
     assignCurriculumToApplicant,
     uploadCurriculumDocument,
-    updateCurriculumItemStatus
+    updateCurriculumItemStatus,
+    assignBATStandard
 } = require('../controllers/curriculumController');
 
 const { protect } = require('../middleware/authMiddleware');
@@ -57,6 +58,7 @@ router.route('/:id/contract-docs/:docId/status').put(protect, updateContractDocS
 
 // Prevention Documents (Module 5B - Variable by position)
 router.route('/:id/prevention/assign').post(protect, assignCurriculumToApplicant);
+router.route('/:id/prevention/bat/:type').post(protect, assignBATStandard);
 router.route('/:id/prevention/upload').post(protect, upload.single('file'), uploadCurriculumDocument);
 router.route('/:id/prevention/:type/:itemCode/status').put(protect, updateCurriculumItemStatus);
 

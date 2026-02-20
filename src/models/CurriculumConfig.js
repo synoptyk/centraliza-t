@@ -67,7 +67,29 @@ const CurriculumConfigSchema = new mongoose.Schema({
         }
     }],
 
-    // Position-specific curriculum mapping
+    // Master catalog of hiring/legal documents
+    masterHiringDocs: [{
+        code: {
+            type: String,
+            required: true
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        category: {
+            type: String,
+            enum: ['Legal', 'Social', 'Educacional', 'Personal', 'Otros'],
+            default: 'Legal'
+        },
+        description: String,
+        isActive: {
+            type: Boolean,
+            default: true
+        }
+    }],
+
+    // Position-specific curriculum and document mapping
     positionCurriculum: [{
         position: {
             type: String,
@@ -75,6 +97,7 @@ const CurriculumConfigSchema = new mongoose.Schema({
         },
         requiredCourses: [String], // Array of course codes
         requiredExams: [String],   // Array of exam codes
+        requiredHiringDocs: [String], // Array of hiring document codes
         additionalDocs: [String],  // Position-specific documents
         notes: String,
         createdAt: {

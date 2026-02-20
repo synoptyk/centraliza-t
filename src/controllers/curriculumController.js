@@ -6,20 +6,85 @@ const { upload } = require('../config/cloudinary');
 // @desc    Get curriculum configuration
 // @route   GET /api/curriculum/config
 const getCurriculumConfig = asyncHandler(async (req, res) => {
-    let config = await CurriculumConfig.findOne({ companyId: req.user.companyId });
+    const companyId = req.user.companyId;
 
-    if (!config) {
-        // Create default config if doesn't exist
-        config = await CurriculumConfig.create({
-            companyId: req.user.companyId,
+    if (!companyId) {
+        // For SuperAdmins without a specific company, we can return empty or a default view
+        // For now, let's return a basic structure to prevent frontend crashes
+        return res.json({
             masterCourses: [],
             masterExams: [],
+            masterHiringDocs: [],
             positionCurriculum: []
         });
     }
 
+    let config = await CurriculumConfig.findOne({ companyId });
+
+    const defaultCourses = [
+        { code: 'IHN-001', name: 'Inducción de Seguridad Hombre Nuevo', category: 'Seguridad', description: 'Inducción general de seguridad para personal nuevo.' },
+        { code: 'RIOHS-001', name: 'Reglamento Interno (RIOHS)', category: 'Seguridad', description: 'Recepción y conocimiento del Reglamento Interno.' },
+        { code: 'DAS-001', name: 'Derecho a Saber (DAS)', category: 'Seguridad', description: 'Información sobre riesgos laborales y medidas preventivas.' },
+        { code: 'MAN-DEF', name: 'Curso de Manejo Defensivo', category: 'Seguridad', description: 'Capacitación para conducción segura de vehículos.' },
+        { code: 'IND-ESP', name: 'Inducción Específica del Cargo', category: 'Seguridad', description: 'Riesgos y procedimientos específicos según la función.' }
+    ];
+
+    const defaultExams = [
+        { code: 'ALT-FIS', name: 'Altura Física', category: 'Médico', validityMonths: 12 },
+        { code: 'AUD-MET', name: 'Audiometría', category: 'Médico', validityMonths: 12 },
+        { code: 'GRA-ALT', name: 'Gran Altura Geográfica', category: 'Médico', validityMonths: 12 },
+        { code: 'ORI-COM', name: 'Orina Completa', category: 'Médico', validityMonths: 12 },
+        { code: 'SIL-ICE', name: 'Sílice', category: 'Médico', validityMonths: 12 },
+        { code: 'DRO-BAT', name: 'Examen de Drogas (BAT)', category: 'Médico', validityMonths: 6 },
+        { code: 'OST-MUS', name: 'Evaluación Osteomuscular', category: 'Médico', validityMonths: 12 }
+    ];
+
+    const defaultHiringDocs = [
+        { code: 'CV', name: 'Currículum Vitae (Formato según cargo)', category: 'Legal' },
+        { code: 'ANT', name: 'Certificado de Antecedentes (Original Vigente)', category: 'Legal' },
+        { code: 'AFP', name: 'Certificado Afiliación AFP (Mínimo 12 cotizaciones)', category: 'Social' },
+        { code: 'SAL', name: 'Certificado Isapre o Fonasa (Incluir monto Plan)', category: 'Social' },
+        { code: 'EST', name: 'Certificado Estudios (Enseñanza Media o Superior)', category: 'Educacional' },
+        { code: 'FOT', name: '2 Fotografías color fondo blanco (Tamaño pasaporte)', category: 'Personal' },
+        { code: 'FIN', name: 'Finiquito último empleador / Carta de renuncia', category: 'Legal' },
+        { code: 'RUT', name: 'Fotocopia Carné de Identidad (Ambos lados)', category: 'Personal' },
+        { code: 'FAM', name: 'Certificados de Asignación familiar', category: 'Social' },
+        { code: 'RES', name: 'Certificado de Residencia', category: 'Personal' },
+        { code: 'CAR', name: 'Afiliación de Cargas familiares', category: 'Social' },
+        { code: 'NAC', name: 'Certificado de Nacimiento (Postulante)', category: 'Personal' },
+        { code: 'NAH', name: 'Certificado de Nacimiento Hijos', category: 'Personal' },
+        { code: 'MAT', name: 'Certificado de Matrimonio', category: 'Personal' }
+    ];
+
+    if (!config) {
+        config = await CurriculumConfig.create({
+            companyId,
+            masterCourses: defaultCourses,
+            masterExams: defaultExams,
+            masterHiringDocs: defaultHiringDocs,
+            positionCurriculum: []
+        });
+    } else {
+        // Seed if empty or missing defaults
+        let modified = false;
+        if (config.masterCourses.length === 0) {
+            config.masterCourses = defaultCourses;
+            modified = true;
+        }
+        if (config.masterExams.length === 0) {
+            config.masterExams = defaultExams;
+            modified = true;
+        }
+        if (!config.masterHiringDocs || config.masterHiringDocs.length === 0) {
+            config.masterHiringDocs = defaultHiringDocs;
+            modified = true;
+        }
+        if (modified) await config.save();
+    }
+
     res.json(config);
 });
+
 
 // @desc    Add course to master catalog
 // @route   POST /api/curriculum/courses
@@ -84,6 +149,37 @@ const addMasterExam = asyncHandler(async (req, res) => {
     await config.save();
     res.json(config);
 });
+// @desc    Add hiring document to master catalog
+// @route   POST /api/curriculum/hiring-docs
+const addHiringDocToMaster = asyncHandler(async (req, res) => {
+    const { code, name, category, description } = req.body;
+
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId });
+
+    if (!config) {
+        res.status(404);
+        throw new Error('Configuración no encontrada');
+    }
+
+    // Check if code already exists
+    const exists = config.masterHiringDocs.find(d => d.code === code);
+    if (exists) {
+        res.status(400);
+        throw new Error('El código de documento ya existe');
+    }
+
+    config.masterHiringDocs.push({
+        code,
+        name,
+        category: category || 'Legal',
+        description,
+        isActive: true
+    });
+
+    await config.save();
+    res.json(config);
+});
+
 
 // @desc    Update course in master catalog
 // @route   PUT /api/curriculum/courses/:code
@@ -226,10 +322,15 @@ const getPositionCurriculum = asyncHandler(async (req, res) => {
         config.masterExams.find(e => e.code === code)
     ).filter(Boolean);
 
+    const hiringDocs = (positionConfig.requiredHiringDocs || []).map(code =>
+        config.masterHiringDocs.find(d => d.code === code)
+    ).filter(Boolean);
+
     res.json({
         position: positionConfig.position,
         courses,
         exams,
+        hiringDocs,
         additionalDocs: positionConfig.additionalDocs,
         notes: positionConfig.notes
     });
@@ -281,6 +382,22 @@ const assignCurriculumToApplicant = asyncHandler(async (req, res) => {
             status: 'Pendiente'
         };
     });
+
+    // Assign Hiring Documents
+    if (positionConfig.requiredHiringDocs && positionConfig.requiredHiringDocs.length > 0) {
+        positionConfig.requiredHiringDocs.forEach(docCode => {
+            const masterDoc = config.masterHiringDocs.find(d => d.code === docCode);
+            if (masterDoc) {
+                const exists = applicant.contractDocuments.find(d => d.docType === masterDoc.name);
+                if (!exists) {
+                    applicant.contractDocuments.push({
+                        docType: masterDoc.name,
+                        status: 'Pendiente'
+                    });
+                }
+            }
+        });
+    }
 
     applicant.preventionDocuments.assignedAt = new Date();
     applicant.preventionDocuments.assignedBy = req.user.name;
@@ -386,10 +503,60 @@ const updateCurriculumItemStatus = asyncHandler(async (req, res) => {
             applicant.preventionDocuments.exams[examIndex].approvedBy = req.user.name;
             applicant.preventionDocuments.exams[examIndex].approvedAt = new Date();
         }
-    } else {
-        res.status(400);
-        throw new Error('Tipo inválido');
     }
+
+    await applicant.save();
+    res.json(applicant);
+});
+
+// @desc    Assign BAT Standard (BAT 1 or BAT 2)
+// @route   POST /api/applicants/:id/prevention/bat/:type
+const assignBATStandard = asyncHandler(async (req, res) => {
+    const { type } = req.params; // 'BAT1' or 'BAT2'
+    const applicant = await Applicant.findById(req.params.id);
+
+    if (!applicant) {
+        res.status(404);
+        throw new Error('Postulante no encontrado');
+    }
+
+    const bat1Exams = [
+        { code: 'ALT-FIS', name: 'Altura Física', category: 'Médico' },
+        { code: 'AUD-MET', name: 'Audiometría', category: 'Médico' },
+        { code: 'GRA-ALT', name: 'Gran Altura Geográfica', category: 'Médico' },
+        { code: 'ORI-COM', name: 'Orina Completa', category: 'Médico' },
+        { code: 'SIL-ICE', name: 'Sílice', category: 'Médico' },
+        { code: 'DRO-BAT', name: 'Examen de Drogas (BAT)', category: 'Médico' }
+    ];
+
+    const bat2Exams = [
+        { code: 'GRA-ALT', name: 'Gran Altura Geográfica', category: 'Médico' },
+        { code: 'ORI-COM', name: 'Orina Completa', category: 'Médico' },
+        { code: 'AUD-MET', name: 'Audiometría', category: 'Médico' },
+        { code: 'DRO-BAT', name: 'Examen de Drogas (BAT)', category: 'Médico' }
+    ];
+
+    const targetExams = type === 'BAT1' ? bat1Exams : bat2Exams;
+
+    // Merge logic: Add only if not already present
+    if (!applicant.preventionDocuments) {
+        applicant.preventionDocuments = { courses: [], exams: [] };
+    }
+
+    targetExams.forEach(exam => {
+        const exists = applicant.preventionDocuments.exams.find(e => e.examCode === exam.code);
+        if (!exists) {
+            applicant.preventionDocuments.exams.push({
+                examCode: exam.code,
+                examName: exam.name,
+                category: exam.category,
+                status: 'Pendiente'
+            });
+        }
+    });
+
+    applicant.preventionDocuments.assignedAt = new Date();
+    applicant.preventionDocuments.assignedBy = req.user.name;
 
     await applicant.save();
     res.json(applicant);
@@ -399,11 +566,13 @@ module.exports = {
     getCurriculumConfig,
     addMasterCourse,
     addMasterExam,
+    addHiringDocToMaster,
     updateMasterCourse,
     updateMasterExam,
     configurePositionCurriculum,
     getPositionCurriculum,
     assignCurriculumToApplicant,
     uploadCurriculumDocument,
-    updateCurriculumItemStatus
+    updateCurriculumItemStatus,
+    assignBATStandard
 };

@@ -7,6 +7,7 @@ const {
     addMasterExam,
     updateMasterCourse,
     updateMasterExam,
+    addHiringDocToMaster,
     configurePositionCurriculum,
     getPositionCurriculum,
     assignCurriculumToApplicant,
@@ -23,6 +24,7 @@ router.route('/courses').post(protect, addMasterCourse);
 router.route('/courses/:code').put(protect, updateMasterCourse);
 router.route('/exams').post(protect, addMasterExam);
 router.route('/exams/:code').put(protect, updateMasterExam);
+router.route('/hiring-docs').post(protect, addHiringDocToMaster);
 
 // Position curriculum routes
 router.route('/position').post(protect, configurePositionCurriculum);

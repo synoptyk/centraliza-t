@@ -32,15 +32,20 @@ const CurriculumManager = ({ onClose }) => {
             const res = await api.get('/projects');
             const allPositions = new Set();
             res.data.forEach(project => {
-                project.requiredPositions?.forEach(pos => {
-                    allPositions.add(pos.position);
+                // Read from the new requirements structure
+                project.requirements?.forEach(req => {
+                    if (req.position) {
+                        allPositions.add(req.position);
+                    }
                 });
             });
             setPositions(Array.from(allPositions).sort());
         } catch (error) {
-            console.error('Error fetching positions');
+            console.error('Error fetching positions:', error);
+            toast.error('Error al cargar cargos de proyectos');
         }
     };
+
 
     const handleAddCourse = async (courseData) => {
         try {
@@ -115,8 +120,8 @@ const CurriculumManager = ({ onClose }) => {
                     <button
                         onClick={() => setActiveTab('courses')}
                         className={`px-6 py-4 font-bold text-sm uppercase tracking-wider transition-all ${activeTab === 'courses'
-                                ? 'text-indigo-600 border-b-4 border-indigo-600'
-                                : 'text-slate-400 hover:text-slate-600'
+                            ? 'text-indigo-600 border-b-4 border-indigo-600'
+                            : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         <BookOpen size={16} className="inline mr-2" />
@@ -125,8 +130,8 @@ const CurriculumManager = ({ onClose }) => {
                     <button
                         onClick={() => setActiveTab('exams')}
                         className={`px-6 py-4 font-bold text-sm uppercase tracking-wider transition-all ${activeTab === 'exams'
-                                ? 'text-indigo-600 border-b-4 border-indigo-600'
-                                : 'text-slate-400 hover:text-slate-600'
+                            ? 'text-indigo-600 border-b-4 border-indigo-600'
+                            : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         <FileText size={16} className="inline mr-2" />
@@ -135,8 +140,8 @@ const CurriculumManager = ({ onClose }) => {
                     <button
                         onClick={() => setActiveTab('positions')}
                         className={`px-6 py-4 font-bold text-sm uppercase tracking-wider transition-all ${activeTab === 'positions'
-                                ? 'text-indigo-600 border-b-4 border-indigo-600'
-                                : 'text-slate-400 hover:text-slate-600'
+                            ? 'text-indigo-600 border-b-4 border-indigo-600'
+                            : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         <Settings size={16} className="inline mr-2" />

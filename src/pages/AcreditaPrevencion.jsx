@@ -1,54 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Activity, BookOpen, User, Search, Upload, FileCheck, ShieldCheck, Tabs, Loader2, Eye, Save, Calendar, Check, X, FileText, ClipboardList } from 'lucide-react';
+import {
+    Activity, BookOpen, Search, Upload, ShieldCheck,
+    Loader2, Eye, Save, X, FileText, ClipboardList,
+    Settings, AlertCircle
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 import PageWrapper from '../components/PageWrapper';
 import usePermissions from '../hooks/usePermissions';
+import MallaConfigTab from '../components/MallaConfigTab';
 
 const AcreditaPrevencion = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const { canUpdate } = usePermissions('acreditacion-prevencion');
     const [loading, setLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState('physical'); // 'physical' or 'online'
+    const [activeTab, setActiveTab] = useState('courses'); // 'courses', 'exams', 'configuracion'
     const [updatingItem, setUpdatingItem] = useState(null);
-
-    const physicalExamsList = [
-        'Altura Física',
-        'Audiometría',
-        'Gran Altura Geográfica',
-        'Orina Completa',
-        'Sílice',
-        'Examen de Drogas (BAT)',
-        'Evaluación Osteomuscular'
-    ];
-
-    const onlineExamsList = [
-        'Inducción de Seguridad Hombre Nuevo',
-        'Reglamento Interno de Orden, Higiene y Seguridad',
-        'Derecho a Saber (DAS)',
-        'Curso de Manejo Defensivo',
-        'Inducción Específica del Cargo'
-    ];
+    const [projects, setProjects] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const statusOptions = [
         'Pendiente',
-        'Agendado',
-        'Realizado',
-        'No Realizado',
-        'Aprobado',
-        'No Aprobado'
+        'En Proceso',
+        'Completado',
+        'Vencido',
+        'Rechazado'
     ];
 
     useEffect(() => {
         fetchApplicants();
+        fetchProjects();
     }, []);
+
+    const fetchProjects = async () => {
+        try {
+            const res = await api.get('/projects');
+            setProjects(res.data);
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+        }
+    };
 
     const fetchApplicants = async () => {
         setLoading(true);
         try {
             const res = await api.get('/applicants');
-            // Filter applicants who are in Accreditation or close to it
+            // Filter applicants
             const relevantApps = res.data.filter(app =>
                 ['Carga Documental', 'Acreditación', 'Pendiente Aprobación Gerencia'].includes(app.status)
             );
@@ -64,35 +62,53 @@ const AcreditaPrevencion = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
         }
     };
 
-    const handleUpdateItem = async (type, itemName, data) => {
+    const handleAssignCurriculum = async () => {
         if (!selectedApplicant) return;
-        setUpdatingItem(`${type}-${itemName}`);
+        setLoading(true);
+        try {
+            const res = await api.post(`/applicants/${selectedApplicant._id}/prevention/assign`);
+            setSelectedApplicant(res.data);
+            toast.success('Malla de prevención asignada exitosamente');
+            fetchApplicants();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Error al asignar malla. Asegúrese de haber configurado el cargo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateItem = async (type, itemCode, data) => {
+        if (!selectedApplicant) return;
+        setUpdatingItem(`${type}-${itemCode}`);
 
         try {
-            const formData = new FormData();
-            if (data.status) formData.append('status', data.status);
-            if (data.observation !== undefined) formData.append('observation', data.observation);
-            if (data.file) formData.append('file', data.file);
+            if (data.file) {
+                const formData = new FormData();
+                formData.append('type', type);
+                formData.append('itemCode', itemCode);
+                formData.append('file', data.file);
 
-            const res = await api.put(
-                `/applicants/${selectedApplicant._id}/accreditation/${type}/${itemName}`,
-                formData,
-                { headers: { 'Content-Type': 'multipart/form-data' } }
-            );
-
-            setSelectedApplicant(res.data);
-            toast.success(`Actualizado: ${itemName}`);
+                const res = await api.post(
+                    `/applicants/${selectedApplicant._id}/prevention/upload`,
+                    formData,
+                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                );
+                setSelectedApplicant(res.data);
+                toast.success('Documento subido');
+            } else if (data.status) {
+                const res = await api.put(
+                    `/applicants/${selectedApplicant._id}/prevention/${type}/${itemCode}/status`,
+                    { status: data.status }
+                );
+                setSelectedApplicant(res.data);
+                toast.success('Estado actualizado');
+            }
             fetchApplicants();
         } catch (error) {
             toast.error('Error al actualizar ítem');
         } finally {
             setUpdatingItem(null);
         }
-    };
-
-    const getItemData = (type, itemName) => {
-        const items = type === 'physical' ? selectedApplicant?.accreditation?.physicalExams : selectedApplicant?.accreditation?.onlineExams;
-        return items?.find(i => i.name === itemName) || { status: 'Pendiente', observation: '' };
     };
 
     const advanceToApproval = async () => {
@@ -108,64 +124,80 @@ const AcreditaPrevencion = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
         }
     };
 
-    const renderItemRow = (type, itemName, idx) => {
-        const itemData = getItemData(type, itemName);
-        const isUpdating = updatingItem === `${type}-${itemName}`;
+    const getProgress = (app) => {
+        if (!app?.preventionDocuments) return { percentage: 0 };
+        const courses = app.preventionDocuments.courses || [];
+        const exams = app.preventionDocuments.exams || [];
+        const total = courses.length + exams.length;
+        if (total === 0) return { percentage: 0 };
+        const completed = [...courses, ...exams].filter(i => i.status === 'Completado').length;
+        return { percentage: Math.round((completed / total) * 100) };
+    };
+
+    const renderItemRow = (type, item, idx) => {
+        const itemCode = type === 'course' ? item.courseCode : item.examCode;
+        const itemName = type === 'course' ? item.courseName : item.examName;
+        const isUpdating = updatingItem === `${type}-${itemCode}`;
+        const itemUrl = type === 'course' ? item.certificateUrl : item.resultUrl;
 
         return (
             <div key={idx} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group">
                 <div className="flex flex-col md:flex-row md:items-center gap-6">
                     {/* Name & Icon */}
                     <div className="flex items-center gap-4 md:w-1/3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${itemData.status === 'Aprobado' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
-                            {type === 'physical' ? <Activity size={20} /> : <BookOpen size={20} />}
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.status === 'Completado' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                            {type === 'course' ? <BookOpen size={20} /> : <Activity size={20} />}
                         </div>
                         <div className="flex flex-col">
                             <span className="font-bold text-slate-800 text-sm tracking-tight">{itemName}</span>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Requisito Obligatorio</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.category || 'Requisito'}</span>
                         </div>
                     </div>
 
                     {/* Status Select */}
                     <div className="md:w-1/5">
                         <select
-                            className={`w-full p-2.5 rounded-xl text-xs font-bold border-2 transition-all outline-none ${itemData.status === 'Aprobado' ? 'border-emerald-100 bg-emerald-50 text-emerald-700' :
-                                itemData.status === 'No Aprobado' ? 'border-red-100 bg-red-50 text-red-700' :
-                                    'border-slate-100 bg-slate-50 text-slate-600'
+                            className={`w-full p-2.5 rounded-xl text-xs font-bold border-2 transition-all outline-none ${item.status === 'Completado' ? 'border-emerald-100 bg-emerald-50 text-emerald-700' :
+                                item.status === 'Rechazado' ? 'border-red-100 bg-red-50 text-red-700' :
+                                    item.status === 'En Proceso' ? 'border-amber-100 bg-amber-50 text-amber-700' :
+                                        'border-slate-100 bg-slate-50 text-slate-600'
                                 }`}
-                            value={itemData.status}
-                            onChange={(e) => handleUpdateItem(type, itemName, { status: e.target.value })}
+                            value={item.status}
+                            onChange={(e) => handleUpdateItem(type, itemCode, { status: e.target.value })}
                             disabled={isUpdating}
                         >
                             {statusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                     </div>
 
-                    {/* Observation */}
+                    {/* Meta Info */}
                     <div className="md:w-1/4">
-                        <input
-                            type="text"
-                            placeholder="Observaciones..."
-                            className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                            value={itemData.observation || ''}
-                            onBlur={(e) => handleUpdateItem(type, itemName, { observation: e.target.value })}
-                            disabled={isUpdating}
-                        />
+                        <div className="flex flex-col gap-1">
+                            {item.issueDate && (
+                                <span className="text-[10px] font-bold text-slate-500">Otorgado: {new Date(item.issueDate).toLocaleDateString()}</span>
+                            )}
+                            {item.expiryDate && (
+                                <span className="text-[10px] font-bold text-orange-500">Vence: {new Date(item.expiryDate).toLocaleDateString()}</span>
+                            )}
+                            {!item.issueDate && !item.expiryDate && (
+                                <span className="text-[10px] italic text-slate-400">Sin registro de vigencia</span>
+                            )}
+                        </div>
                     </div>
 
                     {/* Actions (File Upload/View) */}
                     <div className="flex items-center gap-3 md:w-1/6 justify-end">
-                        {itemData.url && (
-                            <a href={itemData.url} target="_blank" rel="noreferrer" className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all shadow-sm" title="Ver Certificado">
+                        {itemUrl && (
+                            <a href={itemUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all shadow-sm" title="Ver Certificado">
                                 <Eye size={18} />
                             </a>
                         )}
                         <div className="relative group/upload">
                             <input
                                 type="file"
-                                accept=".pdf"
+                                accept=".pdf,image/*"
                                 className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                                onChange={(e) => handleUpdateItem(type, itemName, { file: e.target.files[0] })}
+                                onChange={(e) => handleUpdateItem(type, itemCode, { file: e.target.files[0] })}
                                 disabled={isUpdating}
                             />
                             <button className={`p-2.5 rounded-xl transition-all shadow-sm ${isUpdating ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
@@ -178,151 +210,226 @@ const AcreditaPrevencion = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
         );
     };
 
+    const filteredApplicants = applicants.filter(app => {
+        const search = searchTerm.toLowerCase();
+        return (
+            app.fullName.toLowerCase().includes(search) ||
+            app.rut.includes(searchTerm) ||
+            app.position.toLowerCase().includes(search) ||
+            (app.projectId?.name && app.projectId.name.toLowerCase().includes(search))
+        );
+    });
+
     return (
         <PageWrapper
             className="space-y-8"
             title="CERTIFICACIÓN DE SEGURIDAD INTEGRAL"
-            subtitle="Validación de seguridad y prevención de riesgos"
+            subtitle="VALIDACIÓN DE SEGURIDAD Y PREVENCIÓN DE RIESGOS"
             icon={ShieldCheck}
             auth={auth}
             onLogout={onLogout}
             headerActions={
-                <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-bold border border-white/20 text-white">
-                    <Loader2 size={14} className={loading ? 'animate-spin' : ''} />
-                    {loading ? 'Sincronizando...' : 'Conectado'}
+                <div className="flex items-center gap-3">
+                    <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-bold border border-white/20 text-white">
+                        <Loader2 size={14} className={loading ? 'animate-spin' : ''} />
+                        {loading ? 'Sincronizando...' : 'Conectado'}
+                    </div>
                 </div>
             }
         >
-
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                {/* Applicant Sidebar */}
-                <div className="lg:col-span-1 bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-[700px]">
-                    <div className="p-5 bg-slate-50 border-b border-slate-100">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Buscar candidato..."
-                                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                            />
-                        </div>
-                    </div>
-                    <div className="flex-1 overflow-y-auto divide-y divide-slate-50">
-                        {applicants.map(app => (
-                            <div
-                                key={app._id}
-                                className={`w-full p-5 text-left flex items-start justify-between transition-all hover:bg-emerald-50 group border-b border-slate-50 ${selectedApplicant?._id === app._id ? 'bg-emerald-50 border-r-4 border-emerald-600 shadow-inner' : ''}`}
-                            >
-                                <button
-                                    onClick={() => setSelectedApplicant(app)}
-                                    className="flex-1 flex flex-col gap-1 pr-2"
-                                >
-                                    <span className="font-bold text-slate-800 tracking-tight group-hover:text-emerald-600 transition-colors uppercase text-sm">{app.fullName}</span>
-                                    <div className="flex items-center justify-between mt-1">
-                                        <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest">{app.position}</span>
-                                        <div className="flex gap-2 justify-end">
-                                            {canUpdate && (
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedApplicant(app);
-                                                        setShowModal(true);
-                                                    }}
-                                                    className="px-4 py-2 bg-orange-500 text-white text-xs font-bold rounded-xl hover:bg-orange-600 transition-all shadow-md shadow-orange-200"
-                                                >
-                                                    Gestionar Acreditación
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </button>
-                                <button
-                                    onClick={() => onOpenCENTRALIZAT(app)}
-                                    className="p-2 bg-white text-slate-400 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm opacity-0 group-hover:opacity-100"
-                                >
-                                    <ExternalLink size={14} />
-                                </button>
+            <div className="space-y-6">
+                {/* Global Tabs - Top Level Visibility */}
+                <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div className="flex p-1 bg-slate-50 rounded-2xl">
+                        <button
+                            onClick={() => setActiveTab('courses')}
+                            className={`px-10 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'courses' ? 'bg-white text-indigo-600 shadow-xl shadow-indigo-100/50' : 'text-slate-400 hover:text-indigo-600'}`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <BookOpen size={14} /> Cursos Online
                             </div>
-                        ))}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('exams')}
+                            className={`px-10 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'exams' ? 'bg-white text-indigo-600 shadow-xl shadow-indigo-100/50' : 'text-slate-400 hover:text-indigo-600'}`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Activity size={14} /> Exámenes Físicos
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('configuracion')}
+                            className={`px-10 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'configuracion' ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'text-slate-400 hover:bg-slate-100'}`}
+                        >
+                            <Settings size={14} /> Configurar Mallas
+                        </button>
+                    </div>
+
+                    <div className="pr-8 flex items-center gap-4 border-l border-slate-100 ml-4 py-2 pl-8">
+                        <div className="text-right">
+                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Módulo</p>
+                            <p className="text-xs font-black text-indigo-600 uppercase">Seguridad & Prevención</p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Main Content Area */}
-                <div className="lg:col-span-3">
-                    {selectedApplicant ? (
-                        <div className="animate-in fade-in slide-in-from-right-4 space-y-6">
-                            {/* Profile Bar */}
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/50 to-white">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-emerald-200">
-                                        {selectedApplicant.fullName.split(' ').map(n => n[0]).join('')}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    {/* Applicant Sidebar */}
+                    <div className="lg:col-span-1 bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-[700px]">
+                        <div className="p-5 bg-slate-50 border-b border-slate-100">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                                    <ClipboardList size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-slate-800 uppercase tracking-tight text-sm">Postulantes</h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fase de Acreditación</p>
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar candidato..."
+                                    className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto divide-y divide-slate-50">
+                            {filteredApplicants.map(app => (
+                                <div
+                                    key={app._id}
+                                    className={`w-full p-5 text-left flex items-start justify-between transition-all hover:bg-slate-50 group border-b border-slate-50 ${selectedApplicant?._id === app._id ? 'bg-indigo-50 border-r-4 border-indigo-600 shadow-inner' : ''}`}
+                                >
+                                    <button
+                                        onClick={() => setSelectedApplicant(app)}
+                                        className="flex-1 flex flex-col gap-1 pr-2"
+                                    >
+                                        <span className="font-bold text-slate-800 tracking-tight group-hover:text-indigo-600 transition-colors uppercase text-sm">{app.fullName}</span>
+                                        <div className="flex flex-col gap-0.5 mt-1">
+                                            <p className={`text-[10px] font-black uppercase tracking-widest ${selectedApplicant?._id === app._id ? 'text-indigo-400' : 'text-indigo-600'}`}>
+                                                {app.projectId?.name || 'Sin Proyecto'}
+                                            </p>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">{app.position}</span>
+                                                <div className="flex gap-2 justify-end">
+                                                    <span className={`text-[8px] font-black px-2 py-0.5 rounded-md uppercase ${app.preventionDocuments?.courses?.length > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                        {app.preventionDocuments?.courses?.length > 0 ? 'Malla OK' : 'Sin Malla'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Main Content Area */}
+                    <div className="lg:col-span-3">
+                        {activeTab === 'configuracion' ? (
+                            <MallaConfigTab
+                                type="prevention"
+                                projects={projects}
+                                initialProject={selectedApplicant?.projectId?._id}
+                                initialPosition={selectedApplicant?.position}
+                            />
+                        ) : selectedApplicant ? (
+                            <div className="animate-in fade-in slide-in-from-right-4 space-y-6">
+                                {/* Profile Bar */}
+                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white">
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-200">
+                                            {selectedApplicant.fullName.split(' ').map(n => n[0]).join('')}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase">{selectedApplicant.fullName}</h3>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedApplicant.position}</span>
+                                                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                                <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest flex items-center gap-1">
+                                                    <ClipboardList size={10} /> {selectedApplicant.status}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase">{selectedApplicant.fullName}</h3>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedApplicant.position}</span>
-                                            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                                            <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
-                                                <ClipboardList size={10} /> {selectedApplicant.status}
-                                            </span>
+                                    <div className="flex flex-col items-end">
+                                        <div className="flex items-center gap-3 mb-1">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Progreso</span>
+                                            <span className="text-xl font-black text-indigo-600">{getProgress(selectedApplicant).percentage}%</span>
+                                        </div>
+                                        <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="h-full bg-indigo-600 transition-all duration-1000" style={{ width: `${getProgress(selectedApplicant).percentage}%` }}></div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Sub-menu Tabs */}
-                            <div className="flex p-1 bg-slate-100 rounded-2xl w-fit">
-                                <button
-                                    onClick={() => setActiveTab('physical')}
-                                    className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'physical' ? 'bg-white text-emerald-600 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    <Activity size={16} /> Exámenes Físicos
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('online')}
-                                    className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'online' ? 'bg-white text-emerald-600 shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    <BookOpen size={16} /> Cursos Online
-                                </button>
-                            </div>
+                                {/* Check if curriculum is assigned */}
+                                {(!selectedApplicant.preventionDocuments?.courses?.length && !selectedApplicant.preventionDocuments?.exams?.length) ? (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-[2.5rem] p-10 text-center space-y-6">
+                                        <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto text-amber-600">
+                                            <AlertCircle size={40} />
+                                        </div>
+                                        <div className="max-w-md mx-auto">
+                                            <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight">Malla No Asignada</h4>
+                                            <p className="text-sm text-slate-600 mt-2">
+                                                Este postulante aún no tiene una malla de prevención configurada para el cargo <strong>{selectedApplicant.position}</strong>.
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={handleAssignCurriculum}
+                                            disabled={loading}
+                                            className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all shadow-xl flex items-center gap-3 mx-auto"
+                                        >
+                                            {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                            Asignar Malla Automáticamente
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* Items List */}
+                                        <div className="space-y-3">
+                                            {(activeTab === 'courses' ? selectedApplicant.preventionDocuments.courses : selectedApplicant.preventionDocuments.exams).map((item, idx) =>
+                                                renderItemRow(activeTab === 'courses' ? 'course' : 'exam', item, idx)
+                                            )}
+                                        </div>
 
-                            {/* Items List */}
-                            <div className="space-y-3">
-                                {(activeTab === 'physical' ? physicalExamsList : onlineExamsList).map((itemName, idx) =>
-                                    renderItemRow(activeTab, itemName, idx)
+                                        {/* Final Action */}
+                                        <div className="flex justify-between items-center bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl shadow-slate-300 text-white overflow-hidden relative">
+                                            <div className="absolute top-0 right-0 p-8 opacity-5">
+                                                <ShieldCheck size={160} />
+                                            </div>
+                                            <div className="flex flex-col relative z-10 transition-all">
+                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Acreditación y Prevención Final</span>
+                                                <span className="text-2xl font-black tracking-tight">
+                                                    Validación Integral de Seguridad
+                                                </span>
+                                                <p className="text-xs text-slate-400 mt-2 font-medium">Asegúrese de haber revisado todos los certificados antes de habilitar.</p>
+                                            </div>
+                                            <button
+                                                onClick={advanceToApproval}
+                                                className="relative z-10 bg-emerald-500 text-white px-10 py-5 rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 flex items-center gap-3 active:scale-95"
+                                            >
+                                                Habilitar para Contratación <ShieldCheck size={20} />
+                                            </button>
+                                        </div>
+                                    </>
                                 )}
                             </div>
-
-                            {/* Final Action */}
-                            <div className="flex justify-between items-center bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl shadow-slate-300 text-white overflow-hidden relative">
-                                <div className="absolute top-0 right-0 p-8 opacity-5">
-                                    <ShieldCheck size={160} />
+                        ) : (
+                            <div className="h-full min-h-[700px] flex flex-col items-center justify-center bg-slate-50/50 border-4 border-dashed border-slate-100 rounded-[3rem] text-slate-300 gap-6 animate-pulse">
+                                <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-xl shadow-slate-200/50">
+                                    <ShieldCheck size={40} className="text-slate-200" />
                                 </div>
-                                <div className="flex flex-col relative z-10 transition-all">
-                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Acreditación y Prevención Final</span>
-                                    <span className="text-2xl font-black tracking-tight">
-                                        Validación Integral de Seguridad
-                                    </span>
-                                    <p className="text-xs text-slate-400 mt-2 font-medium">Asegúrese de haber revisado todos los certificados antes de aprobar.</p>
+                                <div className="text-center space-y-2">
+                                    <p className="font-black text-xl text-slate-400 uppercase tracking-widest">Acredita Prevención</p>
+                                    <p className="text-sm font-bold text-slate-300">Seleccione un candidato para gestionar su acreditación de seguridad</p>
                                 </div>
-                                <button
-                                    onClick={advanceToApproval}
-                                    className="relative z-10 bg-emerald-500 text-white px-10 py-5 rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 flex items-center gap-3 active:scale-95"
-                                >
-                                    Habilitar para Contratación <ShieldCheck size={20} />
-                                </button>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="h-full min-h-[700px] flex flex-col items-center justify-center bg-slate-50/50 border-4 border-dashed border-slate-100 rounded-[3rem] text-slate-300 gap-6 animate-pulse">
-                            <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-xl shadow-slate-200/50">
-                                <Activity size={40} className="opacity-20 translate-x-1" />
-                            </div>
-                            <div className="text-center space-y-2">
-                                <p className="font-black text-xl text-slate-400 uppercase tracking-widest">Acredita Prevención</p>
-                                <p className="text-sm font-bold text-slate-300">Seleccione un candidato para gestionar sus exámenes y cursos</p>
-                            </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </PageWrapper>
