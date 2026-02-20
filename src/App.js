@@ -25,6 +25,7 @@ import RemoteApproval from './pages/RemoteApproval';
 import PublicTestPortal from './pages/PublicTestPortal';
 import { Toaster } from 'react-hot-toast';
 import MasterProfileModal from './components/MasterProfileModal';
+import HumanCapitalMaster from './pages/HumanCapitalMaster';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth }) => {
@@ -150,6 +151,12 @@ function AppContent() {
                         <Route path="/contratados" element={
                             <ProtectedRoute auth={auth}>
                                 <ContractedPersonal onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/gestion-capital-humano" element={
+                            <ProtectedRoute auth={auth}>
+                                <HumanCapitalMaster onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 

@@ -58,19 +58,18 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
         { id: 'ingreso', name: 'Captura de Talento', icon: UserPlus, path: '/ingreso' },
         { id: 'entrevista', name: 'Entrevistas Filtro', icon: Calendar, path: '/entrevista', badge: counts.entrevista },
         { id: 'tests', name: 'Evaluación Técnica', icon: BrainCircuit, path: '/tests', badge: counts.tests },
-        { id: 'documentos', name: 'Gestión Documental', icon: FileText, path: '/documentos', badge: counts.documentos },
         { id: 'acreditacion-prevencion', name: 'Seguridad & Prevención', icon: ShieldCheck, path: '/acreditacion-prevencion', badge: counts.acreditacion },
+        { id: 'documentos', name: 'Gestión Documental', icon: FileText, path: '/documentos', badge: counts.documentos },
+        { id: 'ficha-colaborador', name: 'Maestro de Personal', icon: UserPlus, path: '/ficha-colaborador', badge: counts.ficha },
     ];
 
     const managementItems = [
         { id: 'contratacion', name: 'Aprobación de Contrato', icon: FileCheck, path: '/contratacion', badge: counts.contratacion },
-        { id: 'ficha-colaborador', name: 'Maestro de Personal', icon: UserPlus, path: '/ficha-colaborador', badge: counts.ficha },
-        { id: 'contratados', name: 'Nómina de Contratados', icon: Users, path: '/contratados' },
-        { id: 'historial', name: 'Expediente Maestro', icon: History, path: '/historial' },
     ];
 
     const supervisionItems = [
         { id: 'dashboard-empresa', name: 'Dashboard Empresa', icon: Activity, path: '/dashboard-empresa' },
+        { id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano' },
         { id: 'contenedor', name: 'Contenedor (Portal Cliente)', icon: FolderOpen, path: '/contenedor' },
     ];
 
