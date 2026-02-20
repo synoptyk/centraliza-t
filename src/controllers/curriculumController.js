@@ -31,29 +31,35 @@ const getCurriculumConfig = asyncHandler(async (req, res) => {
 
     const defaultExams = [
         { code: 'ALT-FIS', name: 'Altura Física', category: 'Médico', validityMonths: 12 },
-        { code: 'AUD-MET', name: 'Audiometría', category: 'Médico', validityMonths: 12 },
+        { code: 'AUD-MET', name: 'Audiométrica / Audiometría', category: 'Médico', validityMonths: 12 },
         { code: 'GRA-ALT', name: 'Gran Altura Geográfica', category: 'Médico', validityMonths: 12 },
         { code: 'ORI-COM', name: 'Orina Completa', category: 'Médico', validityMonths: 12 },
         { code: 'SIL-ICE', name: 'Sílice', category: 'Médico', validityMonths: 12 },
-        { code: 'DRO-BAT', name: 'Examen de Drogas (BAT)', category: 'Médico', validityMonths: 6 },
-        { code: 'OST-MUS', name: 'Evaluación Osteomuscular', category: 'Médico', validityMonths: 12 }
+        { code: 'DRO-BAT', name: 'Examen de Drogas (Anfetaminas, Benzodiacepinas, Cocaína, Marihuana, Opiáceos)', category: 'Médico', validityMonths: 12, description: 'Técnica rápida' },
+        { code: 'PRE-OCU', name: 'Examen Preocupacional (Básico)', category: 'Médico', validityMonths: 12 },
+        { code: 'PSI-LOG', name: 'Evaluación Psicológica', category: 'Psicológico', validityMonths: 12 },
+        { code: 'AV-RIES', name: 'Evaluación Aversión al Riesgo', category: 'Psicológico', validityMonths: 12 },
+        { code: 'PSI-SEN', name: 'Examen Psicosensotécnico', category: 'Técnico', validityMonths: 12 }
     ];
 
     const defaultHiringDocs = [
-        { code: 'CV', name: 'Currículum Vitae (Formato según cargo)', category: 'Legal' },
-        { code: 'ANT', name: 'Certificado de Antecedentes (Original Vigente)', category: 'Legal' },
-        { code: 'AFP', name: 'Certificado Afiliación AFP (Mínimo 12 cotizaciones)', category: 'Social' },
-        { code: 'SAL', name: 'Certificado Isapre o Fonasa (Incluir monto Plan)', category: 'Social' },
-        { code: 'EST', name: 'Certificado Estudios (Enseñanza Media o Superior)', category: 'Educacional' },
-        { code: 'FOT', name: '2 Fotografías color fondo blanco (Tamaño pasaporte)', category: 'Personal' },
-        { code: 'FIN', name: 'Finiquito último empleador / Carta de renuncia', category: 'Legal' },
-        { code: 'RUT', name: 'Fotocopia Carné de Identidad (Ambos lados)', category: 'Personal' },
-        { code: 'FAM', name: 'Certificados de Asignación familiar', category: 'Social' },
-        { code: 'RES', name: 'Certificado de Residencia', category: 'Personal' },
-        { code: 'CAR', name: 'Afiliación de Cargas familiares', category: 'Social' },
-        { code: 'NAC', name: 'Certificado de Nacimiento (Postulante)', category: 'Personal' },
-        { code: 'NAH', name: 'Certificado de Nacimiento Hijos', category: 'Personal' },
-        { code: 'MAT', name: 'Certificado de Matrimonio', category: 'Personal' }
+        { code: 'CV', name: '1. Currículum Vitae', category: 'Legal' },
+        { code: 'PREOC', name: '2. Examen Preocupacional (Básico, Altura Geográfica)', category: 'Legal' },
+        { code: 'PSIC', name: '3. Evaluación psicológica (si aplica)', category: 'Personal' },
+        { code: 'AVER', name: '4. Evaluación aversión al riesgo (si aplica)', category: 'Personal' },
+        { code: 'ANT', name: '5. Certificado de Antecedentes Original Vigente (Art. 2 Código del Trabajo)', category: 'Legal' },
+        { code: 'AFP', name: '6. Certificado Afiliación AFP - Últimas 12 cotizaciones', category: 'Social' },
+        { code: 'SAL', name: '7. Certificado Isapre o Fonasa (Indicando valor del plan)', category: 'Social' },
+        { code: 'EST', name: '8. Certificado de estudios Enseñanza Media o Superior (Fotocopia)', category: 'Educacional' },
+        { code: 'FOT', name: '9. 2 Fotografías color fondo blanco (Tamaño pasaporte)', category: 'Personal' },
+        { code: 'FIN', name: '10. Finiquito último empleador o carta renuncia (Fotocopias)', category: 'Legal' },
+        { code: 'CI', name: '11. Fotocopia Carné de Identidad (Ambos lados)', category: 'Personal' },
+        { code: 'COMP', name: '12. Fotocopias de competencias (Títulos o cursos)', category: 'Educacional' },
+        { code: 'ASIG', name: '13. Certificados de Asignación familiar', category: 'Personal' },
+        { code: 'RES', name: '14. Certificado de Residencia (Junta de Vecinos, Notaría o Comprobante)', category: 'Personal' },
+        { code: 'CHV', name: 'a) Certificado Hoja de Vida del Conductor', category: 'Otros', description: 'Si va a conducir' },
+        { code: 'LIC', name: 'b) Fotocopia Licencia de Conducir', category: 'Otros', description: 'Si va a conducir' },
+        { code: 'PST', name: 'c) Examen Psicosensotécnico', category: 'Otros', description: 'Si va a conducir' }
     ];
 
     if (!config) {
@@ -71,11 +77,11 @@ const getCurriculumConfig = asyncHandler(async (req, res) => {
             config.masterCourses = defaultCourses;
             modified = true;
         }
-        if (config.masterExams.length === 0) {
+        if (config.masterExams.length < defaultExams.length) {
             config.masterExams = defaultExams;
             modified = true;
         }
-        if (!config.masterHiringDocs || config.masterHiringDocs.length === 0) {
+        if (!config.masterHiringDocs || config.masterHiringDocs.length < defaultHiringDocs.length) {
             config.masterHiringDocs = defaultHiringDocs;
             modified = true;
         }
@@ -526,14 +532,14 @@ const assignBATStandard = asyncHandler(async (req, res) => {
         { code: 'GRA-ALT', name: 'Gran Altura Geográfica', category: 'Médico' },
         { code: 'ORI-COM', name: 'Orina Completa', category: 'Médico' },
         { code: 'SIL-ICE', name: 'Sílice', category: 'Médico' },
-        { code: 'DRO-BAT', name: 'Examen de Drogas (BAT)', category: 'Médico' }
+        { code: 'DRO-BAT', name: 'Examen de Drogas (Anfetaminas, Benzodiacepinas, Cocaína, Marihuana, Opiáceos)', category: 'Médico' }
     ];
 
     const bat2Exams = [
         { code: 'GRA-ALT', name: 'Gran Altura Geográfica', category: 'Médico' },
         { code: 'ORI-COM', name: 'Orina Completa', category: 'Médico' },
         { code: 'AUD-MET', name: 'Audiometría', category: 'Médico' },
-        { code: 'DRO-BAT', name: 'Examen de Drogas (BAT)', category: 'Médico' }
+        { code: 'DRO-BAT', name: 'Examen de Drogas (Anfetaminas, Benzodiacepinas, Cocaína, Marihuana, Opiáceos)', category: 'Médico' }
     ];
 
     const targetExams = type === 'BAT1' ? bat1Exams : bat2Exams;
