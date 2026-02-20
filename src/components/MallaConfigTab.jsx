@@ -9,7 +9,9 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
     const [loading, setLoading] = useState(true);
     const [selectedProject, setSelectedProject] = useState(initialProject || '');
     const [selectedPosition, setSelectedPosition] = useState(initialPosition || '');
-    const [showAddModal, setShowAddModal] = useState(false);
+
+    // UI state
+    const [isApplyingProfile, setIsApplyingProfile] = useState(false);
 
     // List of positions for selected project
     const [availablePositions, setAvailablePositions] = useState([]);
@@ -102,46 +104,36 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
         );
     };
 
-    const handleAddMasterItem = async (formData) => {
-        try {
-            let endpoint = '';
-            if (formData.type === 'course') endpoint = '/curriculum/courses';
-            else if (formData.type === 'exam') endpoint = '/curriculum/exams';
-            else if (formData.type === 'hiring') endpoint = '/curriculum/hiring-docs';
 
-            const res = await api.post(endpoint, formData);
-            setConfig(res.data);
-            toast.success('Ítem agregado al catálogo maestro');
-            setShowAddModal(false);
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Error al agregar ítem');
-        }
-    };
 
     const handleQuickAssign = (profileVariant) => {
         if (!config) return;
+        setIsApplyingProfile(profileVariant);
 
-        if (profileVariant === 'hiring') {
-            const allHiringDocs = config.masterHiringDocs.map(d => d.code);
-            setSelectedHiringDocs(allHiringDocs);
-            toast.success('Todos los documentos de ingreso han sido asignados.');
-        } else if (profileVariant === 'bat1') {
-            const allCourses = config.masterCourses.map(c => c.code);
-            const bat1Exams = ['ALT-FIS', 'AUD-MET', 'GRA-ALT', 'ORI-COM', 'SIL-ICE', 'DRO-BAT', 'PRE-OCU', 'PSI-LOG', 'AV-RIES', 'PSI-SEN'];
-            const examsToAssign = config.masterExams.filter(e => bat1Exams.includes(e.code)).map(e => e.code);
+        setTimeout(() => {
+            if (profileVariant === 'hiring') {
+                const allHiringDocs = config.masterHiringDocs.map(d => d.code);
+                setSelectedHiringDocs(allHiringDocs);
+                toast.success('Todos los documentos de ingreso han sido asignados.');
+            } else if (profileVariant === 'bat1') {
+                const allCourses = config.masterCourses.map(c => c.code);
+                const bat1Exams = ['ALT-FIS', 'AUD-MET', 'GRA-ALT', 'ORI-COM', 'SIL-ICE', 'DRO-BAT', 'PRE-OCU', 'PSI-LOG', 'AV-RIES', 'PSI-SEN'];
+                const examsToAssign = config.masterExams.filter(e => bat1Exams.includes(e.code)).map(e => e.code);
 
-            setSelectedCourses(allCourses);
-            setSelectedExams(examsToAssign);
-            toast.success('Perfil BAT 1 (Terreno) aplicado correctamente.');
-        } else if (profileVariant === 'bat2') {
-            const allCourses = config.masterCourses.map(c => c.code);
-            const bat2Exams = ['GRA-ALT', 'ORI-COM', 'AUD-MET', 'DRO-BAT'];
-            const examsToAssign = config.masterExams.filter(e => bat2Exams.includes(e.code)).map(e => e.code);
+                setSelectedCourses(allCourses);
+                setSelectedExams(examsToAssign);
+                toast.success('Perfil BAT 1 (Terreno) aplicado correctamente.');
+            } else if (profileVariant === 'bat2') {
+                const allCourses = config.masterCourses.map(c => c.code);
+                const bat2Exams = ['GRA-ALT', 'ORI-COM', 'AUD-MET', 'DRO-BAT'];
+                const examsToAssign = config.masterExams.filter(e => bat2Exams.includes(e.code)).map(e => e.code);
 
-            setSelectedCourses(allCourses);
-            setSelectedExams(examsToAssign);
-            toast.success('Perfil BAT 2 (Administrativo) aplicado correctamente.');
-        }
+                setSelectedCourses(allCourses);
+                setSelectedExams(examsToAssign);
+                toast.success('Perfil BAT 2 (Administrativo) aplicado correctamente.');
+            }
+            setIsApplyingProfile(false);
+        }, 800); // Simulated delay for visual feedback
     };
 
     if (loading) return (
@@ -158,12 +150,6 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
                     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Administrador de Mallas Requeridas</h3>
                     <p className="text-xs font-bold text-slate-400 mt-1">Configura rápidamente los requisitos exigibles por cargo</p>
                 </div>
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl whitespace-nowrap"
-                >
-                    <Plus size={16} /> Crear Ítem Maestro
-                </button>
             </div>
 
             {/* Selection Area */}
@@ -209,23 +195,29 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
                             {type === 'hiring' ? (
                                 <button
                                     onClick={() => handleQuickAssign('hiring')}
-                                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 border border-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-md active:scale-95"
+                                    disabled={isApplyingProfile === 'hiring'}
+                                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 border border-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-md active:scale-95 disabled:opacity-70 disabled:pointer-events-none"
                                 >
-                                    <Check size={16} /> Asignar 14 Docs Estándar
+                                    {isApplyingProfile === 'hiring' ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                                    {isApplyingProfile === 'hiring' ? 'Cargando Requisitos...' : 'Asignar 14 Docs Estándar'}
                                 </button>
                             ) : (
                                 <>
                                     <button
                                         onClick={() => handleQuickAssign('bat1')}
-                                        className="flex items-center gap-2 px-6 py-3 bg-orange-600 border border-orange-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-orange-700 transition-all shadow-md active:scale-95"
+                                        disabled={isApplyingProfile === 'bat1'}
+                                        className="flex items-center gap-2 px-6 py-3 bg-orange-600 border border-orange-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-orange-700 transition-all shadow-md active:scale-95 disabled:opacity-70 disabled:pointer-events-none"
                                     >
-                                        <Check size={16} /> Aplicar Perfil BAT 1 (Terreno)
+                                        {isApplyingProfile === 'bat1' ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                                        {isApplyingProfile === 'bat1' ? 'Cargando Perfil...' : 'Aplicar Perfil BAT 1 (Terreno)'}
                                     </button>
                                     <button
                                         onClick={() => handleQuickAssign('bat2')}
-                                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 border border-blue-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition-all shadow-md active:scale-95"
+                                        disabled={isApplyingProfile === 'bat2'}
+                                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 border border-blue-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition-all shadow-md active:scale-95 disabled:opacity-70 disabled:pointer-events-none"
                                     >
-                                        <Check size={16} /> Aplicar Perfil BAT 2 (Administrativo)
+                                        {isApplyingProfile === 'bat2' ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                                        {isApplyingProfile === 'bat2' ? 'Cargando Perfil...' : 'Aplicar Perfil BAT 2 (Administrativo)'}
                                     </button>
                                 </>
                             )}
