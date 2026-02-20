@@ -1,57 +1,35 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+
+// Initialize Resend with the provided API key (either from env or fallback for testing)
+const resend = new Resend(process.env.RESEND_API_KEY || 're_YRQ7RQ3o_JN357m3Tt9kSiCLJZjnvbp1j');
 
 const sendEmail = async (options) => {
-    // 1. Use strictly Environment Variables
-    let smtpConfig = {
-        host: process.env.SMTP_HOST || 'smtp.zoho.com',
-        port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 465,
-        user: (process.env.SMTP_USER || process.env.SMTP_EMAIL || '').trim(),
-        pass: (process.env.SMTP_PASS || process.env.SMTP_PASSWORD || ''),
-        fromName: process.env.FROM_NAME || 'Centraliza-T'
-    };
-
-    if (!smtpConfig.user || !smtpConfig.pass) {
-        console.error('--- SMTP ERROR: Missing Credentials ---');
-        console.error('User:', smtpConfig.user ? 'Set' : 'Missing');
-        console.error('Pass:', smtpConfig.pass ? 'Set' : 'Missing');
-        throw new Error('SMTP Credentials not configured');
-    }
-
-    const transporter = nodemailer.createTransport({
-        host: smtpConfig.host,
-        port: smtpConfig.port,
-        secure: Number(smtpConfig.port) === 465, // true for 465, false for 587
-        auth: {
-            user: smtpConfig.user,
-            pass: smtpConfig.pass
-        },
-        tls: {
-            rejectUnauthorized: false
-        },
-        debug: true, // Show SMTP traffic
-        logger: true, // Log to console
-        connectionTimeout: 15000,
-        greetingTimeout: 15000,
-        socketTimeout: 15000
-    });
-
-    const message = {
-        from: `"${smtpConfig.fromName}" <${smtpConfig.user}>`,
-        to: options.email,
-        subject: options.subject,
-        text: options.message,
-        html: options.html
-    };
-
     try {
-        console.log(`--- Attempting to send email to ${options.email} via ${smtpConfig.host}:${smtpConfig.port} ---`);
-        const info = await transporter.sendMail(message);
-        console.log('Message sent: %s', info.messageId);
-        return info;
-    } catch (error) {
-        console.error('--- NODEMAILER ERROR:', error.message);
-        console.error('Stack:', error.stack);
-        throw new Error(`Email sending failed (${smtpConfig.host}:${smtpConfig.port}): ${error.message} (User: ${smtpConfig.user ? 'OK' : 'MISSING'})`);
+        const fromEmail = process.env.FROM_EMAIL || 'soporte@synoptyk.cl';
+        const fromName = process.env.FROM_NAME || 'Centraliza-T';
+
+        console.log(`--- Resend API: Attempting to send email to ${options.email} ---`);
+
+        const { data, error } = await resend.emails.send({
+            from: `${fromName} <${fromEmail}>`,
+            to: [options.email],
+            subject: options.subject,
+            html: options.html, // Prioritize HTML if it exists
+            text: options.message // Fallback text
+        });
+
+        if (error) {
+            console.error('--- RESEND API ERROR:', error.message);
+            throw new Error(`Resend API failed: ${error.message}`);
+        }
+
+        console.log('--- Message sent successfully via Resend:', data.id);
+        return data;
+
+    } catch (err) {
+        console.error('--- UNEXPECTED EMAIL ERROR:', err.message);
+        console.error('Stack:', err.stack);
+        throw new Error(`Email sending failed: ${err.message}`);
     }
 };
 

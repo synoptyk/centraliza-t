@@ -181,28 +181,7 @@ const PORT = process.env.PORT || process.env.SERVER_PORT || 5000;
 connectDB().then(() => {
     startNotificationWorker();
 
-    // Verify SMTP Connection on Startup
-    const nodemailer = require('nodemailer');
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.zoho.com',
-        port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
-        secure: Number(process.env.SMTP_PORT || 587) === 465,
-        auth: {
-            user: (process.env.SMTP_USER || process.env.SMTP_EMAIL || '').trim(),
-            pass: (process.env.SMTP_PASS || process.env.SMTP_PASSWORD || '')
-        },
-        connectionTimeout: 15000,
-        greetingTimeout: 15000,
-        socketTimeout: 15000
-    });
-
-    transporter.verify((error, success) => {
-        if (error) {
-            console.error('--- SMTP SERVER ERROR (Check Credentials/Zoho Logs):', error.message);
-        } else {
-            console.log('--- SMTP SERVER READY (Zoho Connected Successfully) ---');
-        }
-    });
+    // Nodemailer SMTP removed. Email delivery utilizes Resend HTTP API natively.
 
     server.listen(PORT, () => {
         console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
