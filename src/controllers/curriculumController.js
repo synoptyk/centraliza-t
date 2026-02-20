@@ -6,18 +6,7 @@ const { upload } = require('../config/cloudinary');
 // @desc    Get curriculum configuration
 // @route   GET /api/curriculum/config
 const getCurriculumConfig = asyncHandler(async (req, res) => {
-    const companyId = req.user.companyId;
-
-    if (!companyId) {
-        // For SuperAdmins without a specific company, we can return empty or a default view
-        // For now, let's return a basic structure to prevent frontend crashes
-        return res.json({
-            masterCourses: [],
-            masterExams: [],
-            masterHiringDocs: [],
-            positionCurriculum: []
-        });
-    }
+    const companyId = req.user.companyId || null;
 
     let config = await CurriculumConfig.findOne({ companyId });
 
@@ -97,7 +86,7 @@ const getCurriculumConfig = asyncHandler(async (req, res) => {
 const addMasterCourse = asyncHandler(async (req, res) => {
     const { code, name, category, description, validityMonths } = req.body;
 
-    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId });
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
 
     if (!config) {
         res.status(404);
@@ -129,7 +118,7 @@ const addMasterCourse = asyncHandler(async (req, res) => {
 const addMasterExam = asyncHandler(async (req, res) => {
     const { code, name, category, description, validityMonths } = req.body;
 
-    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId });
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
 
     if (!config) {
         res.status(404);
@@ -160,7 +149,7 @@ const addMasterExam = asyncHandler(async (req, res) => {
 const addHiringDocToMaster = asyncHandler(async (req, res) => {
     const { code, name, category, description } = req.body;
 
-    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId });
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
 
     if (!config) {
         res.status(404);
@@ -193,7 +182,7 @@ const updateMasterCourse = asyncHandler(async (req, res) => {
     const { code } = req.params;
     const { name, category, description, validityMonths, isActive } = req.body;
 
-    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId });
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
 
     const courseIndex = config.masterCourses.findIndex(c => c.code === code);
     if (courseIndex === -1) {
@@ -217,7 +206,7 @@ const updateMasterExam = asyncHandler(async (req, res) => {
     const { code } = req.params;
     const { name, category, description, validityMonths, isActive } = req.body;
 
-    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId });
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
 
     const examIndex = config.masterExams.findIndex(e => e.code === code);
     if (examIndex === -1) {
@@ -240,7 +229,7 @@ const updateMasterExam = asyncHandler(async (req, res) => {
 const configurePositionCurriculum = asyncHandler(async (req, res) => {
     const { position, requiredCourses, requiredExams, additionalDocs, notes } = req.body;
 
-    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId });
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
 
     if (!config) {
         res.status(404);
@@ -301,7 +290,7 @@ const configurePositionCurriculum = asyncHandler(async (req, res) => {
 // @route   GET /api/curriculum/position/:position
 const getPositionCurriculum = asyncHandler(async (req, res) => {
     const { position } = req.params;
-    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId });
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
 
     if (!config) {
         res.status(404);

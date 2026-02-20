@@ -4,7 +4,7 @@ const CurriculumConfigSchema = new mongoose.Schema({
     companyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',
-        required: true
+        required: false // Allow global/default configs
     },
 
     // Master catalog of all available courses
