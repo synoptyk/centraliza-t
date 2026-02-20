@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, BookOpen, FileText, Settings, Save, Trash2, Edit2, Check, Search, AlertCircle, Loader2, X, Activity } from 'lucide-react';
+import { Plus, BookOpen, FileText, Settings, Save, Trash2, Edit2, Check, Search, AlertCircle, Loader2, X, Activity, ChevronDown, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
@@ -114,6 +114,7 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
             if (profileVariant === 'hiring') {
                 const allHiringDocs = config.masterHiringDocs.map(d => d.code);
                 setSelectedHiringDocs(allHiringDocs);
+                setIsExpandedDocs(true);
                 toast.success('Todos los documentos de ingreso han sido asignados.');
             } else if (profileVariant === 'bat1') {
                 const allCourses = config.masterCourses.map(c => c.code);
@@ -122,6 +123,8 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
 
                 setSelectedCourses(allCourses);
                 setSelectedExams(examsToAssign);
+                setIsExpandedCourses(true);
+                setIsExpandedExams(true);
                 toast.success('Perfil BAT 1 (Terreno) aplicado correctamente.');
             } else if (profileVariant === 'bat2') {
                 const allCourses = config.masterCourses.map(c => c.code);
@@ -130,6 +133,8 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
 
                 setSelectedCourses(allCourses);
                 setSelectedExams(examsToAssign);
+                setIsExpandedCourses(true);
+                setIsExpandedExams(true);
                 toast.success('Perfil BAT 2 (Administrativo) aplicado correctamente.');
             }
             setIsApplyingProfile(false);
@@ -227,87 +232,120 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
                     {/* Lists */}
                     {type === 'hiring' ? (
                         <div className="space-y-4">
-                            <h4 className="font-black text-slate-800 uppercase tracking-tight">Documentos Obligatorios Requeridos</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                                {config.masterHiringDocs?.map(doc => (
-                                    <label
-                                        key={doc.code}
-                                        className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedHiringDocs.includes(doc.code) ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-slate-200 hover:border-indigo-300'}`}
-                                    >
-                                        <div className={`mt-0.5 min-w-5 h-5 rounded flex items-center justify-center border ${selectedHiringDocs.includes(doc.code) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
-                                            {selectedHiringDocs.includes(doc.code) && <Check size={14} strokeWidth={4} />}
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            className="hidden"
-                                            checked={selectedHiringDocs.includes(doc.code)}
-                                            onChange={() => toggleItem(doc.code, selectedHiringDocs, setSelectedHiringDocs)}
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`font-bold text-xs uppercase leading-snug break-words ${selectedHiringDocs.includes(doc.code) ? 'text-indigo-900' : 'text-slate-700'}`}>{doc.name}</p>
-                                        </div>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-8">
-                            {/* Courses */}
-                            <div className="space-y-4">
-                                <h4 className="font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                                    <BookOpen size={20} className="text-indigo-600" />
-                                    Cursos de Seguridad y Competencias
-                                </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                                    {config.masterCourses?.map(course => (
+                            <button
+                                onClick={() => setIsExpandedDocs(!isExpandedDocs)}
+                                className="w-full flex items-center justify-between font-black text-slate-800 uppercase tracking-tight py-4 px-6 bg-slate-50 hover:bg-slate-100 rounded-2xl transition-all"
+                            >
+                                <span className="flex items-center gap-2 text-sm">
+                                    <FileText size={20} className="text-indigo-600" />
+                                    Documentos Obligatorios Requeridos
+                                    {selectedHiringDocs.length > 0 && <span className="ml-2 bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xs">{selectedHiringDocs.length} sel.</span>}
+                                </span>
+                                {isExpandedDocs ? <ChevronDown size={20} className="text-slate-400" /> : <ChevronRight size={20} className="text-slate-400" />}
+                            </button>
+
+                            {isExpandedDocs && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-2 p-2">
+                                    {config.masterHiringDocs?.map(doc => (
                                         <label
-                                            key={course.code}
-                                            className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedCourses.includes(course.code) ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-slate-200 hover:border-indigo-300'}`}
+                                            key={doc.code}
+                                            className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedHiringDocs.includes(doc.code) ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-slate-200 hover:border-indigo-300'}`}
                                         >
-                                            <div className={`mt-0.5 min-w-5 h-5 rounded flex items-center justify-center border ${selectedCourses.includes(course.code) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
-                                                {selectedCourses.includes(course.code) && <Check size={14} strokeWidth={4} />}
+                                            <div className={`mt-0.5 min-w-5 h-5 rounded flex items-center justify-center border ${selectedHiringDocs.includes(doc.code) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
+                                                {selectedHiringDocs.includes(doc.code) && <Check size={14} strokeWidth={4} />}
                                             </div>
                                             <input
                                                 type="checkbox"
                                                 className="hidden"
-                                                checked={selectedCourses.includes(course.code)}
-                                                onChange={() => toggleItem(course.code, selectedCourses, setSelectedCourses)}
+                                                checked={selectedHiringDocs.includes(doc.code)}
+                                                onChange={() => toggleItem(doc.code, selectedHiringDocs, setSelectedHiringDocs)}
                                             />
                                             <div className="flex-1 min-w-0">
-                                                <p className={`font-bold text-xs uppercase leading-snug break-words ${selectedCourses.includes(course.code) ? 'text-indigo-900' : 'text-slate-700'}`}>{course.name}</p>
+                                                <p className={`font-bold text-xs uppercase leading-snug break-words ${selectedHiringDocs.includes(doc.code) ? 'text-indigo-900' : 'text-slate-700'}`}>{doc.name}</p>
                                             </div>
                                         </label>
                                     ))}
                                 </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {/* Courses */}
+                            <div className="space-y-2">
+                                <button
+                                    onClick={() => setIsExpandedCourses(!isExpandedCourses)}
+                                    className="w-full flex items-center justify-between font-black text-slate-800 uppercase tracking-tight py-4 px-6 bg-slate-50 hover:bg-slate-100 rounded-2xl transition-all"
+                                >
+                                    <span className="flex items-center gap-2 text-sm">
+                                        <BookOpen size={20} className="text-indigo-600" />
+                                        Cursos de Seguridad y Competencias
+                                        {selectedCourses.length > 0 && <span className="ml-2 bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xs">{selectedCourses.length} sel.</span>}
+                                    </span>
+                                    {isExpandedCourses ? <ChevronDown size={20} className="text-slate-400" /> : <ChevronRight size={20} className="text-slate-400" />}
+                                </button>
+
+                                {isExpandedCourses && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-2 p-2">
+                                        {config.masterCourses?.map(course => (
+                                            <label
+                                                key={course.code}
+                                                className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedCourses.includes(course.code) ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-slate-200 hover:border-indigo-300'}`}
+                                            >
+                                                <div className={`mt-0.5 min-w-5 h-5 rounded flex items-center justify-center border ${selectedCourses.includes(course.code) ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
+                                                    {selectedCourses.includes(course.code) && <Check size={14} strokeWidth={4} />}
+                                                </div>
+                                                <input
+                                                    type="checkbox"
+                                                    className="hidden"
+                                                    checked={selectedCourses.includes(course.code)}
+                                                    onChange={() => toggleItem(course.code, selectedCourses, setSelectedCourses)}
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`font-bold text-xs uppercase leading-snug break-words ${selectedCourses.includes(course.code) ? 'text-indigo-900' : 'text-slate-700'}`}>{course.name}</p>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Exams */}
-                            <div className="space-y-4">
-                                <h4 className="font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                                    <Activity size={20} className="text-orange-600" />
-                                    Exámenes de Salud Ocupacional (BAT)
-                                </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                                    {config.masterExams?.map(exam => (
-                                        <label
-                                            key={exam.code}
-                                            className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedExams.includes(exam.code) ? 'bg-orange-50 border-orange-500' : 'bg-white border-slate-200 hover:border-orange-300'}`}
-                                        >
-                                            <div className={`mt-0.5 min-w-5 h-5 rounded flex items-center justify-center border ${selectedExams.includes(exam.code) ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'}`}>
-                                                {selectedExams.includes(exam.code) && <Check size={14} strokeWidth={4} />}
-                                            </div>
-                                            <input
-                                                type="checkbox"
-                                                className="hidden"
-                                                checked={selectedExams.includes(exam.code)}
-                                                onChange={() => toggleItem(exam.code, selectedExams, setSelectedExams)}
-                                            />
-                                            <div className="flex-1 min-w-0">
-                                                <p className={`font-bold text-xs uppercase leading-snug break-words ${selectedExams.includes(exam.code) ? 'text-orange-900' : 'text-slate-700'}`}>{exam.name}</p>
-                                            </div>
-                                        </label>
-                                    ))}
-                                </div>
+                            <div className="space-y-2 pt-4 border-t border-slate-100">
+                                <button
+                                    onClick={() => setIsExpandedExams(!isExpandedExams)}
+                                    className="w-full flex items-center justify-between font-black text-slate-800 uppercase tracking-tight py-4 px-6 bg-slate-50 hover:bg-slate-100 rounded-2xl transition-all"
+                                >
+                                    <span className="flex items-center gap-2 text-sm">
+                                        <Activity size={20} className="text-orange-600" />
+                                        Exámenes de Salud Ocupacional (BAT)
+                                        {selectedExams.length > 0 && <span className="ml-2 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xs">{selectedExams.length} sel.</span>}
+                                    </span>
+                                    {isExpandedExams ? <ChevronDown size={20} className="text-slate-400" /> : <ChevronRight size={20} className="text-slate-400" />}
+                                </button>
+
+                                {isExpandedExams && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-2 p-2">
+                                        {config.masterExams?.map(exam => (
+                                            <label
+                                                key={exam.code}
+                                                className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedExams.includes(exam.code) ? 'bg-orange-50 border-orange-500' : 'bg-white border-slate-200 hover:border-orange-300'}`}
+                                            >
+                                                <div className={`mt-0.5 min-w-5 h-5 rounded flex items-center justify-center border ${selectedExams.includes(exam.code) ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'}`}>
+                                                    {selectedExams.includes(exam.code) && <Check size={14} strokeWidth={4} />}
+                                                </div>
+                                                <input
+                                                    type="checkbox"
+                                                    className="hidden"
+                                                    checked={selectedExams.includes(exam.code)}
+                                                    onChange={() => toggleItem(exam.code, selectedExams, setSelectedExams)}
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`font-bold text-xs uppercase leading-snug break-words ${selectedExams.includes(exam.code) ? 'text-orange-900' : 'text-slate-700'}`}>{exam.name}</p>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
