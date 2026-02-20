@@ -118,7 +118,7 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
                 const allHiringDocs = config.masterHiringDocs.map(d => d.code);
                 setSelectedHiringDocs(allHiringDocs);
                 setIsExpandedDocs(true);
-                toast.success('Todos los documentos de ingreso han sido asignados.');
+                toast.success('Documentos seleccionados. Revisa y Guardar para confirmar.');
             } else if (profileVariant === 'bat1') {
                 const allCourses = config.masterCourses.map(c => c.code);
                 const bat1Exams = ['ALT-FIS', 'AUD-MET', 'GRA-ALT', 'ORI-COM', 'SIL-ICE', 'DRO-BAT', 'PRE-OCU', 'PSI-LOG', 'AV-RIES', 'PSI-SEN'];
@@ -128,7 +128,7 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
                 setSelectedExams(examsToAssign);
                 setIsExpandedCourses(true);
                 setIsExpandedExams(true);
-                toast.success('Perfil BAT 1 (Terreno) aplicado correctamente.');
+                toast.success('Perfil cargado en pantalla. Revisa y haz clic en Guardar.');
             } else if (profileVariant === 'bat2') {
                 const allCourses = config.masterCourses.map(c => c.code);
                 const bat2Exams = ['GRA-ALT', 'ORI-COM', 'AUD-MET', 'DRO-BAT'];
@@ -138,7 +138,7 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
                 setSelectedExams(examsToAssign);
                 setIsExpandedCourses(true);
                 setIsExpandedExams(true);
-                toast.success('Perfil BAT 2 (Administrativo) aplicado correctamente.');
+                toast.success('Perfil cargado en pantalla. Revisa y haz clic en Guardar.');
             }
             setIsApplyingProfile(false);
         }, 800); // Simulated delay for visual feedback
