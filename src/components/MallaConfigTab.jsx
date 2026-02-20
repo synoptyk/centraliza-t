@@ -12,6 +12,9 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
 
     // UI state
     const [isApplyingProfile, setIsApplyingProfile] = useState(false);
+    const [isExpandedDocs, setIsExpandedDocs] = useState(false);
+    const [isExpandedCourses, setIsExpandedCourses] = useState(false);
+    const [isExpandedExams, setIsExpandedExams] = useState(false);
 
     // List of positions for selected project
     const [availablePositions, setAvailablePositions] = useState([]);
