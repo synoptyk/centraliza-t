@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, BookOpen, FileText, Settings, Save, Trash2, Edit2, Check, Search, AlertCircle, Loader2, X } from 'lucide-react';
+import { Plus, BookOpen, FileText, Settings, Save, Trash2, Edit2, Check, Search, AlertCircle, Loader2, X, Activity } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
