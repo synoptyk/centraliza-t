@@ -113,11 +113,18 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
         if (!config) return;
         setIsApplyingProfile(profileVariant);
 
+        // Immediate visual feedback for expansion
+        if (profileVariant === 'hiring') {
+            setIsExpandedDocs(true);
+        } else if (profileVariant === 'bat1' || profileVariant === 'bat2') {
+            setIsExpandedCourses(true);
+            setIsExpandedExams(true);
+        }
+
         setTimeout(() => {
             if (profileVariant === 'hiring') {
                 const allHiringDocs = config.masterHiringDocs.map(d => d.code);
                 setSelectedHiringDocs(allHiringDocs);
-                setIsExpandedDocs(true);
                 toast.success('Documentos seleccionados. Revisa y Guardar para confirmar.');
             } else if (profileVariant === 'bat1') {
                 const allCourses = config.masterCourses.map(c => c.code);
@@ -126,8 +133,6 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
 
                 setSelectedCourses(allCourses);
                 setSelectedExams(examsToAssign);
-                setIsExpandedCourses(true);
-                setIsExpandedExams(true);
                 toast.success('Perfil cargado en pantalla. Revisa y haz clic en Guardar.');
             } else if (profileVariant === 'bat2') {
                 const allCourses = config.masterCourses.map(c => c.code);
@@ -136,8 +141,6 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
 
                 setSelectedCourses(allCourses);
                 setSelectedExams(examsToAssign);
-                setIsExpandedCourses(true);
-                setIsExpandedExams(true);
                 toast.success('Perfil cargado en pantalla. Revisa y haz clic en Guardar.');
             }
             setIsApplyingProfile(false);
