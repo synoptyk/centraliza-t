@@ -101,6 +101,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/comments', require('./routes/commentRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/config', require('./routes/configRoutes'));
 
 // Diagnostic Route for Email
 const sendEmail = require('./utils/sendEmail');
