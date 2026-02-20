@@ -28,6 +28,7 @@ import MasterProfileModal from './components/MasterProfileModal';
 import HumanCapitalMaster from './pages/HumanCapitalMaster';
 import CommercialAdmin from './pages/CommercialAdmin';
 import BillingAndSubscription from './pages/BillingAndSubscription';
+import LandingPage from './pages/LandingPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth }) => {
@@ -79,9 +80,13 @@ function AppContent() {
                         <Route path="/resetpassword/:resettoken" element={<ResetPasswordPage />} />
 
                         <Route path="/" element={
-                            <ProtectedRoute auth={auth}>
-                                <Dashboard onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
-                            </ProtectedRoute>
+                            auth ? (
+                                <ProtectedRoute auth={auth}>
+                                    <Dashboard onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
+                                </ProtectedRoute>
+                            ) : (
+                                <LandingPage />
+                            )
                         } />
 
                         <Route path="/admin/command-center" element={
