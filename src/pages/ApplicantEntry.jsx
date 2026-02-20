@@ -69,6 +69,15 @@ const ApplicantEntry = ({ auth, onLogout }) => {
     };
 
     useEffect(() => {
+        if (applicant.projectId) {
+            const selectedProject = projects.find(p => p._id === applicant.projectId);
+            setAvailablePositions(selectedProject ? selectedProject.requirements : []);
+        } else {
+            setAvailablePositions([]);
+        }
+    }, [applicant.projectId, projects]);
+
+    useEffect(() => {
         if (applicant.projectId && applicant.position) {
             const selectedProject = projects.find(p => p._id === applicant.projectId);
             const req = selectedProject?.requirements.find(r => r.position === applicant.position);
@@ -361,17 +370,33 @@ const ApplicantEntry = ({ auth, onLogout }) => {
                                     <div className="space-y-4 md:col-span-2 pt-6 border-t border-slate-50">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Proyecto Asignado</label>
-                                            <select className="w-full px-6 py-4 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 transition-all outline-none cursor-pointer" value={applicant.projectId} onChange={(e) => setApplicant({ ...applicant, projectId: e.target.value, position: '' })}>
+                                            <select className="w-full px-6 py-4 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 transition-all outline-none cursor-pointer" value={applicant.projectId} onChange={(e) => {
+                                                setApplicant({ ...applicant, projectId: e.target.value, position: '', assignedLocation: '' });
+                                                setCalculatedLocation('');
+                                                setIsFullyOccupied(false);
+                                            }}>
                                                 <option value="">SELECCIONAR PROYECTO...</option>
                                                 {projects.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
                                             </select>
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cargo a Postular</label>
-                                            <select className="w-full px-6 py-4 bg-indigo-50 text-indigo-700 border-0 rounded-2xl font-bold focus:ring-2 focus:ring-indigo-400 transition-all outline-none cursor-pointer disabled:opacity-30" disabled={!applicant.projectId} value={applicant.position} onChange={(e) => setApplicant({ ...applicant, position: e.target.value })}>
-                                                <option value="">SELECCIONAR CARGO...</option>
-                                                {availablePositions.map((req, idx) => <option key={idx} value={req.position}>{req.position}</option>)}
-                                            </select>
+                                            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                                                <select className="flex-1 w-full px-6 py-4 bg-indigo-50 text-indigo-700 border-0 rounded-2xl font-bold focus:ring-2 focus:ring-indigo-400 transition-all outline-none cursor-pointer disabled:opacity-30" disabled={!applicant.projectId} value={applicant.position} onChange={(e) => setApplicant({ ...applicant, position: e.target.value })}>
+                                                    <option value="">SELECCIONAR CARGO...</option>
+                                                    {availablePositions.map((req, idx) => <option key={idx} value={req.position}>{req.position}</option>)}
+                                                </select>
+
+                                                {applicant.position && (
+                                                    <div className={`shrink-0 px-6 py-4 rounded-2xl border-2 flex items-center justify-center gap-2 ${isFullyOccupied ? 'bg-amber-50 border-amber-200 text-amber-700' : calculatedLocation ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
+                                                        <MapPin size={18} />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[9px] font-black uppercase tracking-widest">Sede Asignada Automática</span>
+                                                            <span className="text-sm font-bold">{isFullyOccupied ? 'Sin Cupos (Irá a Espera)' : calculatedLocation || 'Sin Sede Requerida'}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
