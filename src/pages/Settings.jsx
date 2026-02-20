@@ -11,7 +11,7 @@ import PageWrapper from '../components/PageWrapper';
 
 // --- HELPER COMPONENTS ---
 
-const ContactModal = ({ isOpen, onClose, onSave, contact, companies, type }) => {
+const ContactModal = ({ isOpen, onClose, onSave, contact, companies, users, type }) => {
     const [formData, setFormData] = useState({
         name: '',
         role: '',
@@ -35,6 +35,27 @@ const ContactModal = ({ isOpen, onClose, onSave, contact, companies, type }) => 
             setFormData({ name: '', role: '', email: '', phone: '', companyId: '', blocked: false });
         }
     }, [contact, isOpen]);
+
+    const handleUserSelect = (e) => {
+        const userId = e.target.value;
+        if (!userId) {
+            if (!contact) {
+                setFormData({ name: '', role: '', email: '', phone: '', companyId: '', blocked: false });
+            }
+            return;
+        }
+        const user = users.find(u => u._id === userId);
+        if (user) {
+            setFormData({
+                name: user.name || '',
+                role: user.role === 'Admin_Centralizat' ? 'Administrador' : (user.role === 'Ceo_Centralizat' ? 'Gerencia General' : user.role),
+                email: user.email || '',
+                phone: user.phone || '',
+                companyId: user.companyId || '',
+                blocked: false
+            });
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -67,6 +88,17 @@ const ContactModal = ({ isOpen, onClose, onSave, contact, companies, type }) => 
 
                 <div className="p-8 space-y-6">
                     <div className="grid grid-cols-1 gap-6">
+                        <div className="space-y-2 pb-4 border-b border-slate-100">
+                            <label className="text-[10px] font-black text-indigo-600 uppercase tracking-widest pl-1">Vincular Usuario del Sistema (Autocompletar)</label>
+                            <select
+                                onChange={handleUserSelect}
+                                className="w-full bg-indigo-50/50 border border-indigo-100 rounded-2xl px-5 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all appearance-none"
+                            >
+                                <option value="">O Mitigar con Ingreso Manual...</option>
+                                {(users || []).map(u => <option key={u._id} value={u._id}>{u.name} ({u.email})</option>)}
+                            </select>
+                        </div>
+
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Empresa</label>
                             <select
@@ -143,7 +175,7 @@ const ContactModal = ({ isOpen, onClose, onSave, contact, companies, type }) => 
     );
 };
 
-const ContactSection = ({ title, icon: Icon, type, description, contacts, companies, onAdd, onRemove, onUpdate }) => {
+const ContactSection = ({ title, icon: Icon, type, description, contacts, companies, users, onAdd, onRemove, onUpdate }) => {
     const [viewMode, setViewMode] = useState('grid'); // grid, table
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -235,8 +267,8 @@ const ContactSection = ({ title, icon: Icon, type, description, contacts, compan
                         <div
                             key={contact.originalIndex}
                             className={`group relative p-6 rounded-[2.5rem] border transition-all duration-500 ${contact.blocked
-                                    ? 'bg-slate-50/50 border-slate-100 opacity-60'
-                                    : 'bg-white border-slate-100 hover:border-indigo-500/20 hover:shadow-2xl hover:shadow-indigo-500/10'
+                                ? 'bg-slate-50/50 border-slate-100 opacity-60'
+                                : 'bg-white border-slate-100 hover:border-indigo-500/20 hover:shadow-2xl hover:shadow-indigo-500/10'
                                 }`}
                         >
                             {/* Actions Floating */}
@@ -355,6 +387,7 @@ const ContactSection = ({ title, icon: Icon, type, description, contacts, compan
                         onSave={handleSaveContact}
                         contact={editingContact}
                         companies={companies}
+                        users={users}
                         type={type}
                     />
                 )}
@@ -366,6 +399,7 @@ const ContactSection = ({ title, icon: Icon, type, description, contacts, compan
 const Settings = ({ auth, onLogout }) => {
     const [config, setConfig] = useState({ managers: [], admins: [] });
     const [companies, setCompanies] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
@@ -376,12 +410,14 @@ const Settings = ({ auth, onLogout }) => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [configRes, companiesRes] = await Promise.all([
+            const [configRes, companiesRes, usersRes] = await Promise.all([
                 api.get('/config'),
-                api.get('/companies')
+                api.get('/companies'),
+                api.get('/users')
             ]);
             setConfig(configRes.data);
             setCompanies(companiesRes.data);
+            setUsers(usersRes.data);
         } catch (error) {
             toast.error('Error al cargar datos');
         }
@@ -477,6 +513,7 @@ const Settings = ({ auth, onLogout }) => {
                         type="managers"
                         contacts={config.managers}
                         companies={companies}
+                        users={users}
                         onAdd={addContact}
                         onRemove={removeContact}
                         onUpdate={updateContact}
@@ -489,6 +526,7 @@ const Settings = ({ auth, onLogout }) => {
                         type="admins"
                         contacts={config.admins}
                         companies={companies}
+                        users={users}
                         onAdd={addContact}
                         onRemove={removeContact}
                         onUpdate={updateContact}
