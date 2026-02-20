@@ -37,10 +37,15 @@ const ApplicantEntry = ({ auth, onLogout }) => {
             hasFamilyInCompany: false,
             relationship: '',
             employeeName: ''
-        }
+        },
+        assignedLocation: '',
+        isWaitlisted: false
     };
 
     const [applicant, setApplicant] = useState(initialApplicantState);
+    const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+    const [calculatedLocation, setCalculatedLocation] = useState('');
+    const [isFullyOccupied, setIsFullyOccupied] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -64,13 +69,44 @@ const ApplicantEntry = ({ auth, onLogout }) => {
     };
 
     useEffect(() => {
-        if (applicant.projectId) {
+        if (applicant.projectId && applicant.position) {
             const selectedProject = projects.find(p => p._id === applicant.projectId);
-            setAvailablePositions(selectedProject ? selectedProject.requirements : []);
+            const req = selectedProject?.requirements.find(r => r.position === applicant.position);
+
+            if (req && req.locationDistribution && req.locationDistribution.length > 0) {
+                // Find first location with available spots
+                let assignedLoc = '';
+                let fullyOccupied = true;
+
+                for (const dist of req.locationDistribution) {
+                    const currentlyRegistered = allApplicants.filter(a =>
+                        a.projectId === applicant.projectId &&
+                        a.position === applicant.position &&
+                        a.assignedLocation === dist.location &&
+                        a.status !== 'Rechazado'
+                    ).length;
+
+                    if (currentlyRegistered < dist.quantity) {
+                        assignedLoc = dist.location;
+                        fullyOccupied = false;
+                        break;
+                    }
+                }
+
+                setCalculatedLocation(assignedLoc);
+                setIsFullyOccupied(fullyOccupied);
+                setApplicant(prev => ({ ...prev, assignedLocation: assignedLoc }));
+            } else {
+                setCalculatedLocation('');
+                setIsFullyOccupied(false);
+                setApplicant(prev => ({ ...prev, assignedLocation: '' }));
+            }
         } else {
-            setAvailablePositions([]);
+            setCalculatedLocation('');
+            setIsFullyOccupied(false);
+            setApplicant(prev => ({ ...prev, assignedLocation: '' }));
         }
-    }, [applicant.projectId, projects]);
+    }, [applicant.projectId, applicant.position, projects, allApplicants]);
 
     const getProgress = (posName) => {
         if (!applicant.projectId) return null;
@@ -136,16 +172,40 @@ const ApplicantEntry = ({ auth, onLogout }) => {
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
+
+        // Waitlist check for new applicants
+        if (!applicant._id && applicant.position && isFullyOccupied && !applicant.isWaitlisted) {
+            setShowWaitlistModal(true);
+            return;
+        }
+
+        executeSave(applicant);
+    };
+
+    const handleWaitlistAccept = () => {
+        const waitlistedApplicant = {
+            ...applicant,
+            isWaitlisted: true,
+            status: 'Lista de Espera',
+            assignedLocation: 'Sin Asignación (Lista de Espera)'
+        };
+        setShowWaitlistModal(false);
+        executeSave(waitlistedApplicant);
+    };
+
+    const executeSave = async (dataToSave) => {
         setLoading(true);
         try {
-            if (applicant._id) {
-                await api.put(`/applicants/${applicant._id}`, applicant);
+            if (dataToSave._id) {
+                await api.put(`/applicants/${dataToSave._id}`, dataToSave);
                 toast.success('Ficha de Postulación actualizada');
             } else {
-                await api.post('/applicants', applicant);
-                toast.success('Ficha de Postulación guardada exitosamente');
+                await api.post('/applicants', dataToSave);
+                toast.success(dataToSave.isWaitlisted ? 'Postulante guardado en Lista de Espera' : 'Ficha guardada exitosamente');
             }
             setApplicant(initialApplicantState);
+            setCalculatedLocation('');
+            setIsFullyOccupied(false);
             fetchData();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Error al guardar la ficha');
@@ -591,6 +651,42 @@ const ApplicantEntry = ({ auth, onLogout }) => {
                                     </div>
                                 </div>
                             </section>
+                        </div>
+                    </div>
+                )}
+
+                {/* WAITLIST ADVISORY MODAL */}
+                {showWaitlistModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
+                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+                            <div className="p-8 text-center space-y-6">
+                                <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto text-amber-500">
+                                    <AlertCircle size={40} />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">Cupos Cubiertos</h2>
+                                    <p className="text-sm font-bold text-slate-500 mt-2">
+                                        Las vacantes establecidas en todas las Sedes para el cargo de <span className="text-slate-800">"{applicant.position}"</span> ya han sido cubiertas.
+                                    </p>
+                                    <p className="text-xs font-bold text-amber-600 mt-4 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                                        ¿Deseas guardar a este postulante en la <span className="font-black uppercase">Lista de Espera</span> del proyecto?
+                                    </p>
+                                </div>
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        onClick={() => setShowWaitlistModal(false)}
+                                        className="flex-1 px-4 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-100 transition-all"
+                                    >
+                                        Cancelar Registro
+                                    </button>
+                                    <button
+                                        onClick={handleWaitlistAccept}
+                                        className="flex-1 px-4 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-white bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-200 transition-all"
+                                    >
+                                        Guardar en Espera
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}

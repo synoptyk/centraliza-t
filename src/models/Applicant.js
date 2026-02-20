@@ -11,6 +11,8 @@ const applicantSchema = new mongoose.Schema({
     // Project Info
     projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
     position: { type: String, required: true },
+    assignedLocation: { type: String }, // Control the physical location derived from project
+    isWaitlisted: { type: Boolean, default: false }, // Control waitlist bypass
     clientFormatNumber: { type: String }, // Numero de formato de cliente
 
     // Antecendentes Educacionales
@@ -50,6 +52,7 @@ const applicantSchema = new mongoose.Schema({
         type: String,
         enum: [
             'Postulando',
+            'Lista de Espera',
             'En Entrevista',
             'En Test',
             'Carga Documental',
