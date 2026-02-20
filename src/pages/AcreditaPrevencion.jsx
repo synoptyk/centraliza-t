@@ -15,7 +15,7 @@ const AcreditaPrevencion = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const { canUpdate } = usePermissions('acreditacion-prevencion');
     const [loading, setLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState('courses'); // 'courses', 'exams', 'configuracion'
+    const [activeTab, setActiveTab] = useState('expediente'); // 'expediente', 'configuracion'
     const [updatingItem, setUpdatingItem] = useState(null);
     const [projects, setProjects] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -242,19 +242,11 @@ const AcreditaPrevencion = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                 <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between">
                     <div className="flex p-1 bg-slate-50 rounded-2xl">
                         <button
-                            onClick={() => setActiveTab('courses')}
-                            className={`px-10 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'courses' ? 'bg-white text-indigo-600 shadow-xl shadow-indigo-100/50' : 'text-slate-400 hover:text-indigo-600'}`}
+                            onClick={() => setActiveTab('expediente')}
+                            className={`px-10 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'expediente' ? 'bg-white text-indigo-600 shadow-xl shadow-indigo-100/50' : 'text-slate-400 hover:text-indigo-600'}`}
                         >
                             <div className="flex items-center gap-2">
-                                <BookOpen size={14} /> Cursos Online
-                            </div>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('exams')}
-                            className={`px-10 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'exams' ? 'bg-white text-indigo-600 shadow-xl shadow-indigo-100/50' : 'text-slate-400 hover:text-indigo-600'}`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <Activity size={14} /> Exámenes Físicos
+                                <ShieldCheck size={14} /> Expediente de Prevención 360
                             </div>
                         </button>
                         <button
@@ -389,31 +381,86 @@ const AcreditaPrevencion = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                     </div>
                                 ) : (
                                     <>
-                                        {/* Items List */}
-                                        <div className="space-y-3">
-                                            {(activeTab === 'courses' ? selectedApplicant.preventionDocuments.courses : selectedApplicant.preventionDocuments.exams).map((item, idx) =>
-                                                renderItemRow(activeTab === 'courses' ? 'course' : 'exam', item, idx)
-                                            )}
-                                        </div>
+                                        <div className="space-y-8 pb-32">
+                                            {/* Prevention Section */}
+                                            <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
+                                                <div className="flex justify-between items-center mb-8">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                                            <ShieldCheck size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Cursos y Exámenes</h3>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Requisitos de Seguridad Industrial</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                        {/* Final Action */}
-                                        <div className="flex justify-between items-center bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl shadow-slate-300 text-white overflow-hidden relative">
-                                            <div className="absolute top-0 right-0 p-8 opacity-5">
-                                                <ShieldCheck size={160} />
+                                                <div className="space-y-8">
+                                                    <div>
+                                                        <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">
+                                                            <BookOpen size={12} /> Cursos de Capacitación
+                                                        </h4>
+                                                        <div className="grid grid-cols-1 gap-3">
+                                                            {selectedApplicant.preventionDocuments.courses?.map((item, idx) => renderItemRow('course', item, idx))}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">
+                                                            <Activity size={12} /> Exámenes de Salud
+                                                        </h4>
+                                                        <div className="grid grid-cols-1 gap-3">
+                                                            {selectedApplicant.preventionDocuments.exams?.map((item, idx) => renderItemRow('exam', item, idx))}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col relative z-10 transition-all">
-                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Acreditación y Prevención Final</span>
-                                                <span className="text-2xl font-black tracking-tight">
-                                                    Validación Integral de Seguridad
-                                                </span>
-                                                <p className="text-xs text-slate-400 mt-2 font-medium">Asegúrese de haber revisado todos los certificados antes de habilitar.</p>
+
+                                            {/* Contract Docs View (Read Only for Context) */}
+                                            <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 opacity-80">
+                                                <div className="flex justify-between items-center mb-8">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400">
+                                                            <FileText size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Expediente de Contratación</h3>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Vista de Sincronización</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-black uppercase flex items-center gap-2 border border-amber-100">
+                                                        <AlertCircle size={12} /> Solo Lectura
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {selectedApplicant.contractDocuments?.map((doc) => (
+                                                        <div key={doc._id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
+                                                            <div className="flex-1 min-w-0 pr-4">
+                                                                <p className="font-black text-[11px] uppercase truncate text-slate-700">{doc.docType}</p>
+                                                                <span className={`text-[10px] font-bold ${doc.status === 'OK' || doc.status === 'Verificado' ? 'text-emerald-500' : 'text-slate-400'} uppercase`}>{doc.status}</span>
+                                                            </div>
+                                                            {doc.url && <a href={doc.url} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-indigo-600"><Eye size={16} /></a>}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <button
-                                                onClick={advanceToApproval}
-                                                className="relative z-10 bg-emerald-500 text-white px-10 py-5 rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 flex items-center gap-3 active:scale-95"
-                                            >
-                                                Habilitar para Contratación <ShieldCheck size={20} />
-                                            </button>
+
+                                            {/* Final Action Bar */}
+                                            <div className="fixed bottom-12 right-12 left-auto z-40">
+                                                <div className="bg-slate-900 shadow-2xl shadow-indigo-900/40 p-2 rounded-3xl border border-white/10 flex items-center gap-8 pl-8">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Cobertura Prevención</span>
+                                                        <span className="text-2xl font-black text-white">{getProgress(selectedApplicant).percentage}%</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={advanceToApproval}
+                                                        disabled={getProgress(selectedApplicant).percentage < 100}
+                                                        className={`px-12 py-5 rounded-2xl font-black uppercase tracking-widest text-sm transition-all flex items-center gap-3 ${getProgress(selectedApplicant).percentage >= 100 ? 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xl shadow-emerald-600/20' : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
+                                                    >
+                                                        Validar Seguridad Integral <ShieldCheck size={20} />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </>
                                 )}

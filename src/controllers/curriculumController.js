@@ -179,6 +179,59 @@ const addHiringDocToMaster = asyncHandler(async (req, res) => {
     res.json(config);
 });
 
+// @desc    Update hiring document in master catalog
+// @route   PUT /api/curriculum/hiring-docs/:code
+const updateMasterHiringDoc = asyncHandler(async (req, res) => {
+    const { code } = req.params;
+    const { name, category, description, isActive } = req.body;
+
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
+
+    const docIndex = config.masterHiringDocs.findIndex(d => d.code === code);
+    if (docIndex === -1) {
+        res.status(404);
+        throw new Error('Documento no encontrado');
+    }
+
+    if (name) config.masterHiringDocs[docIndex].name = name;
+    if (category) config.masterHiringDocs[docIndex].category = category;
+    if (description !== undefined) config.masterHiringDocs[docIndex].description = description;
+    if (isActive !== undefined) config.masterHiringDocs[docIndex].isActive = isActive;
+
+    await config.save();
+    res.json(config);
+});
+
+// @desc    Delete hiring document from master catalog
+// @route   DELETE /api/curriculum/hiring-docs/:code
+const deleteMasterHiringDoc = asyncHandler(async (req, res) => {
+    const { code } = req.params;
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
+
+    if (!config) {
+        res.status(404);
+        throw new Error('Configuración no encontrada');
+    }
+
+    const docIndex = config.masterHiringDocs.findIndex(d => d.code === code);
+    if (docIndex === -1) {
+        res.status(404);
+        throw new Error('Documento no encontrado');
+    }
+
+    config.masterHiringDocs.splice(docIndex, 1);
+
+    // Also remove from any position that requires it
+    config.positionCurriculum.forEach(pos => {
+        if (pos.requiredHiringDocs) {
+            pos.requiredHiringDocs = pos.requiredHiringDocs.filter(d => d !== code);
+        }
+    });
+
+    await config.save();
+    res.json({ message: 'Documento eliminado exitosamente', config });
+});
+
 
 // @desc    Update course in master catalog
 // @route   PUT /api/curriculum/courses/:code
@@ -226,6 +279,66 @@ const updateMasterExam = asyncHandler(async (req, res) => {
 
     await config.save();
     res.json(config);
+});
+
+// @desc    Delete course from master catalog
+// @route   DELETE /api/curriculum/courses/:code
+const deleteMasterCourse = asyncHandler(async (req, res) => {
+    const { code } = req.params;
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
+
+    if (!config) {
+        res.status(404);
+        throw new Error('Configuración no encontrada');
+    }
+
+    const courseIndex = config.masterCourses.findIndex(c => c.code === code);
+    if (courseIndex === -1) {
+        res.status(404);
+        throw new Error('Curso no encontrado');
+    }
+
+    config.masterCourses.splice(courseIndex, 1);
+
+    // Also remove from any position that requires it
+    config.positionCurriculum.forEach(pos => {
+        if (pos.requiredCourses) {
+            pos.requiredCourses = pos.requiredCourses.filter(c => c !== code);
+        }
+    });
+
+    await config.save();
+    res.json({ message: 'Curso eliminado exitosamente', config });
+});
+
+// @desc    Delete exam from master catalog
+// @route   DELETE /api/curriculum/exams/:code
+const deleteMasterExam = asyncHandler(async (req, res) => {
+    const { code } = req.params;
+    const config = await CurriculumConfig.findOne({ companyId: req.user.companyId || null });
+
+    if (!config) {
+        res.status(404);
+        throw new Error('Configuración no encontrada');
+    }
+
+    const examIndex = config.masterExams.findIndex(e => e.code === code);
+    if (examIndex === -1) {
+        res.status(404);
+        throw new Error('Examen no encontrado');
+    }
+
+    config.masterExams.splice(examIndex, 1);
+
+    // Also remove from any position that requires it
+    config.positionCurriculum.forEach(pos => {
+        if (pos.requiredExams) {
+            pos.requiredExams = pos.requiredExams.filter(e => e !== code);
+        }
+    });
+
+    await config.save();
+    res.json({ message: 'Examen eliminado exitosamente', config });
 });
 
 // @desc    Configure position curriculum
@@ -573,5 +686,9 @@ module.exports = {
     assignCurriculumToApplicant,
     uploadCurriculumDocument,
     updateCurriculumItemStatus,
-    assignBATStandard
+    assignBATStandard,
+    deleteMasterCourse,
+    deleteMasterExam,
+    updateMasterHiringDoc,
+    deleteMasterHiringDoc
 };

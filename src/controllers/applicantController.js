@@ -435,6 +435,61 @@ const uploadContractDocument = asyncHandler(async (req, res) => {
     res.json(updatedApplicant);
 });
 
+// @desc    Delete contract document (Module 5)
+// @route   DELETE /api/applicants/:id/contract-docs/:docId
+const deleteContractDocument = asyncHandler(async (req, res) => {
+    const applicant = await Applicant.findById(req.params.id);
+
+    if (!applicant) {
+        res.status(404);
+        throw new Error('Applicant not found');
+    }
+
+    const docIndex = applicant.contractDocuments.findIndex(d => d._id.toString() === req.params.docId);
+
+    if (docIndex === -1) {
+        res.status(404);
+        throw new Error('Document not found');
+    }
+
+    applicant.contractDocuments.splice(docIndex, 1);
+    const updatedApplicant = await applicant.save();
+
+    res.json(updatedApplicant);
+});
+
+// @desc    Create custom contract document requirement for applicant
+// @route   POST /api/applicants/:id/contract-docs/custom
+const createCustomContractDocument = asyncHandler(async (req, res) => {
+    const applicant = await Applicant.findById(req.params.id);
+    const { docType } = req.body;
+
+    if (!applicant) {
+        res.status(404);
+        throw new Error('Applicant not found');
+    }
+
+    if (!docType) {
+        res.status(400);
+        throw new Error('El nombre del documento es requerido');
+    }
+
+    const exists = applicant.contractDocuments.find(d => d.docType.toLowerCase() === docType.toLowerCase());
+
+    if (exists) {
+        res.status(400);
+        throw new Error('Este documento ya existe en el expediente del postulante');
+    }
+
+    applicant.contractDocuments.push({
+        docType: docType,
+        status: 'Pendiente'
+    });
+
+    const updatedApplicant = await applicant.save();
+    res.json(updatedApplicant);
+});
+
 // @desc    Update contract document status (Module 5)
 // @route   PUT /api/applicants/:id/contract-docs/:docId/status
 const updateContractDocStatus = asyncHandler(async (req, res) => {
@@ -953,6 +1008,8 @@ module.exports = {
     getInterviewsCalendar,
     uploadContractDocument,
     updateContractDocStatus,
+    deleteContractDocument,
+    createCustomContractDocument,
     updateAccreditationItem,
     updateTests,
     sendPsycholaborTest,

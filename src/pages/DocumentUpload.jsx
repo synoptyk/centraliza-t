@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Upload, CheckCircle2, Search, Loader2, Eye, Check, X, Settings, BookOpen, ClipboardList, Send, Activity, ShieldCheck } from 'lucide-react';
+import { FileText, Upload, CheckCircle2, Search, Loader2, Eye, Check, X, Settings, BookOpen, ClipboardList, Send, Activity, ShieldCheck, Trash2, Plus, AlertCircle, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 import PageWrapper from '../components/PageWrapper';
@@ -12,7 +12,8 @@ const DocumentUpload = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const { canUpdate } = usePermissions('documentos');
     const [loading, setLoading] = useState(false);
     const [uploadingDoc, setUploadingDoc] = useState(null);
-    const [activeTab, setActiveTab] = useState('contratacion'); // contratacion, prevencion, configuracion
+    const [activeTab, setActiveTab] = useState('expediente'); // expediente, configuracion
+    const [newDocName, setNewDocName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [projects, setProjects] = useState([]);
 
@@ -92,6 +93,33 @@ const DocumentUpload = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
         }
     };
 
+    const deleteContractDoc = async (docId) => {
+        if (!window.confirm('¿Estás seguro de eliminar este documento? Se borrará el archivo asociado.')) return;
+        try {
+            const res = await api.delete(`/applicants/${selectedApplicant._id}/contract-docs/${docId}`);
+            setSelectedApplicant(res.data);
+            toast.success('Documento eliminado');
+            fetchApplicants();
+        } catch (error) {
+            toast.error('Error al eliminar documento');
+        }
+    };
+
+    const addCustomDoc = async () => {
+        if (!newDocName.trim()) return;
+        try {
+            const res = await api.post(`/applicants/${selectedApplicant._id}/contract-docs/custom`, {
+                docType: newDocName
+            });
+            setSelectedApplicant(res.data);
+            setNewDocName('');
+            toast.success('Nuevo requisito añadido al expediente');
+            fetchApplicants();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Error al añadir requisito');
+        }
+    };
+
     const updatePreventionStatus = async (type, itemCode, status) => {
         try {
             const res = await api.put(`/applicants/${selectedApplicant._id}/prevention/${type}/${itemCode}/status`, {
@@ -136,13 +164,14 @@ const DocumentUpload = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
 
     const assignPreventionCurriculum = async () => {
         if (!selectedApplicant) return;
+        const loadingToast = toast.loading('Calculando requisitos de cargo...');
         try {
             const res = await api.post(`/applicants/${selectedApplicant._id}/prevention/assign`);
             setSelectedApplicant(res.data);
-            toast.success('Malla de prevención asignada exitosamente');
+            toast.success('Expediente actualizado con mallas de cargo', { id: loadingToast });
             fetchApplicants();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Error al asignar malla');
+            toast.error(error.response?.data?.message || 'Error al asignar malla', { id: loadingToast });
         }
     };
 
@@ -215,19 +244,11 @@ const DocumentUpload = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                 <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between">
                     <div className="flex p-1 bg-slate-50 rounded-2xl">
                         <button
-                            onClick={() => setActiveTab('contratacion')}
-                            className={`px-10 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'contratacion' ? 'bg-white text-indigo-600 shadow-xl shadow-indigo-100/50' : 'text-slate-400 hover:text-indigo-600'}`}
+                            onClick={() => setActiveTab('expediente')}
+                            className={`px-10 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'expediente' ? 'bg-white text-indigo-600 shadow-xl shadow-indigo-100/50' : 'text-slate-400 hover:text-indigo-600'}`}
                         >
                             <div className="flex items-center gap-2">
-                                <FileText size={14} /> Contratación
-                            </div>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('prevencion')}
-                            className={`px-10 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'prevencion' ? 'bg-white text-indigo-600 shadow-xl shadow-indigo-100/50' : 'text-slate-400 hover:text-indigo-600'}`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <ShieldCheck size={14} /> Prevención
+                                <FileText size={14} /> Expediente Digital 360
                             </div>
                         </button>
                         <button
@@ -346,123 +367,192 @@ const DocumentUpload = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                             </div>
                                         </div>
 
-                                        {activeTab === 'contratacion' && (
-                                            <div className="space-y-6">
-                                                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-                                                    <div className="flex items-center justify-between mb-8">
+                                        {activeTab === 'expediente' && (
+                                            <div className="space-y-8 pb-32">
+                                                {/* Header Section: Combined Files */}
+                                                <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
+                                                    <div className="flex justify-between items-center mb-8">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold">1</div>
-                                                            <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Expediente de Contratación</h3>
+                                                            <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                                                <FileText size={20} />
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Expediente de Contratación</h3>
+                                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Documentación base y legal</p>
+                                                            </div>
                                                         </div>
+                                                        <button
+                                                            onClick={assignPreventionCurriculum}
+                                                            className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all"
+                                                        >
+                                                            Sincronizar Malla
+                                                        </button>
                                                     </div>
 
                                                     {!selectedApplicant.contractDocuments?.length ? (
-                                                        <div className="bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-3xl p-12 text-center">
-                                                            <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                                                                <FileText size={40} />
+                                                        <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] p-12 text-center">
+                                                            <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                                <FileText size={32} />
                                                             </div>
-                                                            <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight mb-3">Requisitos no asignados</h4>
-                                                            <p className="text-slate-600 font-bold mb-8 max-w-md mx-auto">
-                                                                Debes asignar los requisitos de contratación configurados para el cargo {selectedApplicant.position}.
-                                                            </p>
-                                                            <button
-                                                                onClick={assignPreventionCurriculum}
-                                                                className="px-10 py-5 bg-indigo-600 text-white rounded-3xl font-black uppercase tracking-widest text-sm hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all"
-                                                            >
-                                                                Asignar Requisitos de Cargo
-                                                            </button>
+                                                            <p className="text-slate-500 font-bold mb-6">No hay documentos base asignados.</p>
+                                                            <button onClick={assignPreventionCurriculum} className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700">Comenzar Acreditación</button>
                                                         </div>
-                                                    ) : (
-                                                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                                            {selectedApplicant.contractDocuments.map((doc) => {
-                                                                return (
-                                                                    <div key={doc._id || doc.docType} className={`group p-5 rounded-2xl border transition-all ${doc.status === 'OK' || doc.status === 'Verificado' ? 'bg-emerald-50 border-emerald-200' : doc.status === 'Rechazado' ? 'bg-red-50 border-red-200' : 'bg-white border-slate-100 hover:border-indigo-300'}`}>
-                                                                        <div className="flex justify-between items-start gap-4">
-                                                                            <div className="flex-1 min-w-0">
-                                                                                <p className="font-bold text-slate-700 text-sm truncate uppercase tracking-tight">{doc.docType}</p>
-                                                                                <span className={`text-[10px] font-black uppercase flex items-center gap-1.5 mt-1 ${doc.status === 'OK' || doc.status === 'Verificado' ? 'text-emerald-600' : doc.status === 'Rechazado' ? 'text-red-600' : 'text-indigo-600'}`}>
-                                                                                    <Activity size={10} /> {doc.status}
-                                                                                </span>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2">
-                                                                                {doc.url && <a href={doc.url} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white text-slate-600 rounded-xl border border-slate-200 hover:text-indigo-600 shadow-sm"><Eye size={18} /></a>}
-                                                                                <div className="flex items-center gap-1.5">
-                                                                                    {doc.status === 'Pendiente' && (
-                                                                                        <>
-                                                                                            <button onClick={() => updateContractStatus(doc._id, 'OK')} className="p-2.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600"><Check size={18} /></button>
-                                                                                            <button onClick={() => {
-                                                                                                const reason = prompt('Motivo de rechazo:');
-                                                                                                if (reason) updateContractStatus(doc._id, 'Rechazado', reason);
-                                                                                            }} className="p-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600"><X size={18} /></button>
-                                                                                        </>
-                                                                                    )}
-                                                                                    <label className="cursor-pointer p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
-                                                                                        {uploadingDoc === `contract-${doc.docType}` ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
-                                                                                        <input type="file" className="hidden" onChange={(e) => handleContractUpload(e, doc.docType)} accept=".pdf" disabled={uploadingDoc !== null} />
-                                                                                    </label>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex justify-end p-4">
-                                                    {getProgress(selectedApplicant).contract.total > 0 && getProgress(selectedApplicant).contract.completed >= getProgress(selectedApplicant).contract.total && (
-                                                        <button onClick={advanceStage} className="flex items-center gap-3 px-10 py-5 bg-indigo-600 text-white rounded-3xl font-black uppercase tracking-widest text-sm shadow-xl hover:bg-indigo-700 transition-all">
-                                                            Finalizar Contratación <Send size={20} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {activeTab === 'prevencion' && (
-                                            <div className="space-y-6">
-                                                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-                                                    <div className="flex justify-between items-center mb-8">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold">2</div>
-                                                            <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Prevención de Riesgos</h3>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <button onClick={() => handleAssignBAT('BAT1')} className="px-4 py-2 bg-red-600 text-white rounded-xl font-black text-[10px] uppercase">BAT 1</button>
-                                                            <button onClick={() => handleAssignBAT('BAT2')} className="px-4 py-2 bg-indigo-900 text-white rounded-xl font-black text-[10px] uppercase">BAT 2</button>
-                                                        </div>
-                                                    </div>
-                                                    {!selectedApplicant.preventionDocuments?.assignedAt ? (
-                                                        <button onClick={assignPreventionCurriculum} className="w-full py-10 border-2 border-dashed border-indigo-100 rounded-[2rem] text-indigo-400 font-black uppercase tracking-widest hover:bg-indigo-50 transition-all">Asignar Malla de Cargo</button>
                                                     ) : (
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            {selectedApplicant.preventionDocuments.exams?.map(exam => (
-                                                                <div key={exam.examCode} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
-                                                                    <div>
-                                                                        <p className="font-black text-xs uppercase">{exam.examName}</p>
-                                                                        <p className="text-[10px] font-bold text-slate-400">{exam.status}</p>
+                                                            {selectedApplicant.contractDocuments.map((doc) => (
+                                                                <div key={doc._id} className={`group bg-white p-5 rounded-2xl border-2 transition-all ${doc.status === 'OK' || doc.status === 'Verificado' ? 'border-emerald-100 bg-emerald-50/30' : 'border-slate-50 hover:border-indigo-100'}`}>
+                                                                    <div className="flex justify-between items-start gap-4">
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <h4 className="font-black text-slate-800 text-xs uppercase tracking-tight truncate">{doc.docType}</h4>
+                                                                            <div className="flex items-center gap-2 mt-1">
+                                                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase ${doc.status === 'OK' || doc.status === 'Verificado' ? 'bg-emerald-100 text-emerald-600' : doc.status === 'Rechazado' ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500'}`}>
+                                                                                    {doc.status}
+                                                                                </span>
+                                                                                {doc.uploadDate && <span className="text-[10px] font-bold text-slate-300 italic">{new Date(doc.uploadDate).toLocaleDateString()}</span>}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                            {doc.url && <a href={doc.url} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"><Eye size={16} /></a>}
+                                                                            <label className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer">
+                                                                                {uploadingDoc === `contract-${doc.docType}` ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                                                                                <input type="file" className="hidden" onChange={(e) => handleContractUpload(e, doc.docType)} accept=".pdf" />
+                                                                            </label>
+                                                                            <button onClick={() => deleteContractDoc(doc._id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                                                                        </div>
                                                                     </div>
-                                                                    <label className="cursor-pointer p-2 bg-emerald-600 text-white rounded-lg">
-                                                                        <Upload size={14} />
-                                                                        <input type="file" className="hidden" onChange={(e) => handlePreventionUpload(e, 'exam', exam.examCode)} accept=".pdf" />
-                                                                    </label>
+                                                                    {doc.status === 'Pendiente' && doc.url && (
+                                                                        <div className="mt-4 pt-4 border-t border-slate-100 flex gap-2">
+                                                                            <button onClick={() => updateContractStatus(doc._id, 'OK')} className="flex-1 py-2 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors">Aprobar</button>
+                                                                            <button onClick={() => {
+                                                                                const r = prompt('Razón del rechazo:');
+                                                                                if (r) updateContractStatus(doc._id, 'Rechazado', r);
+                                                                            }} className="flex-1 py-2 bg-slate-200 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Rechazar</button>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             ))}
+
+                                                            {/* Add Custom Doc Input */}
+                                                            <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-4 rounded-2xl flex items-center gap-3">
+                                                                <Plus size={18} className="text-slate-400 ml-2" />
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Solicitar otro documento..."
+                                                                    value={newDocName}
+                                                                    onChange={(e) => setNewDocName(e.target.value)}
+                                                                    onKeyDown={(e) => e.key === 'Enter' && addCustomDoc()}
+                                                                    className="flex-1 bg-transparent border-none focus:ring-0 text-xs font-bold text-slate-600 placeholder:text-slate-400"
+                                                                />
+                                                                <button onClick={addCustomDoc} className="p-2 bg-white text-indigo-600 rounded-xl shadow-sm hover:bg-indigo-50"><Check size={16} /></button>
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
+
+                                                {/* Prevention Section */}
+                                                <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
+                                                    <div className="flex justify-between items-center mb-8">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                                                <ShieldCheck size={20} />
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Requisitos de Prevención</h3>
+                                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cursos, Certificados y Exámenes</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="mr-4 flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100">
+                                                                <AlertCircle size={12} />
+                                                                <span className="text-[10px] font-black uppercase">Sincronizado con Acreditación</span>
+                                                            </div>
+                                                            <button onClick={() => handleAssignBAT('BAT1')} className="px-4 py-2 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-100">Cargar BAT 1</button>
+                                                            <button onClick={() => handleAssignBAT('BAT2')} className="px-4 py-2 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase hover:bg-orange-600 transition-all shadow-lg shadow-orange-100">Cargar BAT 2</button>
+                                                        </div>
+                                                    </div>
+
+                                                    {!selectedApplicant.preventionDocuments?.assignedAt ? (
+                                                        <div className="py-12 text-center bg-emerald-50/30 rounded-3xl border-2 border-dashed border-emerald-100">
+                                                            <p className="text-emerald-700 font-bold mb-4">No se ha sincronizado la malla de prevención para este cargo.</p>
+                                                            <button onClick={assignPreventionCurriculum} className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-emerald-700">Cargar Requisitos de Prevención</button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-8">
+                                                            {/* Courses */}
+                                                            <div>
+                                                                <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">
+                                                                    <BookOpen size={12} /> Cursos de Capacitación
+                                                                </h4>
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                    {selectedApplicant.preventionDocuments.courses?.map(course => (
+                                                                        <div key={course.courseCode} className="group p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center hover:bg-indigo-50/30 transition-all">
+                                                                            <div className="flex-1 min-w-0 pr-4">
+                                                                                <p className="font-black text-[11px] uppercase truncate text-slate-700">{course.courseName}</p>
+                                                                                <div className="flex items-center gap-2 mt-1">
+                                                                                    <div className={`w-2 h-2 rounded-full ${course.status === 'Completado' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                                                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{course.status}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-2">
+                                                                                {course.url && <a href={course.url} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-400 hover:text-indigo-600"><Eye size={16} /></a>}
+                                                                                <label className="cursor-pointer p-2.5 bg-white text-indigo-600 border border-indigo-100 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm">
+                                                                                    {uploadingDoc === `prevention-course-${course.courseCode}` ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                                                                                    <input type="file" className="hidden" onChange={(e) => handlePreventionUpload(e, 'course', course.courseCode)} accept=".pdf" />
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Exams */}
+                                                            <div>
+                                                                <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">
+                                                                    <Activity size={12} /> Exámenes de Salud
+                                                                </h4>
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                    {selectedApplicant.preventionDocuments.exams?.map(exam => (
+                                                                        <div key={exam.examCode} className="group p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center hover:bg-orange-50/30 transition-all">
+                                                                            <div className="flex-1 min-w-0 pr-4">
+                                                                                <p className="font-black text-[11px] uppercase truncate text-slate-700">{exam.examName}</p>
+                                                                                <div className="flex items-center gap-2 mt-1">
+                                                                                    <div className={`w-2 h-2 rounded-full ${exam.status === 'Completado' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                                                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{exam.status}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-2">
+                                                                                {exam.url && <a href={exam.url} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-400 hover:text-orange-600"><Eye size={16} /></a>}
+                                                                                <label className="cursor-pointer p-2.5 bg-white text-orange-600 border border-orange-100 rounded-xl hover:bg-orange-600 hover:text-white transition-all shadow-sm">
+                                                                                    {uploadingDoc === `prevention-exam-${exam.examCode}` ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                                                                                    <input type="file" className="hidden" onChange={(e) => handlePreventionUpload(e, 'exam', exam.examCode)} accept=".pdf" />
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Final Action Bar */}
+                                                <div className="fixed bottom-12 right-12 left-auto z-40">
+                                                    <div className="bg-slate-900 shadow-2xl shadow-indigo-900/40 p-2 rounded-3xl border border-white/10 flex items-center gap-8 pl-8">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Cobertura Total</span>
+                                                            <span className="text-2xl font-black text-white">{getProgress(selectedApplicant).percentage}% <span className="text-xs text-slate-500 font-bold ml-1">({getProgress(selectedApplicant).completed}/{getProgress(selectedApplicant).total})</span></span>
+                                                        </div>
+                                                        <button
+                                                            onClick={advanceStage}
+                                                            disabled={getProgress(selectedApplicant).percentage < 100}
+                                                            className={`px-12 py-5 rounded-2xl font-black uppercase tracking-widest text-sm transition-all flex items-center gap-3 ${getProgress(selectedApplicant).percentage >= 100 ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-xl shadow-indigo-600/20' : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
+                                                        >
+                                                            Finalizar Acreditación <CheckCircle2 size={20} />
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
-
-                                        <div className="flex justify-between items-center bg-slate-900 p-8 rounded-[2.5rem] mt-8 text-white">
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estado General</span>
-                                                <span className="text-2xl font-black">{getProgress(selectedApplicant).completed} / {getProgress(selectedApplicant).total} Verificados</span>
-                                            </div>
-                                            <button onClick={advanceStage} disabled={getProgress(selectedApplicant).percentage < 100} className="px-10 py-5 bg-indigo-600 rounded-2xl font-black uppercase tracking-widest text-sm disabled:opacity-30">
-                                                Acreditar <CheckCircle2 size={20} className="inline ml-2" />
-                                            </button>
-                                        </div>
                                     </>
                                 )}
                             </div>

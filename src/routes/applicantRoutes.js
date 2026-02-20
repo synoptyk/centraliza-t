@@ -13,6 +13,8 @@ const {
     suspendInterview,
     getInterviewsCalendar,
     uploadContractDocument,
+    deleteContractDocument,
+    createCustomContractDocument,
     updateContractDocStatus,
     updateAccreditationItem,
     updateTests,
@@ -54,6 +56,9 @@ router.route('/:id/tests/results').get(protect, getTestResults);
 
 // Contract Documents (Module 5 - Universal)
 router.route('/:id/contract-docs').post(protect, upload.single('file'), uploadContractDocument);
+router.route('/:id/contract-docs/custom').post(protect, createCustomContractDocument);
+router.route('/:id/contract-docs/:docId')
+    .delete(protect, deleteContractDocument);
 router.route('/:id/contract-docs/:docId/status').put(protect, updateContractDocStatus);
 
 // Prevention Documents (Module 5B - Variable by position)
