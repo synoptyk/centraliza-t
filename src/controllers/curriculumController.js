@@ -20,11 +20,15 @@ const getCurriculumConfig = asyncHandler(async (req, res) => {
 
     const defaultExams = [
         { code: 'ALT-FIS', name: 'Altura Física', category: 'Médico', validityMonths: 12 },
-        { code: 'AUD-MET', name: 'Audiométrica / Audiometría', category: 'Médico', validityMonths: 12 },
+        { code: 'AUD-MET', name: 'Audiometría', category: 'Médico', validityMonths: 12 },
         { code: 'GRA-ALT', name: 'Gran Altura Geográfica', category: 'Médico', validityMonths: 12 },
         { code: 'ORI-COM', name: 'Orina Completa', category: 'Médico', validityMonths: 12 },
         { code: 'SIL-ICE', name: 'Sílice', category: 'Médico', validityMonths: 12 },
-        { code: 'DRO-BAT', name: 'Examen de Drogas (Anfetaminas, Benzodiacepinas, Cocaína, Marihuana, Opiáceos)', category: 'Médico', validityMonths: 12, description: 'Técnica rápida' },
+        { code: 'DRO-ANF', name: 'Anfetaminas Técnica rápida', category: 'Médico', validityMonths: 12 },
+        { code: 'DRO-BEN', name: 'Benzodiacepinas Técnica rápida', category: 'Médico', validityMonths: 12 },
+        { code: 'DRO-COC', name: 'Cocaína Técnica Rápida', category: 'Médico', validityMonths: 12 },
+        { code: 'DRO-MAR', name: 'Marihuana Técnica Rápida', category: 'Médico', validityMonths: 12 },
+        { code: 'DRO-OPI', name: 'Opiáceos Técnica Rápida', category: 'Médico', validityMonths: 12 },
         { code: 'PRE-OCU', name: 'Examen Preocupacional (Básico)', category: 'Médico', validityMonths: 12 },
         { code: 'PSI-LOG', name: 'Evaluación Psicológica', category: 'Psicológico', validityMonths: 12 },
         { code: 'AV-RIES', name: 'Evaluación Aversión al Riesgo', category: 'Psicológico', validityMonths: 12 },

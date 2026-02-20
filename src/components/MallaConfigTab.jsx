@@ -128,8 +128,11 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
                 toast.success('Documentos seleccionados. Revisa y Guardar para confirmar.');
             } else if (profileVariant === 'bat1') {
                 const allCourses = config.masterCourses.map(c => c.code);
-                // Based on image: Altura Física, Audiometría, Gran Altura, Orina, Sílice, Drogas.
-                const bat1Exams = ['ALT-FIS', 'AUD-MET', 'GRA-ALT', 'ORI-COM', 'SIL-ICE', 'DRO-BAT'];
+                // Based on image: Altura Física, Audiometría, Gran Altura, Orina, Sílice, and 5 separate Drugs tests
+                const bat1Exams = [
+                    'ALT-FIS', 'AUD-MET', 'GRA-ALT', 'ORI-COM', 'SIL-ICE',
+                    'DRO-ANF', 'DRO-BEN', 'DRO-COC', 'DRO-MAR', 'DRO-OPI'
+                ];
                 const examsToAssign = config.masterExams.filter(e => bat1Exams.includes(e.code)).map(e => e.code);
 
                 setSelectedCourses(allCourses);
@@ -137,7 +140,10 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
                 toast.success('Perfil cargado en pantalla. Revisa y haz clic en Guardar.');
             } else if (profileVariant === 'bat2') {
                 const allCourses = config.masterCourses.map(c => c.code);
-                const bat2Exams = ['GRA-ALT', 'ORI-COM', 'AUD-MET', 'DRO-BAT'];
+                const bat2Exams = [
+                    'GRA-ALT', 'ORI-COM', 'AUD-MET',
+                    'DRO-ANF', 'DRO-BEN', 'DRO-COC', 'DRO-MAR', 'DRO-OPI'
+                ];
                 const examsToAssign = config.masterExams.filter(e => bat2Exams.includes(e.code)).map(e => e.code);
 
                 setSelectedCourses(allCourses);
