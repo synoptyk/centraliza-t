@@ -5,6 +5,15 @@ const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 const { createInternalNotification } = require('./notificationController');
 
+// Helper to find applicant ensuring company isolation
+const findScopedApplicant = async (id, user) => {
+    let query = { _id: id };
+    if (user.role !== 'Ceo_Centralizat' && user.role !== 'Admin_Centralizat') {
+        query.companyId = user.companyId;
+    }
+    return await Applicant.findOne(query);
+};
+
 // @desc    Register a new applicant (Module 2)
 // @route   POST /api/applicants
 const registerApplicant = asyncHandler(async (req, res) => {
@@ -56,7 +65,7 @@ const getApplicants = asyncHandler(async (req, res) => {
 // @desc    Update applicant status (Generic for all modules)
 // @route   PUT /api/applicants/:id/status
 const updateApplicantStatus = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (applicant) {
         const oldStatus = applicant.status;
@@ -171,7 +180,7 @@ const updateApplicantStatus = asyncHandler(async (req, res) => {
 // @desc    Register/Update interview (Module 3 - Enhanced)
 // @route   PUT /api/applicants/:id/interview
 const registerInterview = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (applicant) {
         // Preserve existing interview data and merge with updates
@@ -216,7 +225,7 @@ const registerInterview = asyncHandler(async (req, res) => {
 // @desc    Confirm interview
 // @route   PUT /api/applicants/:id/interview/confirm
 const confirmInterview = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (!applicant) {
         res.status(404);
@@ -251,7 +260,7 @@ const confirmInterview = asyncHandler(async (req, res) => {
 // @route   PUT /api/applicants/:id/interview/reschedule
 const rescheduleInterview = asyncHandler(async (req, res) => {
     const { newDate, reason } = req.body;
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (!applicant) {
         res.status(404);
@@ -296,7 +305,7 @@ const rescheduleInterview = asyncHandler(async (req, res) => {
 // @route   PUT /api/applicants/:id/interview/cancel
 const cancelInterview = asyncHandler(async (req, res) => {
     const { reason } = req.body;
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (!applicant) {
         res.status(404);
@@ -333,7 +342,7 @@ const cancelInterview = asyncHandler(async (req, res) => {
 // @route   PUT /api/applicants/:id/interview/suspend
 const suspendInterview = asyncHandler(async (req, res) => {
     const { reason } = req.body;
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (!applicant) {
         res.status(404);
@@ -407,7 +416,7 @@ const getInterviewsCalendar = asyncHandler(async (req, res) => {
 // @desc    Upload contract document (Module 5)
 // @route   POST /api/applicants/:id/contract-docs
 const uploadContractDocument = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (!applicant) {
         res.status(404);
@@ -446,7 +455,7 @@ const uploadContractDocument = asyncHandler(async (req, res) => {
 // @desc    Delete contract document (Module 5)
 // @route   DELETE /api/applicants/:id/contract-docs/:docId
 const deleteContractDocument = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (!applicant) {
         res.status(404);
@@ -469,7 +478,7 @@ const deleteContractDocument = asyncHandler(async (req, res) => {
 // @desc    Create custom contract document requirement for applicant
 // @route   POST /api/applicants/:id/contract-docs/custom
 const createCustomContractDocument = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
     const { docType } = req.body;
 
     if (!applicant) {
@@ -501,7 +510,7 @@ const createCustomContractDocument = asyncHandler(async (req, res) => {
 // @desc    Update contract document status (Module 5)
 // @route   PUT /api/applicants/:id/contract-docs/:docId/status
 const updateContractDocStatus = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (!applicant) {
         res.status(404);
@@ -530,7 +539,7 @@ const updateContractDocStatus = asyncHandler(async (req, res) => {
 // @desc    Update accreditation item (Module 6)
 // @route   PUT /api/applicants/:id/accreditation/:type/:itemName
 const updateAccreditationItem = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (!applicant) {
         res.status(404);
@@ -575,7 +584,7 @@ const updateAccreditationItem = asyncHandler(async (req, res) => {
 // @desc    Update tests (Module 4)
 // @route   PUT /api/applicants/:id/tests
 const updateTests = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (applicant) {
         applicant.tests = {
@@ -615,7 +624,7 @@ const updateTests = asyncHandler(async (req, res) => {
 // @desc    Update applicant general (Hiring Approval use case)
 // @route   PUT /api/applicants/:id
 const updateApplicant = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (applicant) {
         // Capture old state for history comparison
@@ -812,7 +821,7 @@ const getRemoteApprovalDetails = asyncHandler(async (req, res) => {
 // @desc    Send Psycholabor Test via Email
 // @route   POST /api/applicants/:id/tests/send-psycholabor
 const sendPsycholaborTest = asyncHandler(async (req, res) => {
-    const applicant = await Applicant.findById(req.params.id);
+    const applicant = await findScopedApplicant(req.params.id, req.user);
 
     if (!applicant) {
         res.status(404);

@@ -34,10 +34,11 @@ const {
 } = require('../controllers/curriculumController');
 
 const { protect } = require('../middleware/authMiddleware');
+const { checkSubscriptionStatus, checkResourceLimits } = require('../middleware/subscriptionMiddleware');
 
 router.route('/')
     .get(protect, getApplicants)
-    .post(protect, registerApplicant);
+    .post(protect, checkSubscriptionStatus, checkResourceLimits('applicants'), registerApplicant);
 
 router.route('/:id')
     .put(protect, updateApplicant);

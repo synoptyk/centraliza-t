@@ -10,10 +10,11 @@ const {
     resendCredentials
 } = require('../controllers/userController');
 const { protect, authorize } = require('../middleware/authMiddleware');
+const { checkSubscriptionStatus, checkResourceLimits } = require('../middleware/subscriptionMiddleware');
 const { upload } = require('../config/cloudinary');
 
 router.route('/')
-    .post(protect, authorize('Ceo_Centralizat', 'Admin_Empresa'), registerUser)
+    .post(protect, authorize('Ceo_Centralizat', 'Admin_Empresa'), checkSubscriptionStatus, checkResourceLimits('users'), registerUser)
     .get(protect, authorize('Ceo_Centralizat', 'Admin_Centralizat', 'Admin_Empresa'), getUsers);
 
 router.post('/bulk', protect, authorize('Ceo_Centralizat'), bulkRegisterUsers);

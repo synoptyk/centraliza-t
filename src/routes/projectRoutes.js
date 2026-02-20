@@ -9,10 +9,11 @@ const {
 } = require('../controllers/projectController');
 
 const { protect } = require('../middleware/authMiddleware');
+const { checkSubscriptionStatus, checkResourceLimits } = require('../middleware/subscriptionMiddleware');
 
 router.route('/')
     .get(protect, getProjects)
-    .post(protect, createProject);
+    .post(protect, checkSubscriptionStatus, checkResourceLimits('projects'), createProject);
 
 router.route('/:id')
     .get(protect, getProjectById)

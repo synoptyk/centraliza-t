@@ -18,13 +18,13 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
-// Configuración de orígenes permitidos
+// Configuración de orígenes permitidos (Producción)
 const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:5005',
     'https://centraliza-t.synoptyk.cl',
     'https://centraliza-t.vercel.app',
-    process.env.FRONTEND_URL
+    'https://centralizat.cl',
+    process.env.FRONTEND_URL,
+    'http://localhost:3000' // Mantener para debugging local controlado
 ].filter(Boolean);
 
 const corsOptions = {
@@ -32,16 +32,17 @@ const corsOptions = {
         // Permitir solicitudes sin origen (como apps móviles o curl)
         if (!origin) return callback(null, true);
 
-        // Check if origin is in allowedOrigins or matches synoptyk.cl or vercel.app
-        const isAllowed = allowedOrigins.some(ao => origin.startsWith(ao.replace(/\/$/, '')));
-        const isOfficialDomain = origin.endsWith('synoptyk.cl') || origin.endsWith('vercel.app') || origin.includes('centraliza-t');
-        const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
+        // Check against strictly defined allowedOrigins
+        const isAllowed = allowedOrigins.some(ao => origin === ao.replace(/\/$/, ''));
 
-        if (isAllowed || isOfficialDomain || isLocalhost) {
+        // Dynamic allowed domains (official subdomains)
+        const isOfficialSubdomain = origin.endsWith('.synoptyk.cl') || origin.endsWith('.vercel.app');
+
+        if (isAllowed || isOfficialSubdomain) {
             callback(null, true);
         } else {
-            console.log('Bloqueado por CORS:', origin);
-            callback(new Error('No permitido por CORS'));
+            console.warn('CORS Blocked Origin:', origin);
+            callback(new Error('Acceso no permitido por política CORS'));
         }
     },
     credentials: true,
@@ -90,8 +91,15 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
+// Debugging Routes
+app.use((req, res, next) => {
+    console.log(`--- [DEBUG] ${req.method} ${req.url} ---`);
+    next();
+});
+
 // Routes
 app.use('/api/projects', require('./routes/projectRoutes'));
+app.get('/api/ping', (req, res) => res.json({ message: 'pong', time: new Date() }));
 app.use('/api/applicants', require('./routes/applicantRoutes'));
 app.use('/api/curriculum', require('./routes/curriculumRoutes'));
 
@@ -102,6 +110,7 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/comments', require('./routes/commentRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/config', require('./routes/configRoutes'));
+app.use('/api/subscriptions', require('./routes/subscriptionRoutes'));
 
 // Diagnostic Route for Email
 const sendEmail = require('./utils/sendEmail');

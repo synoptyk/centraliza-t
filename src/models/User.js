@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
     companyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',
+        index: true,
         required: function () {
             return this.role === 'Admin_Empresa' || this.role === 'Usuario_Empresa';
         }

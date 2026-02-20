@@ -35,7 +35,7 @@ const projectSchema = new mongoose.Schema({
     }],
 
     status: { type: String, enum: ['Abierto', 'Cerrado', 'En Proceso'], default: 'Abierto' },
-    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }, // Optional for Global/SuperAdmin projects
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', index: true }, // Optional for Global/SuperAdmin projects
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 

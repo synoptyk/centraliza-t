@@ -54,20 +54,33 @@ const getProjects = asyncHandler(async (req, res) => {
 // @desc    Get project by ID
 // @route   GET /api/projects/:id
 const getProjectById = asyncHandler(async (req, res) => {
-    const project = await Project.findById(req.params.id);
+    let query = { _id: req.params.id };
+
+    // Blindaje Multi-Empresa: Validar pertenencia a menos que sea CEO/Admin Global
+    if (req.user.role !== 'Ceo_Centralizat' && req.user.role !== 'Admin_Centralizat') {
+        query.companyId = req.user.companyId;
+    }
+
+    const project = await Project.findOne(query);
 
     if (project) {
         res.json(project);
     } else {
         res.status(404);
-        throw new Error('Project not found');
+        throw new Error('Proyecto no encontrado o no pertenece a su empresa');
     }
 });
 
 // @desc    Update project
 // @route   PUT /api/projects/:id
 const updateProject = asyncHandler(async (req, res) => {
-    const project = await Project.findById(req.params.id);
+    let query = { _id: req.params.id };
+
+    if (req.user.role !== 'Ceo_Centralizat' && req.user.role !== 'Admin_Centralizat') {
+        query.companyId = req.user.companyId;
+    }
+
+    const project = await Project.findOne(query);
 
     if (project) {
         project.name = req.body.name || project.name;
@@ -85,21 +98,27 @@ const updateProject = asyncHandler(async (req, res) => {
         res.json(updatedProject);
     } else {
         res.status(404);
-        throw new Error('Project not found');
+        throw new Error('Proyecto no encontrado o no tiene permisos para editarlo');
     }
 });
 
 // @desc    Delete project
 // @route   DELETE /api/projects/:id
 const deleteProject = asyncHandler(async (req, res) => {
-    const project = await Project.findById(req.params.id);
+    let query = { _id: req.params.id };
+
+    if (req.user.role !== 'Ceo_Centralizat' && req.user.role !== 'Admin_Centralizat') {
+        query.companyId = req.user.companyId;
+    }
+
+    const project = await Project.findOne(query);
 
     if (project) {
         await project.deleteOne();
-        res.json({ message: 'Project removed' });
+        res.json({ message: 'Proyecto eliminado con éxito' });
     } else {
         res.status(404);
-        throw new Error('Project not found');
+        throw new Error('Proyecto no encontrado o no tiene permisos para eliminarlo');
     }
 });
 

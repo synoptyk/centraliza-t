@@ -353,7 +353,7 @@ const applicantSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 applicantSchema.add({
-    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true }
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true, index: true }
 });
 
 module.exports = mongoose.model('Applicant', applicantSchema);

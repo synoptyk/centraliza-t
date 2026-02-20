@@ -28,6 +28,7 @@ const commentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Index for performance
+commentSchema.index({ companyId: 1, createdAt: -1 });
 commentSchema.index({ targetId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Comment', commentSchema);

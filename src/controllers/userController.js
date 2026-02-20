@@ -23,6 +23,15 @@ const registerUser = asyncHandler(async (req, res) => {
         password = generatedPassword;
     }
 
+    // Blindaje Multi-Empresa: Forzar companyId si no es SuperAdmin
+    if (req.user.role !== 'Ceo_Centralizat' && req.user.role !== 'Admin_Centralizat') {
+        companyId = req.user.companyId;
+        // Prevenir que un Admin_Empresa cree un SuperAdmin
+        if (role === 'Ceo_Centralizat' || role === 'Admin_Centralizat') {
+            role = 'Usuario_Empresa';
+        }
+    }
+
     let user;
     try {
         user = await User.create({
@@ -116,7 +125,12 @@ const getUsers = asyncHandler(async (req, res) => {
 // @desc    Update user
 // @route   PUT /api/users/:id
 const updateUser = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id);
+    let query = { _id: req.params.id };
+    if (req.user.role !== 'Ceo_Centralizat' && req.user.role !== 'Admin_Centralizat') {
+        query.companyId = req.user.companyId;
+    }
+
+    const user = await User.findOne(query);
 
     try {
         if (user) {
@@ -160,7 +174,12 @@ const updateUser = asyncHandler(async (req, res) => {
 // @desc    Delete user
 // @route   DELETE /api/users/:id
 const deleteUser = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id);
+    let query = { _id: req.params.id };
+    if (req.user.role !== 'Ceo_Centralizat' && req.user.role !== 'Admin_Centralizat') {
+        query.companyId = req.user.companyId;
+    }
+
+    const user = await User.findOne(query);
 
     try {
         if (user) {

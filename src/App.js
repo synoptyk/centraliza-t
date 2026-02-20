@@ -26,6 +26,8 @@ import PublicTestPortal from './pages/PublicTestPortal';
 import { Toaster } from 'react-hot-toast';
 import MasterProfileModal from './components/MasterProfileModal';
 import HumanCapitalMaster from './pages/HumanCapitalMaster';
+import CommercialAdmin from './pages/CommercialAdmin';
+import BillingAndSubscription from './pages/BillingAndSubscription';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth }) => {
@@ -85,6 +87,12 @@ function AppContent() {
                         <Route path="/admin/command-center" element={
                             <ProtectedRoute auth={auth} allowedRoles={['Ceo_Centralizat']}>
                                 <CommandCenter auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/comercial" element={
+                            <ProtectedRoute auth={auth} allowedRoles={['Ceo_Centralizat']}>
+                                <CommercialAdmin auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
@@ -163,6 +171,12 @@ function AppContent() {
                         <Route path="/configuracion" element={
                             <ProtectedRoute auth={auth}>
                                 <Settings auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/suscripcion" element={
+                            <ProtectedRoute auth={auth}>
+                                <BillingAndSubscription auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 

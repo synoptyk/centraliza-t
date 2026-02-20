@@ -22,7 +22,10 @@ import {
     Activity,
     ChevronRight,
     Building2,
-    FolderOpen
+    FolderOpen,
+    CreditCard,
+    Zap,
+    Trophy
 } from 'lucide-react';
 
 const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
@@ -49,9 +52,11 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
     // --- TOP LEVEL ITEMS ---
     const topLevelItems = [
         ...(auth?.role === 'Ceo_Centralizat' ? [{ id: 'admin-command', name: 'Centro de Mando CEO', icon: ShieldCheck, path: '/admin/command-center' }] : []),
+        ...(auth?.role === 'Ceo_Centralizat' ? [{ id: 'comercial', name: 'Mando Comercial', icon: Trophy, path: '/comercial' }] : []),
     ];
 
     const settingsItem = { id: 'configuracion', name: 'Ajustes del Sistema', icon: Settings, path: '/configuracion' };
+    const subscriptionItem = { id: 'suscripcion', name: 'Planes & Facturas', icon: CreditCard, path: '/suscripcion' };
 
     const talentFlowItems = [
         { id: 'proyectos', name: 'Gestión de Proyectos', icon: ClipboardList, path: '/proyectos' },
@@ -125,9 +130,16 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
                     </div>
                     <div className="space-y-0.5">
                         <h1 className="text-xl font-black text-white tracking-[0.2em] uppercase italic leading-none">CENTRALIZA-T</h1>
-                        <p className="text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] flex items-center gap-2">
-                            Ecosystem v5.0
-                        </p>
+                        <div className="flex flex-col gap-0.5">
+                            <p className="text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] flex items-center gap-2">
+                                Ecosystem v5.0
+                            </p>
+                            {auth?.company?.name && (
+                                <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.1em] truncate max-w-[150px]">
+                                    {auth.company.name}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -199,8 +211,9 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
 
                     <div className={`space-y-1 overflow-hidden transition-all duration-500 pl-2 ${sections.centralizat ? 'max-h-[2000px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
 
-                        {/* Level 2: Settings */}
+                        {/* Level 2: Settings & Billing */}
                         {checkPermission(settingsItem) && <NavItem item={settingsItem} level={1} />}
+                        {checkPermission(subscriptionItem) && <NavItem item={subscriptionItem} level={1} />}
 
                         {/* Level 2: Flujo de Talento */}
                         <div className="space-y-1 mt-2">
