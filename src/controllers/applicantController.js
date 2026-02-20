@@ -564,6 +564,44 @@ const updateApplicant = asyncHandler(async (req, res) => {
         // But the frontend HiringApproval sets it TO "Contratado". 
         // Let's assume this handles the manual approval from dashboard.
 
+        // Trigger Email Notification to Admins if Manager Decision is made
+        if (req.body.hiring?.managerApproval && req.body.hiring.managerApproval !== oldApproval) {
+            const decision = req.body.hiring.managerApproval;
+            const managerName = req.body.hiring.approvedBy || req.user.name || 'Gerencia';
+            const note = req.body.hiring.managerNote;
+
+            const config = await Config.findOne();
+            if (config && config.admins && config.admins.length > 0) {
+                for (const admin of config.admins) {
+                    // Fire-and-forget to avoid blocking the UI
+                    sendEmail({
+                        email: admin.email,
+                        subject: `RESOLUCIÓN DE CONTRATACIÓN: ${applicant.fullName} - ${decision}`,
+                        html: `
+                            <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+                                <div style="background: linear-gradient(to right, ${decision === 'Aprobado' ? '#10b981, #059669' : '#ef4444, #dc2626'}); padding: 30px; border-radius: 15px; text-align: center; color: white;">
+                                    <h1 style="margin: 0; font-size: 24px; text-transform: uppercase;">VEREDICTO DE GERENCIA</h1>
+                                    <p style="margin: 5px 0 0; font-size: 14px; font-weight: bold; text-transform: uppercase;">Estado: ${decision}</p>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <p>Estimado/a Administrador/a <strong>${admin.name}</strong>,</p>
+                                    <p>Se ha registrado una decisión ejecutiva respecto a una contratación en curso desde el Panel Centraliza-T.</p>
+                                    <div style="background: #f8fafc; padding: 25px; border-radius: 15px; margin: 20px 0; border: 1px solid #f1f5f9;">
+                                        <p style="margin: 5px 0;"><strong>Postulante:</strong> ${applicant.fullName}</p>
+                                        <p style="margin: 5px 0;"><strong>Cargo / Rol:</strong> ${applicant.position}</p>
+                                        <p style="margin: 5px 0;"><strong>Gerente Responsable:</strong> ${managerName}</p>
+                                        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 15px 0;" />
+                                        <p style="margin: 5px 0; font-style: italic; color: #475569;"><strong>Motivo / Nota del Gerente:</strong> ${note || 'Sin observaciones adicionales'}</p>
+                                    </div>
+                                    <p style="font-size: 12px; color: #64748b; text-align: center;">Por favor, proceda acorde a sus protocolos internos (emisión de contratos o aviso de rechazo del postulante).</p>
+                                </div>
+                            </div>
+                        `
+                    }).catch(err => console.error('Error enviando notificación a Admin:', err));
+                }
+            }
+        }
+
         const updatedApplicant = await applicant.save();
         res.json(updatedApplicant);
     } else {
@@ -620,6 +658,37 @@ const processRemoteApproval = asyncHandler(async (req, res) => {
         applicantId: applicant._id,
         projectId: applicant.projectId
     });
+
+    // Notify Administrators (Config.admins) about the Manager's Verdict
+    const config = await Config.findOne();
+    if (config && config.admins && config.admins.length > 0) {
+        for (const admin of config.admins) {
+            await sendEmail({
+                email: admin.email,
+                subject: `RESOLUCIÓN DE CONTRATACIÓN: ${applicant.fullName} - ${decision}`,
+                html: `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+                        <div style="background: linear-gradient(to right, ${decision === 'Aprobado' ? '#10b981, #059669' : '#ef4444, #dc2626'}); padding: 30px; border-radius: 15px; text-align: center; color: white;">
+                            <h1 style="margin: 0; font-size: 24px; text-transform: uppercase;">VEREDICTO DE GERENCIA</h1>
+                            <p style="margin: 5px 0 0; font-size: 14px; font-weight: bold; text-transform: uppercase;">Estado: ${decision}</p>
+                        </div>
+                        <div style="padding: 20px;">
+                            <p>Estimado/a Administrador/a <strong>${admin.name}</strong>,</p>
+                            <p>Se ha registrado una decisión ejecutiva respecto a una contratación en curso.</p>
+                            <div style="background: #f8fafc; padding: 25px; border-radius: 15px; margin: 20px 0; border: 1px solid #f1f5f9;">
+                                <p style="margin: 5px 0;"><strong>Postulante:</strong> ${applicant.fullName}</p>
+                                <p style="margin: 5px 0;"><strong>Cargo / Rol:</strong> ${applicant.position}</p>
+                                <p style="margin: 5px 0;"><strong>Gerente Responsable:</strong> ${managerName}</p>
+                                <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 15px 0;" />
+                                <p style="margin: 5px 0; font-style: italic; color: #475569;"><strong>Motivo / Nota del Gerente:</strong> ${note || 'Sin observaciones adicionales'}</p>
+                            </div>
+                            <p style="font-size: 12px; color: #64748b; text-align: center;">Por favor, proceda acorde a sus protocolos internos (emisión de contratos o aviso de rechazo del postulante).</p>
+                        </div>
+                    </div>
+                `
+            });
+        }
+    }
 
     res.json({ message: `Decisión procesada: ${decision}` });
 });
