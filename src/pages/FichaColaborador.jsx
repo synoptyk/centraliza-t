@@ -247,20 +247,40 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
 
     const handleSave = async (isFinal = false) => {
         if (!selectedId) return toast.error('Seleccione un postulante');
+
+        if (isFinal) {
+            // Validaciones Estrictas para Gerencia
+            if (!formData.financial.liquidSalary || formData.financial.liquidSalary <= 0) {
+                return toast.error('Debe ingresar un Sueldo Líquido válido');
+            }
+            if (!formData.financial.bankData.bank || !formData.financial.bankData.accountNumber) {
+                return toast.error('Debe completar los datos bancarios para el depósito');
+            }
+            if (!formData.contract.startDate) {
+                return toast.error('Debe definir la Fecha de Inicio de contrato');
+            }
+        }
+
         setSaving(true);
         try {
             const statusUpdate = isFinal ? 'Enviado para Aprobación' : 'En Proceso Validación';
             const payload = {
                 workerData: { ...formData, validationStatus: statusUpdate }
             };
+
+            // Si es final, gatillar el cambio de estado global para que aparezca en la cola de gerencia
+            if (isFinal) {
+                payload.status = 'Pendiente Aprobación Gerencia';
+            }
+
             await api.put(`/applicants/${selectedId}`, payload);
             toast.success(isFinal ? 'Enviado a revisión de Gerencia' : 'Progreso guardado');
+            setSelectedId(''); // Limpiar selección para forzar refresco total de la cola
             fetchAwaitingApplicants();
         } catch (error) {
-            toast.error('Error al guardar datos');
+            toast.error(error.response?.data?.message || 'Error al guardar datos');
         } finally {
-            setSaving(true);
-            setTimeout(() => setSaving(false), 500);
+            setSaving(false);
         }
     };
 

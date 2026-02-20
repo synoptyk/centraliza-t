@@ -105,18 +105,46 @@ const RemoteApproval = () => {
                                 </div>
 
                                 {applicant && (
-                                    <div className="w-full bg-slate-50 p-8 rounded-[3rem] border-2 border-slate-100 flex flex-col md:flex-row items-center gap-6 text-left">
-                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                                            <User className="text-indigo-600" size={32} />
-                                        </div>
-                                        <div className="flex-1 space-y-1">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Postulante a Validar</p>
-                                            <h3 className="text-xl font-bold text-slate-900">{applicant.name}</h3>
-                                            <div className="flex items-center gap-3">
-                                                <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">{applicant.position}</span>
-                                                <span className="bg-slate-200 text-slate-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">{applicant.department}</span>
+                                    <div className="w-full space-y-6">
+                                        <div className="w-full bg-slate-50 p-8 rounded-[3rem] border-2 border-slate-100 flex flex-col md:flex-row items-center gap-6 text-left">
+                                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                                                <User className="text-indigo-600" size={32} />
+                                            </div>
+                                            <div className="flex-1 space-y-1">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Postulante a Validar</p>
+                                                <h3 className="text-xl font-bold text-slate-900">{applicant.name}</h3>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">{applicant.position}</span>
+                                                    <span className="bg-slate-200 text-slate-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">{applicant.department || 'Operaciones'}</span>
+                                                </div>
                                             </div>
                                         </div>
+
+                                        {/* Economic Proposal Section */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-slate-900 text-white p-6 rounded-[2.5rem] flex flex-col gap-1 items-center justify-center border border-white/10">
+                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Sueldo Líquido</p>
+                                                <p className="text-2xl font-black italic tracking-tighter">${parseInt(applicant.salary || 0).toLocaleString('es-CL')}</p>
+                                            </div>
+                                            <div className="bg-indigo-50 border-2 border-indigo-100 p-6 rounded-[2.5rem] flex flex-col gap-1 items-center justify-center">
+                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Tipo Contrato</p>
+                                                <p className="text-sm font-black text-indigo-900 uppercase">{applicant.contractType || 'Por definir'}</p>
+                                            </div>
+                                        </div>
+
+                                        {applicant.bonuses && applicant.bonuses.length > 0 && (
+                                            <div className="bg-emerald-50 border-2 border-emerald-100 p-6 rounded-[2.5rem] space-y-2">
+                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 text-center mb-2">Bonificaciones Adicionales</p>
+                                                <div className="flex flex-wrap justify-center gap-2">
+                                                    {applicant.bonuses.map((b, i) => (
+                                                        <div key={i} className="bg-white px-4 py-2 rounded-xl border border-emerald-200 shadow-sm flex items-center gap-2">
+                                                            <span className="text-[10px] font-bold text-slate-600 uppercase">{b.name}</span>
+                                                            <span className="text-xs font-black text-emerald-600">${parseInt(b.amount || 0).toLocaleString('es-CL')}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 

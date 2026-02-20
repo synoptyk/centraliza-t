@@ -64,6 +64,14 @@ const updateApplicantStatus = asyncHandler(async (req, res) => {
         const note = req.body.comments || '';
 
         if (newStatus && newStatus !== oldStatus) {
+            // BLINDAJE: Si pasa a aprobación de gerencia, validar que la ficha esté completa
+            if (newStatus === 'Pendiente Aprobación Gerencia') {
+                if (!applicant.workerData?.financial?.liquidSalary || applicant.workerData?.validationStatus !== 'Enviado para Aprobación') {
+                    res.status(400);
+                    throw new Error('No se puede enviar a aprobación sin completar la ficha administrativa de colaborador (Sueldo/Validación).');
+                }
+            }
+
             applicant.status = newStatus;
 
             // Add to history
@@ -784,12 +792,16 @@ const getRemoteApprovalDetails = asyncHandler(async (req, res) => {
         throw new Error('Enlace de aprobación inválido o expirado');
     }
 
-    // Return only safe/necessary details
+    // Return package + financial details
     res.json({
         name: applicant.fullName,
+        rut: applicant.rut,
         position: applicant.position,
         department: applicant.department,
-        salary: applicant.finance?.salary, // Optional context
+        salary: applicant.workerData?.financial?.liquidSalary,
+        bonuses: applicant.workerData?.financial?.bonuses,
+        contractType: applicant.workerData?.contract?.type,
+        startDate: applicant.workerData?.contract?.startDate,
         status: applicant.status
     });
 });

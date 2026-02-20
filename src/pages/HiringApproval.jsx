@@ -305,6 +305,41 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                 </div>
                             )}
 
+                            {/* Compliance Audit Banner */}
+                            {(() => {
+                                const courses = selectedApplicant.preventionDocuments?.courses || [];
+                                const exams = selectedApplicant.preventionDocuments?.exams || [];
+                                const phys = selectedApplicant.accreditation?.physicalExams || [];
+                                const online = selectedApplicant.accreditation?.onlineExams || [];
+                                const totalDocs = courses.length + exams.length + phys.length + online.length;
+                                const pendingDocs = [...courses, ...exams, ...phys, ...online].filter(d => d.status !== 'OK' && d.status !== 'Completado' && d.status !== 'Aprobado').length;
+
+                                if (totalDocs === 0) return null;
+
+                                return (
+                                    <div className={`p-6 rounded-[2rem] border-2 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500 ${pendingDocs === 0 ? 'bg-emerald-50 border-emerald-100 text-emerald-800' : 'bg-rose-50 border-rose-100 text-rose-800'}`}>
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${pendingDocs === 0 ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white shadow-lg shadow-rose-200'}`}>
+                                                <ShieldCheck size={24} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Auditoría de Seguridad y Salud</p>
+                                                <p className="text-sm font-bold">
+                                                    {pendingDocs === 0
+                                                        ? 'Acreditación 100% Completa. El candidato cumple con todos los requisitos de seguridad.'
+                                                        : `ALERTA: Existen ${pendingDocs} documentos o exámenes pendientes de validación.`}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {pendingDocs > 0 && (
+                                            <div className="flex items-center gap-2 px-4 py-2 bg-rose-200 text-rose-900 rounded-xl text-[10px] font-black uppercase tracking-tighter">
+                                                <AlertCircle size={14} /> Riesgo de Incumplimiento
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Finance Details */}
                                 <Section title="Remuneración y Banco" icon={CreditCard}>
