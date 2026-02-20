@@ -299,9 +299,10 @@ const cancelInterview = asyncHandler(async (req, res) => {
     applicant.interview.cancellationReason = reason;
     applicant.interview.cancelledBy = req.user.name;
     applicant.interview.cancelledAt = new Date();
+    applicant.status = 'Rechazado';
 
     applicant.history.push({
-        status: applicant.status,
+        status: 'Rechazado',
         changedBy: req.user.name,
         comments: `Entrevista cancelada. Razón: ${reason}`
     });
@@ -335,9 +336,10 @@ const suspendInterview = asyncHandler(async (req, res) => {
     applicant.interview.suspensionReason = reason;
     applicant.interview.suspendedBy = req.user.name;
     applicant.interview.suspendedAt = new Date();
+    applicant.status = 'Rechazado';
 
     applicant.history.push({
-        status: applicant.status,
+        status: 'Rechazado',
         changedBy: req.user.name,
         comments: `Entrevista suspendida. Razón: ${reason}`
     });
@@ -487,6 +489,17 @@ const updateAccreditationItem = asyncHandler(async (req, res) => {
 
     if (status) item.status = status;
     if (observation !== undefined) item.observation = observation;
+
+    // If status is 'No Aprobado', mark applicant as 'Rechazado' global
+    if (status === 'No Aprobado') {
+        applicant.status = 'Rechazado';
+        applicant.history.push({
+            status: 'Rechazado',
+            changedBy: req.user.name,
+            comments: `Rechazado en acreditación: ${itemName}. Razón: ${observation || 'Sin observaciones'}`
+        });
+    }
+
     if (req.file) {
         item.url = req.file.path;
         item.publicId = req.file.filename;
@@ -518,7 +531,14 @@ const updateTests = asyncHandler(async (req, res) => {
         // If both sections are interacted with (completed check)
         // For a more robust check, we see if they have scores
         if (applicant.tests.psychological.score !== undefined && applicant.tests.professional.score !== undefined) {
-            applicant.status = 'Carga Documental';
+            // Check if professional test is "No Aprobado" or below a threshold if exists
+            // Since there is no explicit result field shown in snippet beyond 'score' 
+            // but the user mentions 'no aprueba', let's check for a 'result' string if present in body
+            if (req.body.professional?.result === 'No Aprobado' || req.body.psychological?.result === 'No Aprobado') {
+                applicant.status = 'Rechazado';
+            } else {
+                applicant.status = 'Carga Documental';
+            }
         }
 
         const updatedApplicant = await applicant.save();

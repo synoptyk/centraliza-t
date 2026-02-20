@@ -92,7 +92,9 @@ const ApplicantEntry = ({ auth, onLogout }) => {
                         a.projectId === applicant.projectId &&
                         a.position === applicant.position &&
                         a.assignedLocation === dist.location &&
-                        a.status !== 'Rechazado'
+                        a.status !== 'Rechazado' &&
+                        a.status !== 'Lista de Espera' &&
+                        !a.isWaitlisted
                     ).length;
 
                     if (currentlyRegistered < dist.quantity) {
@@ -120,7 +122,13 @@ const ApplicantEntry = ({ auth, onLogout }) => {
     const getProgress = (posName) => {
         if (!applicant.projectId) return null;
         const required = availablePositions.find(r => r.position === posName)?.quantity || 0;
-        const registered = allApplicants.filter(a => a.projectId === applicant.projectId && a.position === posName).length;
+        const registered = allApplicants.filter(a =>
+            a.projectId === applicant.projectId &&
+            a.position === posName &&
+            a.status !== 'Rechazado' &&
+            a.status !== 'Lista de Espera' &&
+            !a.isWaitlisted
+        ).length;
         return { registered, required };
     };
 
