@@ -26,7 +26,12 @@ const projectSchema = new mongoose.Schema({
         assignedRegion: { type: String, required: true }, // Seleccionada de 'regions'
         academicRequirement: { type: String, required: true }, // Titulos
         yearsOfExperience: { type: Number, required: true },
-        description: { type: String } // Descripcion General / Observaciones
+        description: { type: String }, // Descripcion General / Observaciones
+        // Distribución de vacantes por Sede (Frontend obliga a sumar = quantity)
+        locationDistribution: [{
+            location: { type: String },
+            quantity: { type: Number }
+        }]
     }],
 
     status: { type: String, enum: ['Abierto', 'Cerrado', 'En Proceso'], default: 'Abierto' },

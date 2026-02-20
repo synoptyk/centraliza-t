@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { Plus, Trash2, Save, ClipboardList, MapPin, Building2, UserCircle, Calendar, Clock, GraduationCap, Briefcase } from 'lucide-react';
+import { Plus, Trash2, Save, ClipboardList, MapPin, Building2, UserCircle, Briefcase, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PageWrapper from '../components/PageWrapper';
 import usePermissions from '../hooks/usePermissions';
@@ -29,6 +29,10 @@ const ProjectRegistration = ({ auth, onLogout }) => {
     const [editingProject, setEditingProject] = useState(null);
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    // Distribution Modal State
+    const [showDistributionModal, setShowDistributionModal] = useState(false);
+    const [distributionData, setDistributionData] = useState([]);
 
     // Fetch Projects on Mount
     useEffect(() => {
@@ -65,7 +69,8 @@ const ProjectRegistration = ({ auth, onLogout }) => {
             assignedRegion: '',
             academicRequirement: 'Enseñanza Media Completa',
             yearsOfExperience: 0,
-            description: ''
+            description: '',
+            locationDistribution: []
         }],
         status: 'Abierto'
     };
@@ -132,7 +137,8 @@ const ProjectRegistration = ({ auth, onLogout }) => {
                 assignedRegion: project.regions[0] || '',
                 academicRequirement: 'Enseñanza Media Completa',
                 yearsOfExperience: 0,
-                description: ''
+                description: '',
+                locationDistribution: []
             }]
         });
     };
@@ -148,24 +154,66 @@ const ProjectRegistration = ({ auth, onLogout }) => {
         setProject({ ...project, requirements: newReqs });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
+        const validLocations = project.locations.filter(l => l.trim() !== '');
+        if (validLocations.length > 0 && project.requirements.length > 0) {
+            // Setup distribution data based on current requirements and locations
+            const initData = project.requirements.map(req => {
+                const dist = req.locationDistribution || [];
+                const activeDist = validLocations.map(loc => {
+                    const existing = dist.find(d => d.location === loc);
+                    return existing ? { ...existing } : { location: loc, quantity: 0 };
+                });
+                return { ...req, locationDistribution: activeDist };
+            });
+            setDistributionData(initData);
+            setShowDistributionModal(true);
+        } else {
+            saveProjectToApi(project);
+        }
+    };
+
+    const saveProjectToApi = async (projectData) => {
         try {
             if (editingProject) {
-                await api.put(`/projects/${editingProject._id}`, project);
+                await api.put(`/projects/${editingProject._id}`, projectData);
                 toast.success('Proyecto actualizado exitosamente');
             } else {
-                await api.post('/projects', project);
+                await api.post('/projects', projectData);
                 toast.success('Proyecto registrado exitosamente');
             }
             fetchProjects();
             setViewMode('list');
             setProject(initialProjectState);
             setEditingProject(null);
+            setShowDistributionModal(false);
         } catch (error) {
             console.error('Error saving project:', error);
             toast.error(error.response?.data?.message || 'Error al guardar proyecto');
         }
+    };
+
+    const handleDistributionChange = (reqIndex, locIndex, value) => {
+        const newData = [...distributionData];
+        newData[reqIndex].locationDistribution[locIndex].quantity = Number(value) || 0;
+        setDistributionData(newData);
+    };
+
+    const confirmDistributionAndSave = () => {
+        // Validate that all requirements have their exact quantity distributed
+        for (let req of distributionData) {
+            const totalDistributed = req.locationDistribution.reduce((acc, curr) => acc + curr.quantity, 0);
+            if (totalDistributed !== Number(req.quantity)) {
+                toast.error(`Error en Cargo "${req.position}": Faltan cupos por asignar o la suma supera el límite (${totalDistributed}/${req.quantity})`);
+                return;
+            }
+        }
+
+        // Update project requirements and save
+        const finalProject = { ...project, requirements: distributionData };
+        setProject(finalProject);
+        saveProjectToApi(finalProject);
     };
 
     return (
@@ -538,6 +586,88 @@ const ProjectRegistration = ({ auth, onLogout }) => {
                             </button>
                         </div>
                     </form>
+                )}
+
+                {/* --- LOCATION DISTRIBUTION MODAL --- */}
+                {showDistributionModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
+                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+                            {/* Header */}
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-800 uppercase tracking-tighter">Distribución de Vacantes por Sede</h2>
+                                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Asegúrese de repartir todos los cupos en las Sedes correspondientes.</p>
+                                </div>
+                                <button onClick={() => setShowDistributionModal(false)} className="p-2 text-slate-400 hover:text-slate-600 bg-white rounded-full shadow-sm hover:shadow-md transition-all">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Body */}
+                            <div className="p-6 overflow-y-auto space-y-8 flex-1">
+                                {distributionData.map((req, reqIndex) => {
+                                    const totalAssigned = req.locationDistribution.reduce((acc, curr) => acc + curr.quantity, 0);
+                                    const target = Number(req.quantity);
+                                    const diff = target - totalAssigned;
+                                    const isComplete = diff === 0;
+                                    const isExceeded = diff < 0;
+
+                                    return (
+                                        <div key={reqIndex} className={`p-6 bg-white border-2 rounded-2xl transition-all duration-300 ${isComplete ? 'border-emerald-500' : isExceeded ? 'border-red-500' : 'border-indigo-100'}`}>
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                                <div>
+                                                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">{req.position || '(Cargo sin título)'}</h3>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-1 rounded-md">{req.area}</span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`px-4 py-2 rounded-xl flex items-baseline gap-1 ${isComplete ? 'bg-emerald-50 text-emerald-700' : isExceeded ? 'bg-red-50 text-red-700' : 'bg-indigo-50 text-indigo-700'}`}>
+                                                        <span className="text-[10px] font-black uppercase tracking-widest">Restante:</span>
+                                                        <span className="text-xl font-black">{diff}</span>
+                                                    </div>
+                                                    <div className="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 flex items-baseline gap-1">
+                                                        <span className="text-[10px] font-black uppercase tracking-widest">Total Req:</span>
+                                                        <span className="text-xl font-black">{target}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                {req.locationDistribution.map((dist, locIndex) => (
+                                                    <div key={locIndex} className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 line-clamp-1" title={dist.location}>{dist.location}</label>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            className="w-full px-4 py-2 rounded-lg border-none bg-white font-black text-indigo-600 text-center text-lg focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm"
+                                                            value={dist.quantity === 0 ? '' : dist.quantity}
+                                                            placeholder="0"
+                                                            onChange={(e) => handleDistributionChange(reqIndex, locIndex, e.target.value)}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Footer */}
+                            <div className="p-6 border-t border-slate-100 bg-white flex justify-end gap-3">
+                                <button
+                                    onClick={() => setShowDistributionModal(false)}
+                                    className="px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-100 transition-all border border-slate-200"
+                                >
+                                    Volver
+                                </button>
+                                <button
+                                    onClick={confirmDistributionAndSave}
+                                    className="px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200"
+                                >
+                                    Confirmar y Guardar Proyecto
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </div>
         </PageWrapper>
