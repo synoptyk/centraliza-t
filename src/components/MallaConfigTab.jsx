@@ -128,7 +128,8 @@ const MallaConfigTab = ({ type, projects, initialProject, initialPosition }) => 
                 toast.success('Documentos seleccionados. Revisa y Guardar para confirmar.');
             } else if (profileVariant === 'bat1') {
                 const allCourses = config.masterCourses.map(c => c.code);
-                const bat1Exams = ['ALT-FIS', 'AUD-MET', 'GRA-ALT', 'ORI-COM', 'SIL-ICE', 'DRO-BAT', 'PRE-OCU', 'PSI-LOG', 'AV-RIES', 'PSI-SEN'];
+                // Based on image: Altura Física, Audiometría, Gran Altura, Orina, Sílice, Drogas.
+                const bat1Exams = ['ALT-FIS', 'AUD-MET', 'GRA-ALT', 'ORI-COM', 'SIL-ICE', 'DRO-BAT'];
                 const examsToAssign = config.masterExams.filter(e => bat1Exams.includes(e.code)).map(e => e.code);
 
                 setSelectedCourses(allCourses);
