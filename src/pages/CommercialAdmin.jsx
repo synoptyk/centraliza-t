@@ -37,6 +37,8 @@ const CommercialAdmin = () => {
     // Modal Control
     const [showPlanModal, setShowPlanModal] = useState(false);
     const [showPromoModal, setShowPromoModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
 
     // Form States
     const [newPlan, setNewPlan] = useState({
@@ -84,12 +86,68 @@ const CommercialAdmin = () => {
     const handleCreatePlan = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/subscriptions/plans', newPlan);
-            toast.success('Plan comercial desplegado con éxito');
-            setShowPlanModal(false);
+            if (isEditing) {
+                await api.put(`/subscriptions/plans/${editingId}`, newPlan);
+                toast.success('Plan actualizado con éxito');
+            } else {
+                await api.post('/subscriptions/plans', newPlan);
+                toast.success('Plan comercial desplegado con éxito');
+            }
+            closePlanModal();
             fetchAllData();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Error al crear plan');
+            toast.error(error.response?.data?.message || 'Error al procesar plan');
+        }
+    };
+
+    const closePlanModal = () => {
+        setShowPlanModal(false);
+        setIsEditing(false);
+        setEditingId(null);
+        setNewPlan({
+            name: '',
+            description: '',
+            priceUF: 0,
+            limits: { adminUsers: 5, monthlyApplicants: 100, projects: 10, storageGB: 5 },
+            features: [''],
+            isTrial: false,
+            isPublic: true
+        });
+    };
+
+    const handleEditPlan = (plan) => {
+        setIsEditing(true);
+        setEditingId(plan._id);
+        setNewPlan({
+            name: plan.name,
+            description: plan.description,
+            priceUF: plan.priceUF,
+            limits: plan.limits || { adminUsers: 5, monthlyApplicants: 100, projects: 10, storageGB: 5 },
+            features: plan.features || [''],
+            isTrial: plan.isTrial || false,
+            isPublic: plan.isPublic
+        });
+        setShowPlanModal(true);
+    };
+
+    const handleDeletePlan = async (id) => {
+        if (!window.confirm('¿Estás seguro de eliminar este plan? Esta acción no se puede deshacer.')) return;
+        try {
+            await api.delete(`/subscriptions/plans/${id}`);
+            toast.success('Plan eliminado del ecosistema');
+            fetchAllData();
+        } catch (error) {
+            toast.error('Error al eliminar plan');
+        }
+    };
+
+    const handleTogglePlanActive = async (plan) => {
+        try {
+            await api.put(`/subscriptions/plans/${plan._id}`, { isActive: !plan.isActive });
+            toast.success(`Plan ${!plan.isActive ? 'activado' : 'suspendido'}`);
+            fetchAllData();
+        } catch (error) {
+            toast.error('Error al cambiar estado del plan');
         }
     };
 
@@ -294,17 +352,38 @@ const CommercialAdmin = () => {
                             <div key={plan._id} className="bg-white border border-slate-200/60 rounded-3xl p-6 hover:border-indigo-600/30 transition-all group shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-lg shadow-inner">
-                                            {plan.name.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <h4 className="text-slate-900 font-black uppercase text-xs tracking-wider">{plan.name}</h4>
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="text-slate-900 font-black uppercase text-xs tracking-wider">{plan.name}</h4>
+                                                {!plan.isActive && <span className="bg-red-100 text-red-600 text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Suspendido</span>}
+                                                {!plan.isPublic && <span className="bg-slate-100 text-slate-500 text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Privado</span>}
+                                            </div>
                                             <p className="text-indigo-600 font-black text-[10px] mt-0.5">{plan.priceUF} UF / mes</p>
                                         </div>
                                     </div>
-                                    <button className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-900 transition-colors">
-                                        <Settings size={16} />
-                                    </button>
+                                    <div className="flex gap-1">
+                                        <button
+                                            onClick={() => handleTogglePlanActive(plan)}
+                                            className={`p-2 rounded-lg transition-colors ${plan.isActive ? 'text-slate-400 hover:text-red-600 hover:bg-red-50' : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'}`}
+                                            title={plan.isActive ? 'Suspender' : 'Activar'}
+                                        >
+                                            <Shield size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleEditPlan(plan)}
+                                            className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-colors"
+                                            title="Editar"
+                                        >
+                                            <Settings size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeletePlan(plan._id)}
+                                            className="p-2 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
+                                            title="Eliminar"
+                                        >
+                                            <AlertTriangle size={16} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -344,8 +423,10 @@ const CommercialAdmin = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
                     <div className="bg-white border border-slate-200 rounded-[3rem] w-full max-w-2xl p-10 space-y-8 max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-200">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Diseñar Nuevo Plan</h2>
-                            <button onClick={() => setShowPlanModal(false)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors uppercase font-black text-[10px]">Cerrar</button>
+                            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">
+                                {isEditing ? `Editar Plan: ${newPlan.name}` : 'Diseñar Nuevo Plan'}
+                            </h2>
+                            <button onClick={closePlanModal} className="p-2 text-slate-400 hover:text-slate-900 transition-colors uppercase font-black text-[10px]">Cerrar</button>
                         </div>
 
                         <form onSubmit={handleCreatePlan} className="space-y-6">
@@ -453,7 +534,7 @@ const CommercialAdmin = () => {
                                 type="submit"
                                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-indigo-600/10 active:scale-95"
                             >
-                                Lanzar Plan al Ecosistema
+                                {isEditing ? 'Guardar Cambios' : 'Lanzar Plan al Ecosistema'}
                             </button>
                         </form>
                     </div>
