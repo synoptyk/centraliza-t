@@ -79,8 +79,8 @@ const LandingPage = ({ auth }) => {
     ];
 
     return (
-        <div className="bg-white min-h-screen font-sans selection:bg-indigo-100 selection:text-indigo-900">
-            <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} auth={auth} />
+        <div className="bg-[#020617] min-h-screen font-sans selection:bg-indigo-500/30 selection:text-white">
+            <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} auth={auth} light={false} />
 
             {/* Mobile Menu Overlay */}
             <AnimatePresence>
@@ -89,12 +89,12 @@ const LandingPage = ({ auth }) => {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="fixed inset-0 z-40 bg-white pt-24 px-6 md:hidden"
+                        className="fixed inset-0 z-40 bg-slate-950 pt-24 px-6 md:hidden"
                     >
                         <div className="flex flex-col gap-8">
-                            <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-900 uppercase tracking-widest">Funcionalidades</a>
-                            <a href="#pricing" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-900 uppercase tracking-widest">Planes</a>
-                            <a href="#nosotros" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-900 uppercase tracking-widest">Nosotros</a>
+                            <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Funcionalidades</a>
+                            <a href="#pricing" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Planes</a>
+                            <a href="#nosotros" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Nosotros</a>
                             <button
                                 onClick={() => navigate(auth ? '/dashboard' : '/login')}
                                 className="bg-indigo-600 text-white w-full py-4 rounded-2xl text-sm font-bold uppercase tracking-widest"
@@ -114,27 +114,27 @@ const LandingPage = ({ auth }) => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-full mb-6">
-                            <Zap size={14} className="text-indigo-600" />
-                            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Lanzamiento Ecosistema v5.0</span>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
+                            <Zap size={14} className="text-indigo-400" />
+                            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Lanzamiento Ecosistema v5.0</span>
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black text-slate-900 leading-[1.1] mb-8 tracking-tight">
+                        <h1 className="text-5xl md:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight">
                             {slides[currentSlide].title}
                         </h1>
-                        <p className="text-lg text-slate-500 leading-relaxed mb-10 max-w-xl">
+                        <p className="text-lg text-slate-400 leading-relaxed mb-10 max-w-xl">
                             {slides[currentSlide].subtitle}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-5">
                             <button
                                 onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}
-                                className="bg-indigo-600 text-white px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-2xl shadow-indigo-200 flex items-center justify-center gap-3 group"
+                                className="bg-indigo-600 text-white px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-white hover:text-indigo-600 transition-all shadow-2xl shadow-indigo-600/20 flex items-center justify-center gap-3 group"
                             >
                                 Ver Planes
                                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button
                                 onClick={() => setIsContactModalOpen(true)}
-                                className="bg-white border-2 border-slate-100 text-slate-900 px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:border-indigo-600 transition-all flex items-center justify-center gap-3"
+                                className="bg-slate-900/40 border-2 border-white/10 text-white px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:border-indigo-600 transition-all flex items-center justify-center gap-3"
                             >
                                 Contactar Ejecutivo
                             </button>
@@ -142,7 +142,7 @@ const LandingPage = ({ auth }) => {
                     </motion.div>
 
                     {/* Image Carousel */}
-                    <div className="relative h-[500px] md:h-[600px] rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white">
+                    <div className="relative h-[500px] md:h-[600px] rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/10">
                         <AnimatePresence mode="wait">
                             <motion.img
                                 key={currentSlide}
@@ -154,7 +154,7 @@ const LandingPage = ({ auth }) => {
                                 className="absolute inset-0 w-full h-full object-cover"
                             />
                         </AnimatePresence>
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 to-transparent" />
 
                         {/* Dots */}
                         <div className="absolute bottom-10 left-10 flex gap-3">
@@ -170,11 +170,11 @@ const LandingPage = ({ auth }) => {
             </section>
 
             {/* Features section */}
-            <section id="features" className="py-32 bg-slate-50/50 relative">
+            <section id="features" className="py-32 bg-slate-950/40 relative">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20">
-                        <p className="text-xs font-black text-indigo-600 uppercase tracking-[0.4em] mb-4">¿Por qué Centraliza-t?</p>
-                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Diseñado para la Excelencia Operativa</h2>
+                        <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">¿Por qué Centraliza-t?</p>
+                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Diseñado para la Excelencia Operativa</h2>
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -182,13 +182,13 @@ const LandingPage = ({ auth }) => {
                             <motion.div
                                 key={i}
                                 whileHover={{ y: -10 }}
-                                className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group"
+                                className="bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-sm hover:shadow-indigo-500/10 transition-all group"
                             >
-                                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-500">
+                                <div className="w-16 h-16 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-500">
                                     <f.icon size={30} />
                                 </div>
-                                <h3 className="text-xl font-black text-slate-900 mb-4">{f.title}</h3>
-                                <p className="text-slate-500 leading-relaxed text-sm">{f.desc}</p>
+                                <h3 className="text-xl font-black text-white mb-4">{f.title}</h3>
+                                <p className="text-slate-400 leading-relaxed text-sm">{f.desc}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -199,59 +199,59 @@ const LandingPage = ({ auth }) => {
             <section id="pricing" className="py-32 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-20">
-                        <p className="text-xs font-black text-indigo-600 uppercase tracking-[0.4em] mb-4">Inversión Inteligente</p>
-                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-6">Planes que se Adaptan a tu Crecimiento</h2>
-                        <p className="text-slate-500 max-w-2xl mx-auto">Selecciona la solución que mejor se adapte a las necesidades de tu empresa. Todos nuestros planes incluyen soporte técnico prioritario.</p>
+                        <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">Inversión Inteligente</p>
+                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-6">Planes que se Adaptan a tu Crecimiento</h2>
+                        <p className="text-slate-400 max-w-2xl mx-auto">Selecciona la solución que mejor se adapte a las necesidades de tu empresa. Todos nuestros planes incluyen soporte técnico prioritario.</p>
                     </div>
 
                     <div className="grid lg:grid-cols-3 gap-10">
                         {plans.map((plan, i) => (
                             <div
                                 key={i}
-                                className={`relative bg-white rounded-[3rem] p-12 border-2 transition-all hover:scale-[1.02] duration-500 ${plan.isTrial ? 'border-indigo-600/20 bg-indigo-50/20' : 'border-slate-100'}`}
+                                className={`relative bg-white/5 backdrop-blur-xl rounded-[3rem] p-12 border-2 transition-all hover:scale-[1.02] duration-500 ${plan.isTrial ? 'border-indigo-600/40 bg-indigo-600/5' : 'border-white/10'}`}
                             >
                                 {plan.isTrial && (
-                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-200">
+                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-600/30">
                                         Más Popular
                                     </div>
                                 )}
                                 <div className="mb-10">
-                                    <h4 className="text-2xl font-black text-slate-900 mb-2">{plan.name}</h4>
-                                    <p className="text-slate-500 text-sm leading-relaxed mb-8 h-12 overflow-hidden">{plan.description}</p>
+                                    <h4 className="text-2xl font-black text-white mb-2">{plan.name}</h4>
+                                    <p className="text-slate-400 text-sm leading-relaxed mb-8 h-12 overflow-hidden">{plan.description}</p>
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-5xl font-black text-slate-900 tracking-tighter">UF {plan.priceUF}</span>
-                                        <span className="text-slate-400 font-bold text-sm">/mes</span>
+                                        <span className="text-5xl font-black text-white tracking-tighter">UF {plan.priceUF}</span>
+                                        <span className="text-slate-500 font-bold text-sm">/mes</span>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4 mb-10">
                                     <div className="flex items-center gap-3">
-                                        <CheckCircle2 size={18} className="text-emerald-500 flex-shrink-0" />
-                                        <span className="text-sm font-bold text-slate-600">{plan.limits.adminUsers} Usuarios Administrativos</span>
+                                        <CheckCircle2 size={18} className="text-indigo-400 flex-shrink-0" />
+                                        <span className="text-sm font-bold text-slate-300">{plan.limits.adminUsers} Usuarios Administrativos</span>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <CheckCircle2 size={18} className="text-emerald-500 flex-shrink-0" />
-                                        <span className="text-sm font-bold text-slate-600">Hasta {plan.limits.monthlyApplicants} Postulantes/Mes</span>
+                                        <CheckCircle2 size={18} className="text-indigo-400 flex-shrink-0" />
+                                        <span className="text-sm font-bold text-slate-300">Hasta {plan.limits.monthlyApplicants} Postulantes/Mes</span>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <CheckCircle2 size={18} className="text-emerald-500 flex-shrink-0" />
-                                        <span className="text-sm font-bold text-slate-600">{plan.limits.projects} Proyectos Activos</span>
+                                        <CheckCircle2 size={18} className="text-indigo-400 flex-shrink-0" />
+                                        <span className="text-sm font-bold text-slate-300">{plan.limits.projects} Proyectos Activos</span>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <CheckCircle2 size={18} className="text-emerald-500 flex-shrink-0" />
-                                        <span className="text-sm font-bold text-slate-600">{plan.limits.storageGB} GB Almacenamiento</span>
+                                        <CheckCircle2 size={18} className="text-indigo-400 flex-shrink-0" />
+                                        <span className="text-sm font-bold text-slate-300">{plan.limits.storageGB} GB Almacenamiento</span>
                                     </div>
                                     {plan.features.map((feature, fIndex) => (
                                         <div key={fIndex} className="flex items-center gap-3">
-                                            <CheckCircle2 size={18} className="text-emerald-500 flex-shrink-0" />
-                                            <span className="text-sm font-bold text-slate-600">{feature}</span>
+                                            <CheckCircle2 size={18} className="text-indigo-400 flex-shrink-0" />
+                                            <span className="text-sm font-bold text-slate-300">{feature}</span>
                                         </div>
                                     ))}
                                 </div>
 
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className={`w-full py-5 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${plan.isTrial ? 'bg-indigo-600 text-white hover:bg-slate-900 shadow-xl shadow-indigo-200' : 'bg-slate-900 text-white hover:bg-indigo-600'}`}
+                                    className={`w-full py-5 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${plan.isTrial ? 'bg-indigo-600 text-white hover:bg-white hover:text-indigo-600 shadow-xl shadow-indigo-500/20' : 'bg-white text-slate-950 hover:bg-indigo-600 hover:text-white'}`}
                                 >
                                     Contratar Ahora
                                 </button>
@@ -262,7 +262,7 @@ const LandingPage = ({ auth }) => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-slate-900 py-20 px-6">
+            <footer className="bg-[#01040a] border-t border-white/5 py-20 px-6">
                 <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-16">
                     <div className="col-span-2">
                         <div className="flex items-center gap-2 mb-8">
