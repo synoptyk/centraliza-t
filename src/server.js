@@ -177,9 +177,20 @@ const seedAdmin = async () => {
 };
 seedAdmin();
 
-app.get('/', (req, res) => {
-    res.send('API Centraliza-T active');
-});
+// Servir archivos estáticos del frontend React en producción
+const path = require('path');
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '..', 'build')));
+    app.get('*', (req, res) => {
+        if (!req.path.startsWith('/api')) {
+            res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
+        }
+    });
+} else {
+    app.get('/', (req, res) => {
+        res.send('API Centraliza-T active (development mode)');
+    });
+}
 
 // Middleware
 app.use(notFound);
