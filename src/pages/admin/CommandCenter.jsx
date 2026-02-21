@@ -127,7 +127,7 @@ const CommandCenter = ({ auth, onLogout }) => {
         e.preventDefault();
 
         if (!validateTaxId(companyForm.rut, companyForm.country)) {
-            const countryData = COUNTRIES.find(c => c.code === companyForm.country);
+            const countryData = COUNTRIES.find(c => c.code === (companyForm.country || 'CL')) || COUNTRIES[0];
             return toast.error(`${countryData.taxIdName} de Empresa inválido`);
         }
         try {
@@ -199,7 +199,7 @@ const CommandCenter = ({ auth, onLogout }) => {
         e.preventDefault();
 
         if (userForm.rut && !validateTaxId(userForm.rut, userForm.country)) {
-            const countryData = COUNTRIES.find(c => c.code === userForm.country);
+            const countryData = COUNTRIES.find(c => c.code === (userForm.country || 'CL')) || COUNTRIES[0];
             return toast.error(`${countryData.taxIdName} de Usuario inválido`);
         }
         try {
@@ -818,7 +818,7 @@ const CommandCenter = ({ auth, onLogout }) => {
                                             <InternationalInput
                                                 selectedCountry={companyForm.country}
                                                 onCountryChange={(code) => setCompanyForm({ ...companyForm, country: code })}
-                                                value={COUNTRIES.find(c => c.code === companyForm.country).name}
+                                                value={COUNTRIES.find(c => c.code === (companyForm.country || 'CL'))?.name || 'Chile'}
                                                 icon={Globe}
                                                 onChange={() => { }}
                                             />
@@ -829,7 +829,7 @@ const CommandCenter = ({ auth, onLogout }) => {
                                         </div>
                                         <div className="space-y-1">
                                             <InternationalInput
-                                                label={COUNTRIES.find(c => c.code === companyForm.country).taxIdName}
+                                                label={COUNTRIES.find(c => c.code === (companyForm.country || 'CL'))?.taxIdName || 'RUT'}
                                                 name="rut"
                                                 value={companyForm.rut}
                                                 onChange={e => setCompanyForm({ ...companyForm, rut: e.target.value })}
@@ -1117,13 +1117,13 @@ const CommandCenter = ({ auth, onLogout }) => {
                                                 <InternationalInput
                                                     selectedCountry={userForm.country}
                                                     onCountryChange={(code) => setUserForm({ ...userForm, country: code })}
-                                                    value={COUNTRIES.find(c => c.code === userForm.country).name}
+                                                    value={COUNTRIES.find(c => c.code === (userForm.country || 'CL'))?.name || 'Chile'}
                                                     icon={Globe}
                                                     onChange={() => { }}
                                                 />
                                             </div>
                                             <InternationalInput
-                                                label={COUNTRIES.find(c => c.code === userForm.country).taxIdName}
+                                                label={COUNTRIES.find(c => c.code === (userForm.country || 'CL'))?.taxIdName || 'RUT'}
                                                 name="rut"
                                                 value={userForm.rut}
                                                 onChange={e => setUserForm({ ...userForm, rut: e.target.value })}
