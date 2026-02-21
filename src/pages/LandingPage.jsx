@@ -110,7 +110,7 @@ const LandingPage = ({ auth }) => {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white selection:bg-indigo-500/30">
+        <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30">
             <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} auth={auth} light={false} />
 
             {/* Mobile Menu Overlay */}
@@ -138,8 +138,8 @@ const LandingPage = ({ auth }) => {
                 )}
             </AnimatePresence>
 
-            {/* Hero Section */}
-            <section className="pt-32 pb-20 px-6 relative overflow-hidden">
+            {/* Hero Section - DEEPEST BACKGROUND */}
+            <section className="pt-32 pb-32 px-6 relative overflow-hidden bg-[#020617]">
                 <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
@@ -434,8 +434,8 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="bg-[#01040a] border-t border-white/5 py-20 px-6">
+            {/* Footer - ALIGNED WITH DEEPEST BACKGROUND */}
+            <footer className="bg-[#020617] border-t border-white/5 py-20 px-6">
                 <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-16">
                     <div className="col-span-2">
                         <div className="flex items-center gap-2 mb-8">
