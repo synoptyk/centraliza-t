@@ -78,23 +78,23 @@ const LandingPage = ({ auth }) => {
     const slides = [
         {
             image: '/assets/landing/hero1.png',
-            title: "NOSOTROS HAREMOS LO DIFICIL PARA QUE TU HAGAS LO IMPORTANTE",
-            subtitle: "Olvídate de certificaciones eternas y burocracia académica. Centraliza-T democratiza la gestión de talento para los que realmente ejecutan."
+            title: "DEMOCRATIZANDO LA POTENCIA TECNOLÓGICA",
+            subtitle: "Mientras 'LA COMPETENCIA' te entierra en burocracia y manuales antiguos, Centraliza-T libera tu capacidad operativa con herramientas diseñadas para los que ejecutan."
         },
         {
             image: '/assets/landing/hero2.png',
-            title: "La Innovación no Necesita un Manual de 400 Páginas",
-            subtitle: "Mientras otros te venden cursos, nosotros te vendemos eficiencia. Control total del flujo de talento sin complicaciones."
+            title: "Dile Adiós al Infierno de las Certificaciones",
+            subtitle: "No somos una academia, somos tu motor de crecimiento. Rompemos las barreras de la competencia para que tu equipo rinda desde el segundo uno."
         },
         {
             image: '/assets/landing/hero3.png',
-            title: "Nos podrán copiar, pero jamás igualar la Innovación",
-            subtitle: "Analítica avanzada y dashboards diseñados para la toma de decisiones, no para decorar el CV de tus empleados."
+            title: "Innovación Real vs. Burocracia Académica",
+            subtitle: "Democratizamos el acceso al talento de élite eliminando los filtros obsoletos de las plataformas tradicionales. El futuro es ágil, no certificado."
         },
         {
             image: '/assets/landing/hero4.png',
-            title: "El Fin de la Burocracia en RRHH",
-            subtitle: "Un ecosistema disruptivo de Empresa Synoptyk diseñado para maximizar tu rentabilidad operativa hoy.",
+            title: "Un Ecosistema Diseñado para Ganar",
+            subtitle: "Centraliza-T es la respuesta disruptiva frente a sistemas rígidos y lentos. Hacemos lo difícil, para que tu éxito sea lo importante.",
             special: true
         }
     ];
@@ -307,7 +307,7 @@ const LandingPage = ({ auth }) => {
                             </h3>
                             <div className="space-y-8">
                                 <div className="space-y-3">
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">La Competencia (Buk, Talana, etc)</p>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">LA COMPETENCIA</p>
                                     <div className="h-4 bg-slate-900 rounded-full overflow-hidden border border-white/5">
                                         <div className="h-full bg-slate-700 w-[60%]"></div>
                                     </div>
