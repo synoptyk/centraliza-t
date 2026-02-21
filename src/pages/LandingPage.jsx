@@ -47,7 +47,7 @@ const LandingPage = ({ auth }) => {
     const slides = [
         {
             image: '/assets/landing/hero1.png',
-            title: "Haremos lo Difícil, Tú harás lo Importante",
+            title: "NOSOTROS HAREMOS LO DIFICIL PARA QUE TU HAGAS LO IMPORTANTE",
             subtitle: "Olvídate de certificaciones eternas y burocracia académica. Centraliza-T democratiza la gestión de talento para los que realmente ejecutan."
         },
         {
@@ -110,7 +110,7 @@ const LandingPage = ({ auth }) => {
     ];
 
     return (
-        <div className="bg-[#020617] min-h-screen font-sans selection:bg-indigo-500/30 selection:text-white">
+        <div className="min-h-screen bg-slate-950 text-white selection:bg-indigo-500/30">
             <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} auth={auth} light={false} />
 
             {/* Mobile Menu Overlay */}
@@ -148,7 +148,7 @@ const LandingPage = ({ auth }) => {
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
                             <Zap size={14} className="text-indigo-400" />
-                            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Lanzamiento Ecosistema v5.0</span>
+                            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Lanzamiento Ecosistema v1.0</span>
                         </div>
                         <h1 className="text-5xl md:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight">
                             {slides[currentSlide].title}
@@ -218,11 +218,11 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Manifesto Section (Disruptive) - MOVED UP */}
-            <section className="py-32 bg-indigo-600 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -ml-20 -mt-20"></div>
-                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-slate-900 rounded-full blur-3xl -mr-20 -mb-20"></div>
+            {/* Manifesto Section (Disruptive) - MOVED UP & COLOR HARMONIZED */}
+            <section className="py-40 bg-gradient-to-b from-slate-950 via-indigo-950/30 to-slate-950 relative overflow-hidden border-y border-white/5">
+                <div className="absolute inset-0">
+                    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] -ml-40 -mt-40"></div>
+                    <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-slate-900/40 rounded-full blur-[120px] -mr-40 -mb-40"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -233,25 +233,25 @@ const LandingPage = ({ auth }) => {
                             viewport={{ once: true }}
                         >
                             <p className="text-xs font-black text-indigo-200 uppercase tracking-[0.5em] mb-6">Nuestra Filosofía</p>
-                            <h2 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8 italic tracking-tighter">
-                                Haremos lo difícil,<br />
-                                <span className="text-slate-900">tú haz lo importante.</span>
+                            <h2 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8 italic tracking-tighter uppercase">
+                                Nosotros haremos lo difícil<br />
+                                <span className="text-slate-900">para que tú hagas lo importante.</span>
                             </h2>
                             <p className="text-indigo-100 text-lg leading-relaxed mb-10 font-medium">
                                 Mientras la competencia te obliga a certificarte en sus plataformas para "entenderlas", nosotros democratizamos la potencia. No somos un centro educacional; somos el motor que escala tu empresa.
                             </p>
                             <div className="flex flex-col gap-4">
-                                <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl border border-white/10">
-                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shrink-0">
+                                <div className="flex items-center gap-4 bg-white/5 p-5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-500/20">
                                         <CheckCircle2 size={24} />
                                     </div>
-                                    <span className="text-white font-bold text-sm">Cero Academias: Úsalo hoy, domínalo hoy.</span>
+                                    <span className="text-slate-200 font-bold text-sm">Cero Academias: Úsalo hoy, domínalo hoy.</span>
                                 </div>
-                                <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl border border-white/10">
-                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shrink-0">
+                                <div className="flex items-center gap-4 bg-white/5 p-5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-500/20">
                                         <CheckCircle2 size={24} />
                                     </div>
-                                    <span className="text-white font-bold text-sm">Sin "DIPLOMAS" de relleno en el CV.</span>
+                                    <span className="text-slate-200 font-bold text-sm">Sin "DIPLOMAS" de relleno en el CV.</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -294,8 +294,8 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Features section moved down */}
-            <section id="features" className="py-32 bg-slate-950/40 relative">
+            {/* Features section moved down - COLOR HARMONIZED */}
+            <section id="features" className="py-40 bg-slate-950 relative">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20">
                         <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">¿Por qué Centraliza-t?</p>
@@ -364,8 +364,8 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Pricing Section */}
-            <section id="pricing" className="py-32 px-6">
+            {/* Pricing Section - COLOR HARMONIZED */}
+            <section id="pricing" className="py-40 px-6 bg-slate-950 border-t border-white/5">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-20">
                         <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">Inversión Inteligente</p>
