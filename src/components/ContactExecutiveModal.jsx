@@ -19,9 +19,7 @@ const ContactExecutiveModal = ({ isOpen, onClose }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            // Reusamos la infraestructura existente o simulamos envío exitoso
-            // En un ecosistema real, esto iría a un endpoint de leads
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulación de red
+            await api.post('/auth/contact-lead', formData);
 
             setSubmitted(true);
             toast.success('Solicitud enviada con éxito. Un ejecutivo te contactará pronto.');
