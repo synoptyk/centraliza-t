@@ -23,7 +23,6 @@ const MODULES_LIST = [
     { id: 'contratacion', name: 'Aprobación de Contrato' },
     { id: 'historial', name: 'Expediente Maestro' },
     { id: 'contratados', name: 'Nómina de Contratados' },
-    { id: 'contratados', name: 'Nómina de Contratados' },
 ];
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
