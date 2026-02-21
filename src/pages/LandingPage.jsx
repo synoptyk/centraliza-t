@@ -11,7 +11,38 @@ const LandingPage = ({ auth }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-    const [plans, setPlans] = useState([]);
+    const [plans, setPlans] = useState([
+        {
+            _id: 'default_startup',
+            name: 'Plan Startup',
+            description: 'Ideal para empresas pequeñas que buscan agilizar su reclutamiento.',
+            priceUF: 1.5,
+            isPublic: true,
+            isTrial: true,
+            limits: { adminUsers: 2, monthlyApplicants: 50, projects: 5, storageGB: 5 },
+            features: ['Soporte por Email', 'Evaluaciones Estándar']
+        },
+        {
+            _id: 'default_business',
+            name: 'Plan Business',
+            description: 'Potencia total para medianas empresas con flujos complejos.',
+            priceUF: 4.5,
+            isPublic: true,
+            isTrial: false,
+            limits: { adminUsers: 10, monthlyApplicants: 200, projects: 20, storageGB: 50 },
+            features: ['Soporte Prioritario', 'Personalización de Marca']
+        },
+        {
+            _id: 'default_enterprise',
+            name: 'Plan Enterprise',
+            description: 'Control absoluto y personalización sin límites para grandes corporaciones.',
+            priceUF: 12.0,
+            isPublic: true,
+            isTrial: false,
+            limits: { adminUsers: 50, monthlyApplicants: 1000, projects: 100, storageGB: 500 },
+            features: ['Soporte 24/7', 'API Personalizada']
+        }
+    ]);
 
     const modules = [
         {
@@ -72,10 +103,12 @@ const LandingPage = ({ auth }) => {
         const fetchPlans = async () => {
             try {
                 const { data } = await api.get('/subscriptions/plans');
-                // Filtrar solo planes públicos
-                setPlans(data.filter(p => p.isPublic));
+                if (data && data.length > 0) {
+                    // Filtrar solo planes públicos
+                    setPlans(data.filter(p => p.isPublic));
+                }
             } catch (error) {
-                console.error("Error al cargar planes:", error);
+                console.warn("Backend no disponible, usando planes estáticos por defecto.");
             }
         };
         fetchPlans();
