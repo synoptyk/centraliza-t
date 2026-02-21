@@ -36,11 +36,11 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [sections, setSections] = useState({
-        ceo: true,
-        centralizat: true,
-        talent: true,
-        management: true,
-        supervision: true
+        ceo: false,
+        centralizat: false,
+        talent: false,
+        management: false,
+        supervision: false
     });
 
     const toggleSection = (section) => {
