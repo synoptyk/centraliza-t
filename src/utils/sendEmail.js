@@ -5,10 +5,10 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_YRQ7RQ3o_JN357m3Tt9k
 
 const sendEmail = async (options) => {
     try {
-        const fromEmail = process.env.FROM_EMAIL || 'soporte@synoptyk.cl';
-        const fromName = process.env.FROM_NAME || 'Centraliza-T';
+        const fromEmail = options.from || process.env.FROM_EMAIL || 'soporte@synoptyk.cl';
+        const fromName = options.fromName || process.env.FROM_NAME || 'Centraliza-T';
 
-        console.log(`--- Resend API: Attempting to send email to ${options.email} ---`);
+        console.log(`--- Resend API: Attempting to send email from ${fromEmail} to ${options.email} ---`);
 
         const { data, error } = await resend.emails.send({
             from: `${fromName} <${fromEmail}>`,
