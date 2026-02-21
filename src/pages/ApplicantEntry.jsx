@@ -27,7 +27,7 @@ const ApplicantEntry = ({ auth, onLogout }) => {
         email: '',
         phone: '',
         rut: '',
-        country: auth.user.country || 'CL',
+        country: auth?.country || 'CL',
         address: '',
         projectId: '',
         position: '',
