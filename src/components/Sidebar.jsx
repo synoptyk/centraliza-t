@@ -210,7 +210,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
                         </button>
 
                         <div className={`space-y-1 overflow-hidden transition-all duration-500 ${sections.ceo ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
-                            {topLevelItems.slice(1).map(item => <NavItem key={item.path} item={item} level={1} />)}
+                            {topLevelItems.map(item => <NavItem key={item.path} item={item} level={1} />)}
                         </div>
                     </div>
                 )}
