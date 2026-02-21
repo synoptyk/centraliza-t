@@ -32,13 +32,12 @@ const corsOptions = {
         // Permitir solicitudes sin origen (como apps móviles o curl)
         if (!origin) return callback(null, true);
 
-        // Check against strictly defined allowedOrigins
-        const isAllowed = allowedOrigins.some(ao => origin === ao.replace(/\/$/, ''));
+        // Validar contra lista fija o subdominios oficiales
+        const isOfficial = allowedOrigins.some(ao => origin === ao.replace(/\/$/, '')) ||
+            origin.endsWith('.synoptyk.cl') ||
+            origin.endsWith('.vercel.app');
 
-        // Dynamic allowed domains (official subdomains)
-        const isOfficialSubdomain = origin.endsWith('.synoptyk.cl') || origin.endsWith('.vercel.app');
-
-        if (isAllowed || isOfficialSubdomain) {
+        if (isOfficial) {
             callback(null, true);
         } else {
             console.warn('CORS Blocked Origin:', origin);
