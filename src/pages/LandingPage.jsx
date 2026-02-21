@@ -141,7 +141,10 @@ const LandingPage = ({ auth }) => {
                                 Ver Planes
                                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </button>
-                            <button className="bg-white border-2 border-slate-100 text-slate-900 px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:border-indigo-600 transition-all flex items-center justify-center gap-3">
+                            <button
+                                onClick={() => window.location.href = 'mailto:centraliza-t@synoptyk.cl?subject=Solicitud de Demo - Centraliza-t&body=Hola, me gustaría solicitar una demostración personalizada del ecosistema Centraliza-t.'}
+                                className="bg-white border-2 border-slate-100 text-slate-900 px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:border-indigo-600 transition-all flex items-center justify-center gap-3"
+                            >
                                 Solicitar Demo
                             </button>
                         </div>
@@ -302,8 +305,8 @@ const LandingPage = ({ auth }) => {
 
                     <div className="grid gap-6">
                         <p className="text-white font-black uppercase tracking-widest text-[10px]">Empresa</p>
-                        <a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">Sobre Nosotros</a>
-                        <a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">Contacto</a>
+                        <a href="#nosotros" className="text-slate-400 text-sm hover:text-white transition-colors">Sobre Nosotros</a>
+                        <a href="mailto:centraliza-t@synoptyk.cl" className="text-slate-400 text-sm hover:text-white transition-colors">Contacto</a>
                         <a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">Blog</a>
                     </div>
                 </div>
