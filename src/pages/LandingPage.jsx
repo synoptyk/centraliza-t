@@ -17,29 +17,29 @@ const LandingPage = ({ auth }) => {
         {
             category: "Flujo de Talento",
             items: [
-                { name: "Gestión de Proyectos", desc: "Administración central de vacantes y requerimientos operativos.", icon: ClipboardList },
-                { name: "Captura de Talento", desc: "Registro y seguimiento integral de nuevos postulantes.", icon: UserPlus },
-                { name: "Entrevistas Filtro", desc: "Coordinación y registro de evaluaciones iniciales.", icon: Calendar },
-                { name: "Evaluación Técnica", desc: "Módulo especializado para medir competencias.", icon: BrainCircuit },
-                { name: "Seguridad & Prevención", desc: "Control de cumplimiento normativo y acreditaciones.", icon: ShieldCheck },
-                { name: "Gestión Documental", desc: "Almacenamiento y validación de expedientes digitales.", icon: FileText },
-                { name: "Maestro de Personal", desc: "Vista 360 de toda la fuerza laboral.", icon: Users },
+                { name: "Gestión de Proyectos", desc: "No pierdas tiempo gestionando vacantes. Nosotros hacemos lo difícil, tú lideras el equipo.", icon: ClipboardList },
+                { name: "Captura de Talento", desc: "Registro integral sin burocracia. Democratizamos el acceso al mejor talento de la región.", icon: UserPlus },
+                { name: "Entrevistas Filtro", desc: "Filtros reales, no manuales. Coordinación inteligente para decisiones rápidas.", icon: Calendar },
+                { name: "Evaluación Técnica", desc: "Mide lo que importa. Olvida las certificaciones de papel, evalúa competencias reales.", icon: BrainCircuit },
+                { name: "Seguridad & Prevención", desc: "Blindaje total. Cumplimiento normativo automático mientras tú te enfocas en crecer.", icon: ShieldCheck },
+                { name: "Gestión Documental", desc: "Cero papeles, cero enredos. Expedientes digitales validados al instante.", icon: FileText },
+                { name: "Maestro de Personal", desc: "Vista 360 de tu equipo. El control que mereces sin la complejidad de siempre.", icon: Users },
             ]
         },
         {
             category: "Control & Gestión",
             items: [
-                { name: "Aprobación de Contrato", desc: "Flujo digital para la validación de contrataciones.", icon: FileCheck },
-                { name: "Dashboard Empresa", desc: "Analítica avanzada y KPIs en tiempo real.", icon: Activity },
-                { name: "Capital Humano 360", desc: "Monitorización integral del desempeño y estatus.", icon: Users },
-                { name: "Contenedor", desc: "Acceso externo para clientes finales.", icon: Folder },
+                { name: "Aprobación de Contrato", desc: "Digitalización real. Valida y contrata en segundos, no en días.", icon: FileCheck },
+                { name: "Dashboard Empresa", desc: "Analítica para ejecutivos, no para académicos. KPIs claros para resultados directos.", icon: Activity },
+                { name: "Capital Humano 360", desc: "Monitoreo integral. Porque gestionar personas no debería ser una carrera universitaria.", icon: Users },
+                { name: "Contenedor", desc: "Portal de cliente transparente. Innovación compartida con tus socios estratégicos.", icon: Folder },
             ]
         },
         {
             category: "Administración",
             items: [
-                { name: "Ajustes del Sistema", desc: "Configuración global de la plataforma.", icon: Settings },
-                { name: "Planes & Facturas", desc: "Gestión de suscripciones y facturación.", icon: CreditCard },
+                { name: "Ajustes del Sistema", desc: "Configuración master. Tú tienes el poder, nosotros la infraestructura.", icon: Settings },
+                { name: "Planes & Facturas", desc: "Transparencia comercial. Sin letras chicas ni certificaciones obligatorias.", icon: CreditCard },
             ]
         }
     ];
@@ -47,23 +47,23 @@ const LandingPage = ({ auth }) => {
     const slides = [
         {
             image: '/assets/landing/hero1.png',
-            title: "Impulsa tu Operación con el Ecosistema Digital más Potente de Chile",
-            subtitle: "Gestión centralizada de capital humano, proyectos y procesos de contratación en una sola plataforma premium."
+            title: "Haremos lo Difícil, Tú harás lo Importante",
+            subtitle: "Olvídate de certificaciones eternas y burocracia académica. Centraliza-T democratiza la gestión de talento para los que realmente ejecutan."
         },
         {
             image: '/assets/landing/hero2.png',
-            title: "Control Total y Escalabilidad para tu Empresa",
-            subtitle: "Optimiza tus tiempos de respuesta y mejora la eficiencia de tu equipo con herramientas de vanguardia."
+            title: "La Innovación no Necesita un Manual de 400 Páginas",
+            subtitle: "Mientras otros te venden cursos, nosotros te vendemos eficiencia. Control total del flujo de talento sin complicaciones."
         },
         {
             image: '/assets/landing/hero3.png',
-            title: "Toma Decisiones Basadas en Datos Reales",
-            subtitle: "Paneles inteligentes y analítica avanzada para llevar tu gestión comercial al siguiente nivel."
+            title: "Nos podrán copiar, pero jamás igualar la Innovación",
+            subtitle: "Analítica avanzada y dashboards diseñados para la toma de decisiones, no para decorar el CV de tus empleados."
         },
         {
             image: '/assets/landing/hero4.png',
-            title: "Ecosistema Centraliza-t",
-            subtitle: "Un desarrollo inteligente de Empresa Synoptyk para la nueva era de la gestión empresarial.",
+            title: "El Fin de la Burocracia en RRHH",
+            subtitle: "Un ecosistema disruptivo de Empresa Synoptyk diseñado para maximizar tu rentabilidad operativa hoy.",
             special: true
         }
     ];
@@ -89,23 +89,23 @@ const LandingPage = ({ auth }) => {
     const features = [
         {
             icon: Users,
-            title: "Gestión de Talento",
-            desc: "Control absoluto del ciclo de vida del colaborador, desde el ingreso hasta la contratación final."
+            title: "Talento sin Filtros",
+            desc: "Gestiona el ciclo de vida del colaborador sin diplomas de adorno. Resultados reales desde el primer día."
         },
         {
             icon: LayoutDashboard,
-            title: "Paneles de Control",
-            desc: "Visualiza el estado de tus proyectos y postulantes en tiempo real con interfaces intuitivas."
+            title: "Control Intuitivo",
+            desc: "Interfaces diseñadas para humanos, no para robots. Visualiza tu éxito operativo sin manuales de 400 páginas."
         },
         {
             icon: ShieldCheck,
-            title: "Blindaje Operativo",
-            desc: "Seguridad multi-empresa y cumplimiento de normativas garantizado en cada proceso."
+            title: "Blindaje de Verdad",
+            desc: "Seguridad y cumplimiento normativo en ADN. Nosotros hacemos lo difícil de la ley, tú haces lo importante."
         },
         {
             icon: Zap,
-            title: "Automatización",
-            desc: "Reduce la carga administrativa automatizando flujos de aprobación y notificaciones."
+            title: "Eficiencia Extrema",
+            desc: "Automatización radical que elimina la burocracia. Hacemos que tu eficiencia llegue al máximo nivel posible."
         }
     ];
 
@@ -223,6 +223,82 @@ const LandingPage = ({ auth }) => {
                                 <p className="text-slate-400 leading-relaxed text-sm">{f.desc}</p>
                             </motion.div>
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Manifesto Section (Disruptive) */}
+            <section className="py-32 bg-indigo-600 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -ml-20 -mt-20"></div>
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-slate-900 rounded-full blur-3xl -mr-20 -mb-20"></div>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
+                    <div className="grid lg:grid-cols-2 gap-20 items-center">
+                        <motion.div
+                            initial={{ opacity: 0, x: -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                        >
+                            <p className="text-xs font-black text-indigo-200 uppercase tracking-[0.5em] mb-6">Nuestra Filosofía</p>
+                            <h2 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8 italic tracking-tighter">
+                                Haremos lo difícil,<br />
+                                <span className="text-slate-900">tú haz lo importante.</span>
+                            </h2>
+                            <p className="text-indigo-100 text-lg leading-relaxed mb-10 font-medium">
+                                Mientras la competencia te obliga a certificarte en sus plataformas para "entenderlas", nosotros democratizamos la potencia. No somos un centro educacional; somos el motor que escala tu empresa.
+                            </p>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl border border-white/10">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shrink-0">
+                                        <CheckCircle2 size={24} />
+                                    </div>
+                                    <span className="text-white font-bold text-sm">Cero Academias: Úsalo hoy, domínalo hoy.</span>
+                                </div>
+                                <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl border border-white/10">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 shrink-0">
+                                        <CheckCircle2 size={24} />
+                                    </div>
+                                    <span className="text-white font-bold text-sm">Sin "DIPLOMAS" de relleno en el CV.</span>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            className="bg-slate-950 p-12 rounded-[3.5rem] border border-white/10 shadow-2xl relative"
+                        >
+                            <div className="absolute -top-6 -right-6 bg-amber-400 text-slate-950 font-black px-8 py-3 rounded-2xl text-[10px] uppercase tracking-widest shadow-xl rotate-12">
+                                100% Disruptivo
+                            </div>
+                            <h3 className="text-2xl font-black text-white mb-10 italic uppercase border-b border-white/10 pb-6 tracking-tighter">
+                                Innovación vs Copia
+                            </h3>
+                            <div className="space-y-8">
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">La Competencia (Buk, Talana, etc)</p>
+                                    <div className="h-4 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                        <div className="h-full bg-slate-700 w-[60%]"></div>
+                                    </div>
+                                    <p className="text-[9px] font-medium text-slate-400 italic">"Te confunden con burocracia y certificaciones académicas."</p>
+                                </div>
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic">Ecosistema Centraliza-T</p>
+                                    <div className="h-4 bg-slate-900 rounded-full overflow-hidden border border-indigo-500/30">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            whileInView={{ width: '100%' }}
+                                            transition={{ duration: 1.5, delay: 0.5 }}
+                                            className="h-full bg-indigo-600 shadow-[0_0_20px_rgba(79,70,229,0.5)]"
+                                        ></motion.div>
+                                    </div>
+                                    <p className="text-[9px] font-black text-indigo-400 italic uppercase">"Hacemos lo difícil. Resultados reales sin manuales."</p>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
