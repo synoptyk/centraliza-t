@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ArrowRight, Zap, Play, CheckCircle2, Building2, LayoutDashboard, Database, ShieldCheck, Mail, Send, Users, Rocket, Briefcase } from 'lucide-react';
+import { ChevronRight, ArrowRight, Zap, Play, CheckCircle2, Building2, LayoutDashboard, Database, ShieldCheck, Mail, Send, Users, Rocket, Briefcase, ClipboardList, UserPlus, Calendar, BrainCircuit, FileText, FileCheck, Activity, Folder, Settings, CreditCard } from 'lucide-react';
 import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import ContactExecutiveModal from '../components/ContactExecutiveModal';
@@ -12,6 +12,37 @@ const LandingPage = ({ auth }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     const [plans, setPlans] = useState([]);
+
+    const modules = [
+        {
+            category: "Flujo de Talento",
+            items: [
+                { name: "Gestión de Proyectos", desc: "Administración central de vacantes y requerimientos operativos.", icon: ClipboardList },
+                { name: "Captura de Talento", desc: "Registro y seguimiento integral de nuevos postulantes.", icon: UserPlus },
+                { name: "Entrevistas Filtro", desc: "Coordinación y registro de evaluaciones iniciales.", icon: Calendar },
+                { name: "Evaluación Técnica", desc: "Módulo especializado para medir competencias.", icon: BrainCircuit },
+                { name: "Seguridad & Prevención", desc: "Control de cumplimiento normativo y acreditaciones.", icon: ShieldCheck },
+                { name: "Gestión Documental", desc: "Almacenamiento y validación de expedientes digitales.", icon: FileText },
+                { name: "Maestro de Personal", desc: "Vista 360 de toda la fuerza laboral.", icon: Users },
+            ]
+        },
+        {
+            category: "Control & Gestión",
+            items: [
+                { name: "Aprobación de Contrato", desc: "Flujo digital para la validación de contrataciones.", icon: FileCheck },
+                { name: "Dashboard Empresa", desc: "Analítica avanzada y KPIs en tiempo real.", icon: Activity },
+                { name: "Capital Humano 360", desc: "Monitorización integral del desempeño y estatus.", icon: Users },
+                { name: "Contenedor", desc: "Acceso externo para clientes finales.", icon: Folder },
+            ]
+        },
+        {
+            category: "Administración",
+            items: [
+                { name: "Ajustes del Sistema", desc: "Configuración global de la plataforma.", icon: Settings },
+                { name: "Planes & Facturas", desc: "Gestión de suscripciones y facturación.", icon: CreditCard },
+            ]
+        }
+    ];
 
     const slides = [
         {
@@ -93,6 +124,7 @@ const LandingPage = ({ auth }) => {
                     >
                         <div className="flex flex-col gap-8">
                             <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Funcionalidades</a>
+                            <a href="#modulos" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Módulos</a>
                             <a href="#pricing" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Planes</a>
                             <a href="#nosotros" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Nosotros</a>
                             <button
@@ -190,6 +222,50 @@ const LandingPage = ({ auth }) => {
                                 <h3 className="text-xl font-black text-white mb-4">{f.title}</h3>
                                 <p className="text-slate-400 leading-relaxed text-sm">{f.desc}</p>
                             </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Modules section */}
+            <section id="modulos" className="py-32 bg-[#01040a] relative">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-20">
+                        <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">Ecosistema Completo</p>
+                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">Módulos Centraliza-T</h2>
+                        <div className="h-1.5 w-24 bg-indigo-600 mx-auto mt-6 rounded-full"></div>
+                    </div>
+
+                    <div className="space-y-32">
+                        {modules.map((cat, i) => (
+                            <div key={i}>
+                                <div className="flex items-center gap-8 mb-16">
+                                    <h3 className="text-2xl font-black text-white uppercase tracking-[0.4em] italic">{cat.category}</h3>
+                                    <div className="h-[2px] bg-gradient-to-r from-indigo-500/50 to-transparent flex-1"></div>
+                                </div>
+                                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                    {cat.items.map((m, j) => (
+                                        <motion.div
+                                            key={j}
+                                            whileHover={{ y: -12, scale: 1.02 }}
+                                            className="bg-white/5 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-white/5 hover:border-indigo-500/40 transition-all duration-500 group relative overflow-hidden"
+                                        >
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-600/10 transition-colors"></div>
+
+                                            <div className="w-16 h-16 bg-slate-900 border border-white/10 rounded-2xl flex items-center justify-center mb-8 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-xl group-hover:shadow-indigo-600/20 transition-all duration-500">
+                                                <m.icon size={28} />
+                                            </div>
+
+                                            <h4 className="text-lg font-black text-white uppercase tracking-wider mb-4 group-hover:text-indigo-400 transition-colors italic">{m.name}</h4>
+                                            <p className="text-sm text-slate-400 leading-relaxed font-medium">{m.desc}</p>
+
+                                            <div className="mt-8 flex items-center gap-2 text-[10px] font-black text-indigo-400/0 group-hover:text-indigo-400 transition-all duration-500 uppercase tracking-widest">
+                                                Explorar Módulo <ArrowRight size={12} />
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>
