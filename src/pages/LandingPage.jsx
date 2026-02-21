@@ -401,6 +401,152 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
+            {/* CEO Visionary Section - PREMIUM DISRUPTIVE ARCHITECT STYLE */}
+            <section id="nosotros" className="py-40 bg-slate-950 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_70%_50%,rgba(79,70,229,0.2),transparent_50%)]"></div>
+
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
+                    <div className="grid lg:grid-cols-2 gap-20 items-center">
+                        {/* Visual Column */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1 }}
+                            className="relative group lg:order-last"
+                        >
+                            <div className="absolute -inset-4 bg-indigo-600/20 rounded-[4rem] blur-3xl group-hover:bg-indigo-600/30 transition-all duration-700"></div>
+                            <div className="relative rounded-[3.5rem] overflow-hidden border-2 border-white/10 shadow-2xl">
+                                <img
+                                    src="/assets/landing/ceo_visionary.png"
+                                    alt="Mauricio Barrientos - CEO Empresa Synoptyk"
+                                    className="w-full grayscale hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                                />
+                                <div className="absolute inset-x-0 bottom-0 p-10 bg-gradient-to-t from-slate-950/90 to-transparent">
+                                    <p className="text-white font-black text-2xl uppercase tracking-tighter italic">Mauricio Barrientos</p>
+                                    <p className="text-indigo-400 text-xs font-black uppercase tracking-[0.3em]">Fundador & Visionario Arquitecto</p>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Text Column */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1, delay: 0.2 }}
+                            className="space-y-10"
+                        >
+                            <div className="space-y-4">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
+                                    <BrainCircuit size={14} className="text-indigo-400" />
+                                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">El Cerebro Detrás del Ecosistema</span>
+                                </div>
+                                <h2 className="text-4xl md:text-6xl font-black text-white leading-tight italic uppercase tracking-tighter">
+                                    De la Resistencia al <span className="text-indigo-500">Poder Absoluto</span>
+                                </h2>
+                            </div>
+
+                            <div className="space-y-6 text-slate-400 text-base leading-relaxed font-medium">
+                                <p>
+                                    <b className="text-white">Empresa Synoptyk</b> es el ecosistema padre de <b className="text-indigo-400 font-black">CENTRALIZA-T</b>, y Mauricio "Mauro" Barrientos es el cerebro detrás de cada línea de código, cada innovación y cada idea que hoy impulsa tu crecimiento.
+                                </p>
+                                <p>
+                                    Con más de 15 años de experiencia liderando flujos administrativos, financieros y operativos, Mauro detectó una verdad incómoda: <i className="text-slate-300">las empresas mueren por la lentitud en sus decisiones.</i> En 2010, cuando la tecnología era un lujo para pocos, él ya diseñaba procesos integrales para obtener datos en línea, sabiendo que la eficiencia no es una opción, sino un arma de supervivencia.
+                                </p>
+                                <p className="border-l-4 border-indigo-600 pl-8 italic py-4 bg-indigo-600/5 rounded-r-3xl">
+                                    "Me cansé de las limitaciones de 'los señores del Excel' y de las visiones administrativas que frenan la innovación. Decidí que mi objetivo transversal no tendría más escalas intermedias."
+                                </p>
+                                <p>
+                                    CENTRALIZA-T nace de esa independencia. Es la democratización de la gestión empresarial. Es el fin de la burocracia académica para dar paso a herramientas amigables pero letalmente eficientes. Mauro no solo creó un software; diseñó una revolución para que tú nunca más tengas que pedir permiso para innovar.
+                                </p>
+                            </div>
+
+                            <div className="pt-6">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    className="px-10 py-5 bg-white text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-indigo-600 hover:text-white transition-all shadow-xl"
+                                    onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}
+                                >
+                                    Únete a la Revolución
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* CEO Visionary Section - PREMIUM DISRUPTIVE ARCHITECT STYLE */}
+            <section id="nosotros" className="py-40 bg-slate-950 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_70%_50%,rgba(79,70,229,0.2),transparent_50%)]"></div>
+
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
+                    <div className="grid lg:grid-cols-2 gap-20 items-center">
+                        {/* Visual Column */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1 }}
+                            className="relative group lg:order-last"
+                        >
+                            <div className="absolute -inset-4 bg-indigo-600/20 rounded-[4rem] blur-3xl group-hover:bg-indigo-600/30 transition-all duration-700"></div>
+                            <div className="relative rounded-[3.5rem] overflow-hidden border-2 border-white/10 shadow-2xl">
+                                <img
+                                    src="/assets/landing/ceo_visionary.png"
+                                    alt="Mauricio Barrientos - CEO Empresa Synoptyk"
+                                    className="w-full grayscale hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                                />
+                                <div className="absolute inset-x-0 bottom-0 p-10 bg-gradient-to-t from-slate-950/90 to-transparent">
+                                    <p className="text-white font-black text-2xl uppercase tracking-tighter italic">Mauricio Barrientos</p>
+                                    <p className="text-indigo-400 text-xs font-black uppercase tracking-[0.3em]">Fundador & Visionario Arquitecto</p>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Text Column */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1, delay: 0.2 }}
+                            className="space-y-10"
+                        >
+                            <div className="space-y-4">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
+                                    <BrainCircuit size={14} className="text-indigo-400" />
+                                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">El Cerebro Detrás del Ecosistema</span>
+                                </div>
+                                <h2 className="text-4xl md:text-6xl font-black text-white leading-tight italic uppercase tracking-tighter">
+                                    De la Resistencia al <span className="text-indigo-500">Poder Absoluto</span>
+                                </h2>
+                            </div>
+
+                            <div className="space-y-6 text-slate-400 text-base leading-relaxed font-medium">
+                                <p>
+                                    <b className="text-white">Empresa Synoptyk</b> es el ecosistema padre de <b className="text-indigo-400 font-black">CENTRALIZA-T</b>, y Mauricio "Mauro" Barrientos es el cerebro detrás de cada línea de código, cada innovación y cada idea que hoy impulsa tu crecimiento.
+                                </p>
+                                <p>
+                                    Con más de 15 años de experiencia liderando flujos administrativos, financieros y operativos, Mauro detectó una verdad incómoda: <i className="text-slate-300">las empresas mueren por la lentitud en sus decisiones.</i> En 2010, cuando la tecnología era un lujo para pocos, él ya diseñaba procesos integrales para obtener datos en línea, sabiendo que la eficiencia no es una opción, sino un arma de supervivencia.
+                                </p>
+                                <p className="border-l-4 border-indigo-600 pl-8 italic py-4 bg-indigo-600/5 rounded-r-3xl">
+                                    "Me cansé de las limitaciones de 'los señores del Excel' y de las visiones administrativas que frenan la innovación. Decidí que mi objetivo transversal no tendría más escalas intermedias."
+                                </p>
+                                <p>
+                                    CENTRALIZA-T nace de esa independencia. Es la democratización de la gestión empresarial. Es el fin de la burocracia académica para dar paso a herramientas amigables pero letalmente eficientes. Mauro no solo creó un software; diseñó una revolución para que tú nunca más tengas que pedir permiso para innovar.
+                                </p>
+                            </div>
+
+                            <div className="pt-6">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    className="px-10 py-5 bg-white text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-indigo-600 hover:text-white transition-all shadow-xl"
+                                    onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}
+                                >
+                                    Únete a la Revolución
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
             {/* Pricing Section - VIBRANT BLUE */}
             <section id="pricing" className="py-40 px-6 bg-indigo-600 relative overflow-hidden">
                 <div className="absolute inset-0">
