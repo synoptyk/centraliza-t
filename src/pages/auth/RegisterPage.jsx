@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Rocket, Shield, Mail, Smartphone, Building2, User, Lock, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Rocket, Shield, Mail, Smartphone, Building2, User, Lock, ArrowLeft, CheckCircle2, Globe } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../config/api';
 import { COUNTRIES, validateTaxId } from '../../utils/intlUtils';

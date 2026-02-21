@@ -3,7 +3,7 @@ import {
     Save, Plus, Trash2, CheckCircle2, Loader2, AlertCircle,
     Share2, Send, MessageCircle, FileText, Eye, Edit3, Edit2,
     User, Users, Mail, Phone, MapPin, Briefcase, GraduationCap,
-    Printer, Smartphone, UserPlus
+    Printer, Smartphone, UserPlus, Globe
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
