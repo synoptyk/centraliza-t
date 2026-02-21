@@ -621,7 +621,9 @@ const LandingPage = ({ auth }) => {
             <footer className="bg-[#020617] border-t border-white/5 py-20 px-6">
                 <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-16">
                     <div className="col-span-2">
-                        <div className="flex items-center gap-2 mb-8">
+                        <div className="flex items-center gap-2 mb-8 cursor-pointer"
+                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        >
                             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
                                 <Rocket className="text-white" size={24} />
                             </div>
