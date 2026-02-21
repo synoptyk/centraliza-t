@@ -38,7 +38,7 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
     ];
 
     return (
-        <nav className={`fixed top-0 w-full z-50 transition-all ${light ? 'bg-white/80 backdrop-blur-xl border-b border-slate-100' : 'bg-slate-950/40 backdrop-blur-xl border-b border-white/5'}`}>
+        <nav className={`fixed top-0 w-full z-50 transition-all ${light ? 'bg-white/80 backdrop-blur-xl border-b border-slate-100' : 'bg-indigo-600/95 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-indigo-500/20'}`}>
             <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
                     <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
@@ -59,7 +59,7 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
                                 if (el) el.scrollIntoView({ behavior: 'smooth' });
                                 else navigate('/#modulos');
                             }}
-                            className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-slate-400 hover:text-indigo-400'}`}
+                            className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-white hover:text-indigo-200'}`}
                         >
                             Módulos Centraliza-T
                             <ChevronDown size={14} className={`transition-transform duration-300 ${isModulesOpen ? 'rotate-180' : ''}`} />
@@ -90,9 +90,9 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
                         </div>
                     </div>
 
-                    <a href="/#features" className={`text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-slate-400 hover:text-indigo-400'}`}>Funcionalidades</a>
-                    <a href="/#pricing" className={`text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-slate-400 hover:text-indigo-400'}`}>Planes</a>
-                    <a href="/#nosotros" className={`text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-slate-400 hover:text-indigo-400'}`}>Nosotros</a>
+                    <a href="/#features" className={`text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-white hover:text-indigo-200'}`}>Funcionalidades</a>
+                    <a href="/#pricing" className={`text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-white hover:text-indigo-200'}`}>Planes</a>
+                    <a href="/#nosotros" className={`text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-white hover:text-indigo-200'}`}>Nosotros</a>
 
                     {auth ? (
                         <button

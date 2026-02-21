@@ -120,7 +120,7 @@ const LandingPage = ({ auth }) => {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="fixed inset-0 z-40 bg-slate-950 pt-24 px-6 md:hidden"
+                        className="fixed inset-0 z-40 bg-indigo-600 pt-24 px-6 md:hidden shadow-2xl"
                     >
                         <div className="flex flex-col gap-8">
                             <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Funcionalidades</a>
@@ -368,20 +368,24 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Pricing Section - SLATE 900 SLIGHT CONTRAST */}
-            <section id="pricing" className="py-40 px-6 bg-[#0f172a] border-t border-white/5">
-                <div className="max-w-7xl mx-auto">
+            {/* Pricing Section - VIBRANT BLUE */}
+            <section id="pricing" className="py-40 px-6 bg-indigo-600 relative overflow-hidden">
+                <div className="absolute inset-0">
+                    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#020617] to-transparent opacity-40"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#020617] to-transparent opacity-40"></div>
+                </div>
+                <div className="max-w-7xl mx-auto relative z-10">
                     <div className="text-center mb-20">
-                        <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">Inversión Inteligente</p>
+                        <p className="text-xs font-black text-indigo-100 uppercase tracking-[0.4em] mb-4">Inversión Inteligente</p>
                         <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-6">Planes que se Adaptan a tu Crecimiento</h2>
-                        <p className="text-slate-400 max-w-2xl mx-auto">Selecciona la solución que mejor se adapte a las necesidades de tu empresa. Todos nuestros planes incluyen soporte técnico prioritario.</p>
+                        <p className="text-indigo-50 max-w-2xl mx-auto">Selecciona la solución que mejor se adapte a las necesidades de tu empresa. Todos nuestros planes incluyen soporte técnico prioritario.</p>
                     </div>
 
                     <div className="grid lg:grid-cols-3 gap-10">
                         {plans.map((plan, i) => (
                             <div
                                 key={i}
-                                className={`relative bg-white/5 backdrop-blur-xl rounded-[3rem] p-12 border-2 transition-all hover:scale-[1.02] duration-500 ${plan.isTrial ? 'border-indigo-600/40 bg-indigo-600/5' : 'border-white/10'}`}
+                                className={`relative bg-slate-950/80 backdrop-blur-xl rounded-[3rem] p-12 border-2 transition-all hover:scale-[1.02] duration-500 ${plan.isTrial ? 'border-amber-400/50 shadow-2xl shadow-amber-400/10' : 'border-white/10'}`}
                             >
                                 {plan.isTrial && (
                                     <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-600/30">
