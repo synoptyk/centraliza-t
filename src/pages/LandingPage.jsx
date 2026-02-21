@@ -37,6 +37,12 @@ const LandingPage = ({ auth }) => {
             image: '/assets/landing/hero3.png',
             title: "Toma Decisiones Basadas en Datos Reales",
             subtitle: "Paneles inteligentes y analítica avanzada para llevar tu gestión comercial al siguiente nivel."
+        },
+        {
+            image: '/assets/landing/hero4.png',
+            title: "Ecosistema Centraliza-t",
+            subtitle: "Un desarrollo inteligente de Empresa Synoptyk para la nueva era de la gestión empresarial.",
+            special: true
         }
     ];
 
@@ -147,10 +153,10 @@ const LandingPage = ({ auth }) => {
                             <motion.img
                                 key={currentSlide}
                                 src={slides[currentSlide].image}
-                                initial={{ opacity: 0, scale: 1.1 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ duration: 0.8, ease: "easeOut" }}
+                                initial={{ opacity: 0, scale: slides[currentSlide].special ? 1.2 : 1.1, x: slides[currentSlide].special ? 50 : 0 }}
+                                animate={{ opacity: 1, scale: 1, x: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, x: slides[currentSlide].special ? -50 : 0 }}
+                                transition={{ duration: slides[currentSlide].special ? 1.2 : 0.8, ease: "easeOut" }}
                                 className="absolute inset-0 w-full h-full object-cover"
                             />
                         </AnimatePresence>
@@ -271,8 +277,11 @@ const LandingPage = ({ auth }) => {
                             </div>
                             <span className="text-xl font-black text-white tracking-tighter">CENTRALIZA-T</span>
                         </div>
-                        <p className="text-slate-400 max-w-sm leading-relaxed mb-8">
+                        <p className="text-slate-400 max-w-sm leading-relaxed mb-4">
                             Transformando la gestión empresarial con tecnología de vanguardia y un ecosistema diseñado para la eficiencia máxima.
+                        </p>
+                        <p className="text-indigo-400 text-xs font-black uppercase tracking-widest mb-8">
+                            Ecosistema Centraliza-t, un desarrollo inteligente de Empresa Synoptyk.
                         </p>
                         <div className="flex gap-4">
                             {/* Social Icons Placeholders */}
