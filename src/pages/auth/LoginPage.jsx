@@ -4,17 +4,30 @@ import { useNavigate } from 'react-router-dom';
 import {
     Lock, Mail, Loader2, Building2, Eye, EyeOff,
     ClipboardList, Zap, BrainCircuit, Search,
-    FileCheck, Users, ArrowRight
+    FileCheck, Users, ArrowRight, UserPlus,
+    CreditCard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Navbar from '../../components/Navbar';
 
 const LoginPage = ({ setAuth }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const navigate = useNavigate();
+    const [isRegistering, setIsRegistering] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
-    const navigate = useNavigate();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // Login State
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    // Register State
+    const [regName, setRegName] = useState('');
+    const [regEmail, setRegEmail] = useState('');
+    const [regPassword, setRegPassword] = useState('');
+    const [regCompanyName, setRegCompanyName] = useState('');
+    const [regRut, setRegRut] = useState('');
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -31,17 +44,34 @@ const LoginPage = ({ setAuth }) => {
             if (data.role === 'Ceo_Centralizat') {
                 navigate('/admin/command-center');
             } else {
-                navigate('/');
+                navigate('/dashboard');
             }
         } catch (error) {
-            console.error('Login Error:', error);
-            if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-                toast.error('El servidor está despertando... Por favor intente nuevamente en 10 segundos.');
-            } else if (!error.response) {
-                toast.error('Error de conexión con el servidor. Verifique su internet.');
-            } else {
-                toast.error(error.response?.data?.message || 'Credenciales incorrectas');
-            }
+            toast.error(error.response?.data?.message || 'Credenciales incorrectas');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const { data } = await api.post('/auth/register-trial', {
+                name: regName,
+                email: regEmail,
+                password: regPassword,
+                companyName: regCompanyName,
+                rut: regRut
+            });
+
+            // Auto login after registration
+            sessionStorage.setItem('centralizat_user', JSON.stringify(data));
+            setAuth(data);
+            toast.success(`¡Felicidades! Tu cuenta Free Trial ha sido creada.`);
+            navigate('/dashboard');
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Error en el registro');
         } finally {
             setLoading(false);
         }
@@ -57,185 +87,229 @@ const LoginPage = ({ setAuth }) => {
     ];
 
     return (
-        <div className="h-screen w-full flex items-center justify-center p-4 md:p-8 bg-[#020617] relative overflow-hidden font-sans">
+        <div className="min-h-screen w-full flex flex-col bg-[#020617] relative overflow-hidden font-sans">
+            <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} light={false} />
 
             {/* AMBIENT BACKGROUND SYSTEM */}
             <div className="absolute inset-0 z-0">
-                <img
-                    src="/assets/login-bg-vortex.png"
-                    alt=""
-                    className="absolute top-1/2 left-1/2 w-[160%] h-[160%] max-w-none object-cover opacity-40 animate-spin-slow pointer-events-none"
-                    onError={(e) => e.target.style.display = 'none'}
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-950/60 to-slate-950 backdrop-blur-[1px]"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-purple-600/10 rounded-full blur-[100px]"></div>
             </div>
 
-            {/* MAIN CONTAINER (ACCESSIBILITY OPTIMIZED) */}
-            <div className="relative z-10 w-full max-w-[1400px] h-full max-h-[850px] flex flex-col lg:flex-row glass-executive rounded-[50px] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.7)] overflow-hidden">
+            {/* MAIN CONTENT AREA */}
+            <div className="relative z-10 flex-1 flex items-center justify-center p-6 md:p-12 mt-20">
+                <div className="w-full max-w-[1300px] max-h-[850px] flex flex-col lg:flex-row glass-executive rounded-[40px] border border-white/10 shadow-2xl overflow-hidden">
 
-                {/* LEFT: THE DYNAMIC FLOW MAP */}
-                <div className="hidden lg:flex lg:w-[58%] p-14 flex-col justify-between relative bg-slate-950/60 border-r border-white/5">
-
-                    {/* Header Branding */}
-                    <div className="flex items-center gap-6 relative z-20">
-                        <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-600 to-fuchsia-600 flex items-center justify-center shadow-2xl shadow-indigo-500/40 ring-2 ring-white/10">
-                            <Building2 className="text-white" size={32} />
-                        </div>
-                        <div className="space-y-1">
-                            <h1 className="text-white text-3xl font-black tracking-[0.4em] uppercase italic leading-none">CENTRALIZA-T</h1>
-                            <div className="space-y-1 mt-2">
-                                <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em] flex items-center gap-2">
-                                    <span className="w-6 h-px bg-indigo-500/30"></span> Ecosistema Inteligente
-                                </p>
-                                <p className="text-white text-[9px] font-black uppercase tracking-[0.4em] flex items-center gap-2">
-                                    <span className="w-6 h-px bg-white/30"></span> EL FLUJO CONECTADO DEL ÉXITO
-                                </p>
+                    {/* LEFT: INFORMATION PANEL */}
+                    <div className="hidden lg:flex lg:w-[45%] p-14 flex-col justify-between bg-slate-950/40 border-r border-white/5">
+                        <div className="space-y-6">
+                            <div className="inline-flex items-center gap-3 px-4 py-2 bg-indigo-500/10 rounded-full border border-indigo-500/20">
+                                <Zap size={14} className="text-indigo-400" />
+                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Digital Governance v5.0</span>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* DYNAMIC FLOW MAP */}
-                    <div className="relative flex-1 flex flex-col justify-center px-10">
-                        {/* Title removed to avoid saturation, moved some to branding */}
-
-                        {/* FLOW GRID */}
-                        <div className="grid grid-cols-3 gap-y-16 gap-x-8 relative">
-                            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" style={{ zIndex: 0 }}>
-                                <path d="M 120 40 L 300 40 L 480 40 M 480 40 L 480 180 L 120 180 M 120 180 L 120 320 L 480 320"
-                                    fill="none" stroke="white" strokeWidth="2" strokeDasharray="10 5" className="animate-[move-bg_20s_linear_infinite]" />
-                            </svg>
-
-                            {platformFlow.map((step, i) => (
-                                <div key={i} className="flex flex-col items-center gap-5 relative z-10 group">
-                                    <div className={`w-24 h-24 rounded-[32px] bg-slate-900/90 border border-white/10 flex items-center justify-center shadow-2xl ${step.glow} group-hover:scale-110 group-hover:bg-white/5 group-hover:border-white/20 transition-all duration-500 relative`}>
-                                        <step.icon size={40} className={`${step.color} transition-all duration-500 group-hover:rotate-[360deg]`} />
-                                        <div className="absolute -top-2 -right-2 w-7 h-7 bg-indigo-600 rounded-full border-2 border-[#020617] flex items-center justify-center text-[10px] font-black text-white shadow-xl">
-                                            {i + 1}
-                                        </div>
-                                    </div>
-                                    <div className="text-center space-y-1">
-                                        <p className="text-xs font-black text-white uppercase tracking-widest italic group-hover:text-vibrant transition-colors">{step.name}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Footer Info */}
-                    <div className="flex items-center justify-between pt-10 border-t border-white/5 opacity-40">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.5em]">SYSTEM ACCESS LEVEL: OMEGA</span>
-                    </div>
-                </div>
-
-                {/* RIGHT: THE LOGIN COMMAND CENTER (ENLARGED INPUTS) */}
-                <div className="flex-1 p-8 md:p-14 lg:p-20 flex flex-col justify-center items-center relative bg-white/[0.04]">
-
-                    {/* Orbital Decoration */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
-                        <div className="w-[600px] h-[600px] rounded-full border-[100px] border-white animate-spin-slow"></div>
-                    </div>
-
-                    <div className="w-full max-w-[440px] space-y-14 relative z-10">
-                        <div className="space-y-4 text-center lg:text-left">
-                            <div className="flex items-center justify-center lg:justify-start gap-4">
-                                <div className="h-px w-10 bg-indigo-500/50"></div>
-                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em]">OPERACIONES ÉLITE</span>
-                            </div>
-                            <h3 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase italic leading-tight">
-                                ACCESO AL <span className="text-vibrant">NÚCLEO</span>
-                            </h3>
-                            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em] leading-relaxed">
-                                Ingrese credenciales de seguridad.
+                            <h2 className="text-4xl font-black text-white leading-tight uppercase italic tracking-tighter">
+                                {isRegistering ? 'Comienza tu Viaje Digital Gratis' : 'Acceso al Núcleo de Operaciones'}
+                            </h2>
+                            <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
+                                {isRegistering
+                                    ? 'Crea tu cuenta empresarial en segundos y experimenta el poder de la gestión centralizada sin costos iniciales.'
+                                    : 'Ingrese sus credenciales de seguridad para gestionar sus proyectos y capital humano con precisión quirúrgica.'}
                             </p>
                         </div>
 
-                        <form onSubmit={handleLogin} className="space-y-10">
-                            {/* Email - ENLARGED */}
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] ml-4">Identificador Usuario</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-7 flex items-center pointer-events-none text-slate-500 group-focus-within:text-white transition-colors">
-                                        <Mail size={20} />
+                        {/* FLOW MAP (Simplified for login) */}
+                        <div className="grid grid-cols-2 gap-6 my-10">
+                            {platformFlow.slice(0, 4).map((step, i) => (
+                                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-all">
+                                    <div className={`p-3 rounded-xl bg-slate-900 border border-white/10 ${step.color}`}>
+                                        <step.icon size={20} />
                                     </div>
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="block w-full pl-16 pr-8 py-5 bg-white/5 border-2 border-white/10 rounded-[30px] text-white placeholder-slate-700 focus:outline-none focus:ring-8 focus:ring-indigo-500/10 focus:border-indigo-500/40 transition-all text-base font-bold shadow-2xl"
-                                        placeholder="ej: mando@centralizat.cl"
-                                        required
-                                    />
+                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">{step.name}</span>
                                 </div>
+                            ))}
+                        </div>
+
+                        <div className="pt-8 border-t border-white/10">
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.5em]">SYSTEM ENCRYPTION: ACTIVE</p>
+                        </div>
+                    </div>
+
+                    {/* RIGHT: FORMS AREA */}
+                    <div className="flex-1 p-8 md:p-16 flex flex-col justify-center bg-slate-950/20">
+                        <div className="w-full max-w-[420px] mx-auto space-y-10">
+
+                            {/* Form Header */}
+                            <div className="flex flex-col gap-2">
+                                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">
+                                    {isRegistering ? 'CREAR CUENTA TRIAL' : 'INICIAR SESIÓN'}
+                                </h3>
+                                <div className="h-1 w-20 bg-indigo-600 rounded-full"></div>
                             </div>
 
-                            {/* Password - ENLARGED */}
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center ml-4 pr-4">
-                                    <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">Clave de Seguridad</label>
-                                </div>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-7 flex items-center pointer-events-none text-slate-500 group-focus-within:text-white transition-colors">
-                                        <Lock size={20} />
-                                    </div>
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="block w-full pl-16 pr-16 py-5 bg-white/5 border-2 border-white/10 rounded-[30px] text-white placeholder-slate-700 focus:outline-none focus:ring-8 focus:ring-indigo-500/10 focus:border-indigo-500/40 transition-all text-base font-bold shadow-2xl"
-                                        placeholder="••••••••••••"
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-7 flex items-center text-slate-600 hover:text-white transition-colors"
-                                    >
-                                        {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}
-                                    </button>
-                                </div>
+                            {/* Forms Toggle Area */}
+                            <div className="min-h-[400px]">
+                                {isRegistering ? (
+                                    /* REGISTER FORM */
+                                    <form onSubmit={handleRegister} className="space-y-6">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-indigo-400 uppercase tracking-widest ml-4">Nombre Completo</label>
+                                                <input
+                                                    type="text"
+                                                    value={regName}
+                                                    onChange={(e) => setRegName(e.target.value)}
+                                                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40"
+                                                    placeholder="Ej: Mauro Rossi"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-indigo-400 uppercase tracking-widest ml-4">Email Corporativo</label>
+                                                <input
+                                                    type="email"
+                                                    value={regEmail}
+                                                    onChange={(e) => setRegEmail(e.target.value)}
+                                                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40"
+                                                    placeholder="ej: mando@empresa.cl"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-indigo-400 uppercase tracking-widest ml-4">Nombre Empresa</label>
+                                                <input
+                                                    type="text"
+                                                    value={regCompanyName}
+                                                    onChange={(e) => setRegCompanyName(e.target.value)}
+                                                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40"
+                                                    placeholder="Nombre Fantasía"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-indigo-400 uppercase tracking-widest ml-4">RUT Empresa</label>
+                                                <input
+                                                    type="text"
+                                                    value={regRut}
+                                                    onChange={(e) => setRegRut(e.target.value)}
+                                                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40"
+                                                    placeholder="77.666.555-4"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-indigo-400 uppercase tracking-widest ml-4">Contraseña Maestra</label>
+                                            <div className="relative">
+                                                <input
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    value={regPassword}
+                                                    onChange={(e) => setRegPassword(e.target.value)}
+                                                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40"
+                                                    placeholder="••••••••"
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                                                >
+                                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-white hover:text-slate-950 transition-all flex items-center justify-center gap-3 shadow-xl shadow-indigo-500/20"
+                                        >
+                                            {loading ? <Loader2 className="animate-spin" size={20} /> : <>Activar Free Trial <UserPlus size={18} /></>}
+                                        </button>
+                                    </form>
+                                ) : (
+                                    /* LOGIN FORM */
+                                    <form onSubmit={handleLogin} className="space-y-8">
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-indigo-400 uppercase tracking-widest ml-4">Identificador Usuario</label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                                                <input
+                                                    type="email"
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                    className="w-full pl-16 pr-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40"
+                                                    placeholder="ej: mando@centralizat.cl"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center px-4">
+                                                <label className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Contraseña Acceso</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate('/forgot-password')}
+                                                    className="text-[8px] font-black text-slate-500 uppercase tracking-widest hover:text-indigo-400"
+                                                >
+                                                    ¿Olvidaste tu clave?
+                                                </button>
+                                            </div>
+                                            <div className="relative">
+                                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                                                <input
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                    className="w-full pl-16 pr-16 py-5 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/40"
+                                                    placeholder="••••••••"
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                                                >
+                                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="w-full bg-white text-slate-950 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.4em] hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-3 shadow-2xl"
+                                        >
+                                            {loading ? <Loader2 className="animate-spin" size={20} /> : <>Ingresar al Sistema <ArrowRight size={18} /></>}
+                                        </button>
+                                    </form>
+                                )}
                             </div>
 
-                            <div className="flex items-center justify-between ml-4 mr-4">
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-indigo-600 border-indigo-600' : 'border-slate-600 group-hover:border-slate-400'}`}>
-                                        {rememberMe && <FileCheck size={14} className="text-white" />}
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        className="hidden"
-                                        checked={rememberMe}
-                                        onChange={(e) => setRememberMe(e.target.checked)}
-                                    />
-                                    <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors ${rememberMe ? 'text-white' : 'text-slate-500 group-hover:text-slate-400'}`}>Recordarme</span>
-                                </label>
-
+                            {/* Toggler */}
+                            <div className="text-center pt-6">
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">
+                                    {isRegistering ? '¿Ya tienes una cuenta corporativa?' : '¿Quieres digitalizar tu operación?'}
+                                </p>
                                 <button
-                                    type="button"
-                                    onClick={() => navigate('/forgot-password')}
-                                    className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] hover:text-vibrant transition-colors border-b border-transparent hover:border-vibrant input-highlight"
+                                    onClick={() => setIsRegistering(!isRegistering)}
+                                    className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] hover:text-white transition-colors flex items-center gap-2 mx-auto decoration-indigo-600/30 decoration-2 underline-offset-8 underline"
                                 >
-                                    ¿Olvidaste tu contraseña?
+                                    {isRegistering ? 'VOLVER AL LOGIN' : 'PRUEBA NUESTRA VERSIÓN FREE TRIAL'}
+                                    {isRegistering ? <ArrowRight size={14} /> : <Zap size={14} />}
                                 </button>
                             </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-white text-slate-950 py-6 rounded-[30px] font-black text-[13px] uppercase tracking-[0.6em] hover:bg-gradient-to-r hover:from-white hover:to-indigo-50 hover:shadow-[0_40px_100px_-20px_rgba(99,102,241,0.5)] active:scale-95 transition-all flex items-center justify-center gap-5 h-[80px] shadow-2xl relative overflow-hidden group/btn"
-                            >
-                                {loading ? (
-                                    <Loader2 size={28} className="animate-spin text-indigo-600" />
-                                ) : (
-                                    <>
-                                        Validar Acceso
-                                        <ArrowRight size={22} className="transition-transform group-hover:translate-x-3 duration-500" />
-                                    </>
-                                )}
-                            </button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {/* Floating decoration */}
+            <div className="absolute top-20 right-20 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
         </div>
     );
 };

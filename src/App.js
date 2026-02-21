@@ -36,7 +36,7 @@ const ProtectedRoute = ({ children, allowedRoles, auth }) => {
         return <Navigate to="/login" replace />;
     }
     if (allowedRoles && !allowedRoles.includes(auth.role)) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/dashboard" replace />;
     }
     return children;
 };
@@ -47,6 +47,7 @@ function AppContent() {
     const [selectedCENTRALIZATApplicant, setSelectedCENTRALIZATApplicant] = useState(null);
     const location = useLocation();
 
+    // Check auth on mount
     useEffect(() => {
         const user = localStorage.getItem('centralizat_user') || sessionStorage.getItem('centralizat_user');
         if (user) {
@@ -68,25 +69,29 @@ function AppContent() {
 
     if (loading) return null;
 
-    return (
-        <div className="flex bg-slate-50 min-h-screen">
-            {auth && <Sidebar onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} setAuth={setAuth} onLogout={handleLogout} />}
+    // Sidebar should only show in dashboard routes
+    const isAppRoute = location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/forgot-password' && !location.pathname.startsWith('/resetpassword') && location.pathname !== '/remote-approval' && !location.pathname.startsWith('/test-psicolaboral');
 
-            <main className={`flex-1 ${auth ? 'ml-80' : ''} transition-all print:ml-0 print:p-0 overflow-hidden`}>
+    return (
+        <div className={`flex min-h-screen ${isAppRoute ? 'bg-slate-50' : 'bg-white'}`}>
+            {auth && isAppRoute && <Sidebar onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} setAuth={setAuth} onLogout={handleLogout} />}
+
+            <main className={`flex-1 ${auth && isAppRoute ? 'ml-80' : ''} transition-all print:ml-0 print:p-0 overflow-hidden`}>
                 <AnimatePresence mode="wait">
                     <Routes location={location} key={location.pathname}>
-                        <Route path="/login" element={!auth ? <LoginPage setAuth={setAuth} /> : <Navigate to="/" />} />
+                        {/* Public Routes */}
+                        <Route path="/" element={<LandingPage auth={auth} />} />
+                        <Route path="/login" element={!auth ? <LoginPage setAuth={setAuth} /> : <Navigate to="/dashboard" />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                         <Route path="/resetpassword/:resettoken" element={<ResetPasswordPage />} />
+                        <Route path="/remote-approval" element={<RemoteApproval />} />
+                        <Route path="/test-psicolaboral/:token" element={<PublicTestPortal />} />
 
-                        <Route path="/" element={
-                            auth ? (
-                                <ProtectedRoute auth={auth}>
-                                    <Dashboard onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
-                                </ProtectedRoute>
-                            ) : (
-                                <LandingPage />
-                            )
+                        {/* Protected App Routes */}
+                        <Route path="/dashboard" element={
+                            <ProtectedRoute auth={auth}>
+                                <Dashboard onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
                         } />
 
                         <Route path="/admin/command-center" element={
@@ -191,13 +196,11 @@ function AppContent() {
                             </ProtectedRoute>
                         } />
 
-                        <Route path="/remote-approval" element={<RemoteApproval />} />
-                        <Route path="/test-psicolaboral/:token" element={<PublicTestPortal />} />
                         <Route path="*" element={<div className="flex items-center justify-center h-full text-slate-400 font-black uppercase tracking-[0.2em]">404 | No se encontró el nodo</div>} />
                     </Routes>
                 </AnimatePresence>
             </main>
-            {auth && <ChatBubble auth={auth} />}
+            {auth && isAppRoute && <ChatBubble auth={auth} />}
             <Toaster position="top-right" />
 
             {selectedCENTRALIZATApplicant && (

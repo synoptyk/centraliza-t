@@ -51,6 +51,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
 
     // --- TOP LEVEL ITEMS ---
     const topLevelItems = [
+        { id: 'dashboard', name: 'Dashboard Principal', icon: LayoutDashboard, path: '/dashboard' },
         ...(auth?.role === 'Ceo_Centralizat' ? [{ id: 'admin-command', name: 'Centro de Mando CEO', icon: ShieldCheck, path: '/admin/command-center' }] : []),
         ...(auth?.role === 'Ceo_Centralizat' ? [{ id: 'comercial', name: 'Mando Comercial', icon: Trophy, path: '/comercial' }] : []),
     ];

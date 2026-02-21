@@ -9,15 +9,14 @@ import {
     ShieldCheck,
     Building2,
     ArrowRight,
-    Menu,
-    X,
     LayoutDashboard,
     Zap,
     Briefcase
 } from 'lucide-react';
 import api from '../utils/api';
+import Navbar from '../components/Navbar';
 
-const LandingPage = () => {
+const LandingPage = ({ auth }) => {
     const navigate = useNavigate();
     const [plans, setPlans] = useState([]);
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -84,36 +83,9 @@ const LandingPage = () => {
 
     return (
         <div className="bg-white min-h-screen font-sans selection:bg-indigo-100 selection:text-indigo-900">
-            {/* Navbar */}
-            <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                            <Rocket className="text-white" size={24} />
-                        </div>
-                        <span className="text-xl font-black text-slate-900 tracking-tighter">CENTRALIZA-T</span>
-                    </div>
+            <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} auth={auth} />
 
-                    {/* Desktop Menu */}
-                    <div className="hidden md:flex items-center gap-10">
-                        <a href="#features" className="text-xs font-bold text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">Funcionalidades</a>
-                        <a href="#pricing" className="text-xs font-bold text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">Planes</a>
-                        <a href="#nosotros" className="text-xs font-bold text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">Nosotros</a>
-                        <button
-                            onClick={() => navigate('/login')}
-                            className="bg-slate-900 text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg hover:shadow-indigo-200"
-                        >
-                            Acceso Clientes
-                        </button>
-                    </div>
-
-                    <button className="md:hidden text-slate-900" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-            </nav>
-
-            {/* Mobile Menu */}
+            {/* Mobile Menu Overlay */}
             <AnimatePresence>
                 {isMenuOpen && (
                     <motion.div
@@ -127,10 +99,10 @@ const LandingPage = () => {
                             <a href="#pricing" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-900 uppercase tracking-widest">Planes</a>
                             <a href="#nosotros" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-900 uppercase tracking-widest">Nosotros</a>
                             <button
-                                onClick={() => navigate('/login')}
+                                onClick={() => navigate(auth ? '/dashboard' : '/login')}
                                 className="bg-indigo-600 text-white w-full py-4 rounded-2xl text-sm font-bold uppercase tracking-widest"
                             >
-                                Acceso Clientes
+                                {auth ? 'Ir al Panel' : 'Acceso Clientes'}
                             </button>
                         </div>
                     </motion.div>
