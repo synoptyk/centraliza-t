@@ -1,26 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    ChevronRight,
-    CheckCircle2,
-    Users,
-    Rocket,
-    ShieldCheck,
-    Building2,
-    ArrowRight,
-    LayoutDashboard,
-    Zap,
-    Briefcase
-} from 'lucide-react';
+import { ChevronRight, ArrowRight, Zap, Play, CheckCircle2, Building2, LayoutDashboard, Database, ShieldCheck, Mail, Send, Users, Rocket, Briefcase } from 'lucide-react';
 import api from '../utils/api';
 import Navbar from '../components/Navbar';
+import ContactExecutiveModal from '../components/ContactExecutiveModal';
 
 const LandingPage = ({ auth }) => {
     const navigate = useNavigate();
-    const [plans, setPlans] = useState([]);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [plans, setPlans] = useState([]);
 
     const slides = [
         {
@@ -142,10 +133,10 @@ const LandingPage = ({ auth }) => {
                                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button
-                                onClick={() => window.location.href = 'mailto:centraliza-t@synoptyk.cl?subject=Solicitud de Demo - Centraliza-t&body=Hola, me gustaría solicitar una demostración personalizada del ecosistema Centraliza-t.'}
+                                onClick={() => setIsContactModalOpen(true)}
                                 className="bg-white border-2 border-slate-100 text-slate-900 px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:border-indigo-600 transition-all flex items-center justify-center gap-3"
                             >
-                                Solicitar Demo
+                                Contactar Ejecutivo
                             </button>
                         </div>
                     </motion.div>
@@ -318,6 +309,11 @@ const LandingPage = ({ auth }) => {
                     </div>
                 </div>
             </footer>
+
+            <ContactExecutiveModal
+                isOpen={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
+            />
         </div>
     );
 };
