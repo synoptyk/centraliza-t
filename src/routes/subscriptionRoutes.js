@@ -22,7 +22,7 @@ console.log('--- SUBSCRIPTION ROUTES LOADED ---');
 // Public / Authenticated Routes
 router.get('/v2-ping', (req, res) => res.json({ status: 'OK', version: '2.0', subscriptions_active: true }));
 router.get('/test', (req, res) => res.json({ message: 'Rutas de suscripción activas' }));
-router.get('/plans', protect, getActivePlans);
+router.get('/plans', getActivePlans);
 router.get('/my-subscription', protect, getMySubscription);
 router.post('/checkout', protect, createCheckoutSession);
 
