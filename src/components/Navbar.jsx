@@ -73,13 +73,13 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
                                         <p className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.3em] mb-4">{cat.category}</p>
                                         <div className="space-y-4">
                                             {cat.items.map((item, j) => (
-                                                <a href="/#modulos" key={j} className="flex items-start gap-4 group/item cursor-pointer">
-                                                    <div className={`p-2 rounded-xl transition-colors ${light ? 'bg-slate-50 group-hover/item:bg-indigo-50 text-slate-400 group-hover/item:text-indigo-600' : 'bg-white/5 group-hover/item:bg-indigo-500/10 text-slate-500 group-hover/item:text-indigo-400'}`}>
-                                                        <item.icon size={16} />
+                                                <a href="/#modulos" key={j} className="flex items-start gap-4 group/item cursor-pointer p-3 rounded-2xl transition-all hover:bg-white/5 hover:translate-x-1">
+                                                    <div className={`p-2.5 rounded-xl transition-all duration-300 ${light ? 'bg-slate-50 group-hover/item:bg-indigo-50 text-slate-400 group-hover/item:text-indigo-600' : 'bg-white/5 group-hover/item:bg-indigo-600 group-hover/item:text-white group-hover/item:shadow-lg group-hover/item:shadow-indigo-600/20 text-slate-500'}`}>
+                                                        <item.icon size={18} />
                                                     </div>
-                                                    <div>
+                                                    <div className="pt-1">
                                                         <p className={`text-[10px] font-black uppercase tracking-tight mb-1 transition-colors ${light ? 'text-slate-900 group-hover/item:text-indigo-600' : 'text-white group-hover/item:text-indigo-400'}`}>{item.name}</p>
-                                                        <p className="text-[9px] font-medium text-slate-400 leading-tight">{item.desc}</p>
+                                                        <p className="text-[9px] font-medium text-slate-500 leading-tight group-hover/item:text-slate-300 transition-colors">{item.desc}</p>
                                                     </div>
                                                 </a>
                                             ))}

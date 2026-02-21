@@ -310,14 +310,14 @@ const LandingPage = ({ auth }) => {
                         {features.map((f, i) => (
                             <motion.div
                                 key={i}
-                                whileHover={{ y: -10 }}
-                                className="bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-sm hover:shadow-indigo-500/10 transition-all group"
+                                whileHover={{ y: -10, scale: 1.02 }}
+                                className="bg-white/5 backdrop-blur-xl p-10 rounded-[3rem] border border-white/10 shadow-xl hover:shadow-indigo-500/10 transition-all group"
                             >
-                                <div className="w-16 h-16 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-500">
+                                <div className="w-16 h-16 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-600/40 transition-all duration-500">
                                     <f.icon size={30} />
                                 </div>
-                                <h3 className="text-xl font-black text-white mb-4">{f.title}</h3>
-                                <p className="text-slate-400 leading-relaxed text-sm">{f.desc}</p>
+                                <h3 className="text-xl font-black text-white mb-4 italic uppercase tracking-tight">{f.title}</h3>
+                                <p className="text-slate-400 leading-relaxed text-sm font-medium">{f.desc}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -345,11 +345,11 @@ const LandingPage = ({ auth }) => {
                                         <motion.div
                                             key={j}
                                             whileHover={{ y: -12, scale: 1.02 }}
-                                            className="bg-white/5 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-white/5 hover:border-indigo-500/40 transition-all duration-500 group relative overflow-hidden"
+                                            className="bg-indigo-600/5 backdrop-blur-3xl p-10 rounded-[3rem] border border-white/5 hover:border-indigo-500/40 transition-all duration-500 group relative overflow-hidden"
                                         >
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-600/10 transition-colors"></div>
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-600/20 transition-colors"></div>
 
-                                            <div className="w-16 h-16 bg-slate-900 border border-white/10 rounded-2xl flex items-center justify-center mb-8 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-xl group-hover:shadow-indigo-600/20 transition-all duration-500">
+                                            <div className="w-16 h-16 bg-slate-900 border border-white/10 rounded-2xl flex items-center justify-center mb-8 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-xl group-hover:shadow-indigo-600/40 transition-all duration-500">
                                                 <m.icon size={28} />
                                             </div>
 
@@ -385,7 +385,7 @@ const LandingPage = ({ auth }) => {
                         {plans.map((plan, i) => (
                             <div
                                 key={i}
-                                className={`relative bg-slate-950/80 backdrop-blur-xl rounded-[3rem] p-12 border-2 transition-all hover:scale-[1.02] duration-500 ${plan.isTrial ? 'border-amber-400/50 shadow-2xl shadow-amber-400/10' : 'border-white/10'}`}
+                                className={`relative bg-slate-900/90 backdrop-blur-xl rounded-[3.5rem] p-12 border-2 transition-all hover:scale-[1.02] duration-500 ${plan.isTrial ? 'border-amber-400/50 shadow-2xl shadow-amber-400/20' : 'border-white/10'}`}
                             >
                                 {plan.isTrial && (
                                     <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-600/30">
