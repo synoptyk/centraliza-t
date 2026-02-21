@@ -6,7 +6,7 @@ const sendEmail = require('../utils/sendEmail');
 // @desc    Register a new user (SuperAdmin or Admin_Empresa)
 // @route   POST /api/users
 const registerUser = asyncHandler(async (req, res) => {
-    let { name, email, password, role, companyId, rut, position, cellphone, permissions } = req.body;
+    let { name, email, password, role, companyId, rut, position, cellphone, permissions, country } = req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -43,7 +43,8 @@ const registerUser = asyncHandler(async (req, res) => {
             rut,
             position,
             cellphone,
-            permissions: permissions || []
+            permissions: permissions || [],
+            country: country || 'CL'
         });
     } catch (dbError) {
         console.error('--- REGISTRATION DB ERROR:', dbError.message);
@@ -142,7 +143,11 @@ const updateUser = asyncHandler(async (req, res) => {
             user.role = req.body.role || user.role;
             user.permissions = req.body.permissions || user.permissions;
             user.companyId = req.body.companyId === null ? null : (req.body.companyId || user.companyId);
-            user.photo = req.body.photo || user.photo; // Kept this line as it was not explicitly removed by the instruction
+            user.photo = req.body.photo || user.photo;
+            user.country = req.body.country || user.country;
+            if (req.body.status) {
+                user.status = req.body.status;
+            }
 
             if (req.body.password) {
                 console.log(`--- [DEBUG] Updating Password for User: ${user.email} ---`);

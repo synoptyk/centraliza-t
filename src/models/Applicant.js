@@ -6,6 +6,7 @@ const applicantSchema = new mongoose.Schema({
     email: { type: String, required: true },
     phone: { type: String, required: true },
     rut: { type: String, required: true, unique: true },
+    country: { type: String, default: 'CL' },
     address: { type: String },
 
     // Project Info

@@ -17,7 +17,7 @@ const findScopedApplicant = async (id, user) => {
 // @desc    Register a new applicant (Module 2)
 // @route   POST /api/applicants
 const registerApplicant = asyncHandler(async (req, res) => {
-    const { rut } = req.body;
+    const { rut, country } = req.body;
 
     const applicantExists = await Applicant.findOne({ rut });
 

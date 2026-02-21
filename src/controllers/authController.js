@@ -30,6 +30,11 @@ const authUser = asyncHandler(async (req, res) => {
         throw new Error('Contraseña incorrecta');
     }
 
+    if (user.status !== 'Active' && user.role !== 'Ceo_Centralizat') {
+        res.status(401);
+        throw new Error('Su cuenta está pendiente de activación o ha sido suspendida. Por favor, contacte al administrador.');
+    }
+
     res.json({
         _id: user._id,
         name: user.name,
@@ -37,6 +42,7 @@ const authUser = asyncHandler(async (req, res) => {
         role: user.role,
         company: user.companyId,
         permissions: user.permissions,
+        country: user.country,
         token: generateToken(user._id)
     });
 });

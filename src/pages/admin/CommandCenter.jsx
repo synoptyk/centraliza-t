@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Building2, Users, ShieldCheck, CheckSquare, Square, Pencil, Trash2, LayoutGrid, List, Download, Upload, FileSpreadsheet, AlertCircle, TrendingUp, DollarSign, Activity, Zap, X as CloseIcon, Eye, EyeOff, RefreshCw, Key } from 'lucide-react';
+import { Plus, Building2, Users, ShieldCheck, CheckSquare, Square, Pencil, Trash2, LayoutGrid, List, Download, Upload, FileSpreadsheet, AlertCircle, TrendingUp, DollarSign, Activity, Zap, X as CloseIcon, Eye, EyeOff, RefreshCw, Key, Globe } from 'lucide-react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import PageWrapper from '../../components/PageWrapper';
@@ -8,6 +8,8 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     AreaChart, Area, PieChart, Pie, Cell
 } from 'recharts';
+import { COUNTRIES, validateTaxId } from '../../utils/intlUtils';
+import InternationalInput from '../../components/InternationalInput';
 
 const MODULES_LIST = [
     { id: 'dashboard', name: 'Panel de Control' },
@@ -49,6 +51,7 @@ const CommandCenter = ({ auth, onLogout }) => {
     const [companyForm, setCompanyForm] = useState({
         name: '', rut: '', address: '', phone: '', email: '', web: '', industry: '',
         businessLine: '',
+        country: 'CL',
         legalRepresentatives: [], // Array of { rut, name, email, phone }
         commercialContacts: [],   // Array of { name, phone, email }
         contractStartDate: '', contractDurationMonths: '', contractEndDate: '',
@@ -72,7 +75,8 @@ const CommandCenter = ({ auth, onLogout }) => {
     // User Form
     const [userForm, setUserForm] = useState({
         name: '', email: '', role: 'Usuario_Centralizat', password: '',
-        rut: '', position: '', cellphone: '', companyId: '', permissions: []
+        rut: '', position: '', cellphone: '', companyId: '', permissions: [],
+        country: 'CL'
     });
 
     // Fetch data on mount
@@ -121,6 +125,11 @@ const CommandCenter = ({ auth, onLogout }) => {
 
     const handleSubmitCompany = async (e) => {
         e.preventDefault();
+
+        if (!validateTaxId(companyForm.rut, companyForm.country)) {
+            const countryData = COUNTRIES.find(c => c.code === companyForm.country);
+            return toast.error(`${countryData.taxIdName} de Empresa inválido`);
+        }
         try {
             if (editingCompany) {
                 await api.put(`/companies/${editingCompany._id}`, companyForm);
@@ -188,6 +197,11 @@ const CommandCenter = ({ auth, onLogout }) => {
 
     const handleSubmitUser = async (e) => {
         e.preventDefault();
+
+        if (userForm.rut && !validateTaxId(userForm.rut, userForm.country)) {
+            const countryData = COUNTRIES.find(c => c.code === userForm.country);
+            return toast.error(`${countryData.taxIdName} de Usuario inválido`);
+        }
         try {
             // Validation: External users MUST have a companyId
             if ((userForm.role === 'Usuario_Empresa' || userForm.role === 'Admin_Empresa') && !userForm.companyId) {
@@ -800,12 +814,28 @@ const CommandCenter = ({ auth, onLogout }) => {
                                     <h3 className="text-xs font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Información Corporativa</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="space-y-1">
+                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">País</label>
+                                            <InternationalInput
+                                                selectedCountry={companyForm.country}
+                                                onCountryChange={(code) => setCompanyForm({ ...companyForm, country: code })}
+                                                value={COUNTRIES.find(c => c.code === companyForm.country).name}
+                                                icon={Globe}
+                                                onChange={() => { }}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
                                             <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Razón Social / Nombre</label>
                                             <input type="text" required value={companyForm.name} onChange={e => setCompanyForm({ ...companyForm, name: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">RUT Empresa</label>
-                                            <input type="text" required value={companyForm.rut} onChange={e => setCompanyForm({ ...companyForm, rut: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                            <InternationalInput
+                                                label={COUNTRIES.find(c => c.code === companyForm.country).taxIdName}
+                                                name="rut"
+                                                value={companyForm.rut}
+                                                onChange={e => setCompanyForm({ ...companyForm, rut: e.target.value })}
+                                                selectedCountry={companyForm.country}
+                                                icon={Building2}
+                                            />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Giro Comercial</label>
@@ -824,8 +854,15 @@ const CommandCenter = ({ auth, onLogout }) => {
                                             <input type="email" value={companyForm.email} onChange={e => setCompanyForm({ ...companyForm, email: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Teléfono</label>
-                                            <input type="text" value={companyForm.phone} onChange={e => setCompanyForm({ ...companyForm, phone: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                            <InternationalInput
+                                                label="Teléfono"
+                                                name="phone"
+                                                value={companyForm.phone}
+                                                onChange={e => setCompanyForm({ ...companyForm, phone: e.target.value })}
+                                                selectedCountry={companyForm.country}
+                                                isPhone={true}
+                                                onCountryChange={(code) => setCompanyForm({ ...companyForm, country: code })}
+                                            />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Industria</label>
@@ -1076,13 +1113,32 @@ const CommandCenter = ({ auth, onLogout }) => {
                                                 <input type="text" required value={userForm.name} onChange={e => setUserForm({ ...userForm, name: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">RUT</label>
-                                                <input type="text" value={userForm.rut} onChange={e => setUserForm({ ...userForm, rut: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
+                                                <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">País</label>
+                                                <InternationalInput
+                                                    selectedCountry={userForm.country}
+                                                    onCountryChange={(code) => setUserForm({ ...userForm, country: code })}
+                                                    value={COUNTRIES.find(c => c.code === userForm.country).name}
+                                                    icon={Globe}
+                                                    onChange={() => { }}
+                                                />
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Celular</label>
-                                                <input type="text" value={userForm.cellphone} onChange={e => setUserForm({ ...userForm, cellphone: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />
-                                            </div>
+                                            <InternationalInput
+                                                label={COUNTRIES.find(c => c.code === userForm.country).taxIdName}
+                                                name="rut"
+                                                value={userForm.rut}
+                                                onChange={e => setUserForm({ ...userForm, rut: e.target.value })}
+                                                selectedCountry={userForm.country}
+                                                icon={User}
+                                            />
+                                            <InternationalInput
+                                                label="Celular"
+                                                name="cellphone"
+                                                value={userForm.cellphone}
+                                                onChange={e => setUserForm({ ...userForm, cellphone: e.target.value })}
+                                                selectedCountry={userForm.country}
+                                                isPhone={true}
+                                                onCountryChange={(code) => setUserForm({ ...userForm, country: code })}
+                                            />
                                             <div className="col-span-2 space-y-2">
                                                 <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Email Corporativo</label>
                                                 <input type="email" required value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none" />

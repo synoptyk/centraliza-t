@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+import { COUNTRIES, validateTaxId } from '../utils/intlUtils';
+import InternationalInput from '../components/InternationalInput';
 import PageWrapper from '../components/PageWrapper';
 import usePermissions from '../hooks/usePermissions';
 
@@ -25,6 +27,7 @@ const ApplicantEntry = ({ auth, onLogout }) => {
         email: '',
         phone: '',
         rut: '',
+        country: auth.user.country || 'CL',
         address: '',
         projectId: '',
         position: '',
@@ -360,13 +363,32 @@ const ApplicantEntry = ({ auth, onLogout }) => {
                                         <input type="text" className="w-full px-6 py-4 bg-slate-50 border-0 rounded-2xl font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="EJ: JUAN PÉREZ" value={applicant.fullName} onChange={(e) => setApplicant({ ...applicant, fullName: e.target.value })} />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">RUT</label>
-                                        <input type="text" className="w-full px-6 py-4 bg-slate-50 border-0 rounded-2xl font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="12.345.678-9" value={applicant.rut} onChange={(e) => setApplicant({ ...applicant, rut: e.target.value })} />
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">País de Residencia</label>
+                                        <InternationalInput
+                                            selectedCountry={applicant.country}
+                                            onCountryChange={(code) => setApplicant({ ...applicant, country: code })}
+                                            value={COUNTRIES.find(c => c.code === applicant.country).name}
+                                            icon={Globe}
+                                            onChange={() => { }}
+                                        />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Teléfono</label>
-                                        <input type="text" className="w-full px-6 py-4 bg-slate-50 border-0 rounded-2xl font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="+56 9..." value={applicant.phone} onChange={(e) => setApplicant({ ...applicant, phone: e.target.value })} />
-                                    </div>
+                                    <InternationalInput
+                                        label={COUNTRIES.find(c => c.code === applicant.country).taxIdName}
+                                        name="rut"
+                                        value={applicant.rut}
+                                        onChange={(e) => setApplicant({ ...applicant, rut: e.target.value })}
+                                        selectedCountry={applicant.country}
+                                        icon={User}
+                                    />
+                                    <InternationalInput
+                                        label="Teléfono"
+                                        name="phone"
+                                        value={applicant.phone}
+                                        onChange={(e) => setApplicant({ ...applicant, phone: e.target.value })}
+                                        selectedCountry={applicant.country}
+                                        isPhone={true}
+                                        onCountryChange={(code) => setApplicant({ ...applicant, country: code })}
+                                    />
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Email</label>
                                         <input type="email" className="w-full px-6 py-4 bg-slate-50 border-0 rounded-2xl font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="juan@ejemplo.com" value={applicant.email} onChange={(e) => setApplicant({ ...applicant, email: e.target.value })} />
@@ -541,7 +563,7 @@ const ApplicantEntry = ({ auth, onLogout }) => {
                                 <div className="grid grid-cols-1 space-y-[-1px] text-[11px]">
                                     {[
                                         { label: 'Nombre Completo', value: applicant.fullName },
-                                        { label: 'Rut:', value: applicant.rut },
+                                        { label: (COUNTRIES.find(c => c.code === applicant.country)?.taxIdName || 'ID') + ':', value: applicant.rut },
                                         { label: 'Teléfono Directo:', value: applicant.phone },
                                         { label: 'Email:', value: applicant.email },
                                         { label: 'Dirección:', value: applicant.address }

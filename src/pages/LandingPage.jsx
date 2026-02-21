@@ -250,7 +250,7 @@ const LandingPage = ({ auth }) => {
                                 </div>
 
                                 <button
-                                    onClick={() => navigate('/login')}
+                                    onClick={() => navigate(`/register?plan=${plan._id}`)}
                                     className={`w-full py-5 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${plan.isTrial ? 'bg-indigo-600 text-white hover:bg-white hover:text-indigo-600 shadow-xl shadow-indigo-500/20' : 'bg-white text-slate-950 hover:bg-indigo-600 hover:text-white'}`}
                                 >
                                     Contratar Ahora

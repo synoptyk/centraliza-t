@@ -10,7 +10,8 @@ const companySchema = new mongoose.Schema({
     industry: String,
     legalRepresentative: String, // Kept for backward compatibility or as main name
     logo: String,
-    status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
+    status: { type: String, enum: ['Pending', 'Active', 'Blocked', 'Suspended'], default: 'Pending' },
+    country: { type: String, default: 'CL' },
 
     // --- New Fields ---
     businessLine: String, // Giro Comercial

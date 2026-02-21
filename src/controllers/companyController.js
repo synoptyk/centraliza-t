@@ -104,6 +104,8 @@ const updateCompany = asyncHandler(async (req, res) => {
         if (req.body.contractedUsersLimit !== undefined) company.contractedUsersLimit = req.body.contractedUsersLimit;
         if (req.body.userValueUF !== undefined) company.userValueUF = req.body.userValueUF;
         if (req.body.monthlyTotalUF !== undefined) company.monthlyTotalUF = req.body.monthlyTotalUF;
+        if (req.body.status) company.status = req.body.status;
+        if (req.body.country) company.country = req.body.country;
 
         company.legalRepresentative = req.body.legalRepresentative || company.legalRepresentative; // Legacy
 

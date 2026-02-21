@@ -17,6 +17,7 @@ import Contenedor from './pages/Contenedor';
 import Settings from './pages/Settings';
 import DashboardEmpresa from './pages/DashboardEmpresa';
 import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ChatBubble from './components/ChatBubble';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
@@ -70,7 +71,7 @@ function AppContent() {
     if (loading) return null;
 
     // Sidebar should only show in dashboard routes
-    const isAppRoute = location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/forgot-password' && !location.pathname.startsWith('/resetpassword') && location.pathname !== '/remote-approval' && !location.pathname.startsWith('/test-psicolaboral');
+    const isAppRoute = location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/forgot-password' && !location.pathname.startsWith('/resetpassword') && location.pathname !== '/remote-approval' && !location.pathname.startsWith('/test-psicolaboral');
 
     return (
         <div className={`flex min-h-screen ${isAppRoute ? 'bg-slate-50' : 'bg-white'}`}>
@@ -82,6 +83,7 @@ function AppContent() {
                         {/* Public Routes */}
                         <Route path="/" element={<LandingPage auth={auth} />} />
                         <Route path="/login" element={!auth ? <LoginPage setAuth={setAuth} /> : <Navigate to="/dashboard" />} />
+                        <Route path="/register" element={!auth ? <RegisterPage /> : <Navigate to="/dashboard" />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                         <Route path="/resetpassword/:resettoken" element={<ResetPasswordPage />} />
                         <Route path="/remote-approval" element={<RemoteApproval />} />

@@ -26,6 +26,8 @@ const CommercialAdmin = () => {
     const [plans, setPlans] = useState([]);
     const [promos, setPromos] = useState([]);
     const [allSubscriptions, setAllSubscriptions] = useState([]);
+    const [companies, setCompanies] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalRevenueUF: 0,
@@ -65,16 +67,20 @@ const CommercialAdmin = () => {
     const fetchAllData = async () => {
         try {
             setLoading(true);
-            const [plansRes, promosRes, statsRes, allSubsRes] = await Promise.all([
+            const [plansRes, promosRes, statsRes, allSubsRes, companiesRes, usersRes] = await Promise.all([
                 api.get('/subscriptions/plans'),
                 api.get('/subscriptions/promos'),
                 api.get('/subscriptions/stats'),
-                api.get('/subscriptions/all')
+                api.get('/subscriptions/all'),
+                api.get('/companies'),
+                api.get('/users')
             ]);
             setPlans(plansRes.data);
             setPromos(promosRes.data);
             setStats(statsRes.data);
             setAllSubscriptions(allSubsRes.data);
+            setCompanies(companiesRes.data);
+            setUsers(usersRes.data);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching commercial data:', error);
@@ -173,6 +179,26 @@ const CommercialAdmin = () => {
         }
     };
 
+    const handleUpdateCompanyStatus = async (companyId, newStatus) => {
+        try {
+            await api.put(`/companies/${companyId}`, { status: newStatus });
+            toast.success(`Empresa actualizada a: ${newStatus}`);
+            fetchAllData();
+        } catch (error) {
+            toast.error('Error al actualizar empresa');
+        }
+    };
+
+    const handleUpdateUserStatus = async (userId, newStatus) => {
+        try {
+            await api.put(`/users/${userId}`, { status: newStatus });
+            toast.success(`Usuario actualizado a: ${newStatus}`);
+            fetchAllData();
+        } catch (error) {
+            toast.error('Error al actualizar usuario');
+        }
+    };
+
     const handleNotifyPayment = async (subId) => {
         try {
             toast.loading('Enviando notificación...', { id: 'notify' });
@@ -233,11 +259,156 @@ const CommercialAdmin = () => {
                 <StatCard title="Tasa de Conversión" value={stats.conversionRate || '0%'} icon={TrendingUp} trend="Directo" color="from-fuchsia-500 to-pink-500" />
             </div>
 
-            {/* GESTIÓN DE EMPRESAS TABLE */}
+            {/* SECCIÓN DE GESTIÓN DE EMPRESAS (NUEVA SOLICITUD DE ALTA) */}
             <div className="bg-white border border-slate-200/60 rounded-[2.5rem] overflow-hidden shadow-sm">
                 <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white">
                     <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
-                        <Activity className="text-indigo-600" size={24} /> Gestión de Ecosistema
+                        <Building2 className="text-indigo-600" size={24} /> Empresas & Solicitudes
+                    </h2>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{companies.length} Entidades en el Sistema</span>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50/50">
+                                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Empresa / RUT</th>
+                                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Contacto</th>
+                                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado Aprobación</th>
+                                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Acciones de Control</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {companies.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="p-20 text-center text-slate-400 font-bold uppercase text-xs">No hay empresas registradas.</td>
+                                </tr>
+                            ) : (
+                                companies.map((company) => (
+                                    <tr key={company._id} className="hover:bg-slate-50/50 transition-all group">
+                                        <td className="p-6">
+                                            <p className="text-slate-900 font-black text-xs uppercase tracking-wider">{company.name}</p>
+                                            <p className="text-slate-400 text-[9px] font-bold">{company.rut}</p>
+                                        </td>
+                                        <td className="p-6">
+                                            <p className="text-slate-600 font-bold text-xs">{company.email}</p>
+                                            <p className="text-slate-400 text-[9px]">{company.phone}</p>
+                                        </td>
+                                        <td className="p-6">
+                                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${company.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                                    company.status === 'Pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                                        'bg-red-50 text-red-600 border-red-100'
+                                                }`}>
+                                                {company.status === 'Active' ? 'Aprobada' :
+                                                    company.status === 'Pending' ? 'Pendiente' :
+                                                        company.status === 'Blocked' ? 'Bloqueada' : 'Suspendida'}
+                                            </span>
+                                        </td>
+                                        <td className="p-6">
+                                            <div className="flex items-center justify-center gap-3">
+                                                {company.status !== 'Active' && (
+                                                    <button
+                                                        onClick={() => handleUpdateCompanyStatus(company._id, 'Active')}
+                                                        className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
+                                                    >
+                                                        Dar de Alta
+                                                    </button>
+                                                )}
+                                                {company.status !== 'Blocked' && (
+                                                    <button
+                                                        onClick={() => handleUpdateCompanyStatus(company._id, 'Blocked')}
+                                                        className="px-4 py-2 rounded-xl bg-red-50 text-red-600 border border-red-100 text-[9px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all"
+                                                    >
+                                                        Bloquear
+                                                    </button>
+                                                )}
+                                                {company.status !== 'Suspended' && (
+                                                    <button
+                                                        onClick={() => handleUpdateCompanyStatus(company._id, 'Suspended')}
+                                                        className="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-[9px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                                                    >
+                                                        Suspender
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* SECCIÓN DE GESTIÓN DE USUARIOS ADMINISTRADORES */}
+            <div className="bg-white border border-slate-200/60 rounded-[2.5rem] overflow-hidden shadow-sm">
+                <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white">
+                    <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
+                        <ShieldCheck className="text-indigo-600" size={24} /> Usuarios & Roles Críticos
+                    </h2>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{users.length} Usuarios Totales</span>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50/50">
+                                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Usuario / RUT</th>
+                                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Rol / Empresa</th>
+                                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado</th>
+                                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {users.filter(u => u.role !== 'Ceo_Centralizat').length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="p-20 text-center text-slate-400 font-bold uppercase text-xs">No hay usuarios para gestionar.</td>
+                                </tr>
+                            ) : (
+                                users.filter(u => u.role !== 'Ceo_Centralizat').map((user) => (
+                                    <tr key={user._id} className="hover:bg-slate-50/50 transition-all group">
+                                        <td className="p-6">
+                                            <p className="text-slate-900 font-black text-xs uppercase tracking-wider">{user.name}</p>
+                                            <p className="text-slate-400 text-[9px] font-bold">{user.email}</p>
+                                        </td>
+                                        <td className="p-6">
+                                            <p className="text-indigo-600 font-black text-[9px] uppercase tracking-widest mb-1">{user.role}</p>
+                                            <p className="text-slate-500 text-[10px] font-bold">{user.companyId?.name || 'Sistema central'}</p>
+                                        </td>
+                                        <td className="p-6">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'Active' ? 'bg-emerald-500' : user.status === 'Pending' ? 'bg-amber-500' : 'bg-red-500'}`}></div>
+                                                <span className={`text-[9px] font-black uppercase tracking-widest ${user.status === 'Active' ? 'text-emerald-600' : user.status === 'Pending' ? 'text-amber-600' : 'text-red-600'}`}>
+                                                    {user.status === 'Active' ? 'Activo' : user.status === 'Pending' ? 'Pendiente' : 'Inhabilitado'}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="p-6">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => handleUpdateUserStatus(user._id, user.status === 'Active' ? 'Suspended' : 'Active')}
+                                                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${user.status === 'Active'
+                                                            ? 'bg-red-50 text-red-600 border border-red-100'
+                                                            : 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
+                                                        }`}
+                                                >
+                                                    {user.status === 'Active' ? 'Inhabilitar' : 'Activar / Alta'}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* SECCIÓN DE SUSCRIPCIONES (EXISTENTE PERO RENOMBRADA) */}
+            <div className="bg-white border border-slate-200/60 rounded-[2.5rem] overflow-hidden shadow-sm">
+                <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white">
+                    <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
+                        <Activity className="text-indigo-600" size={24} /> Estado de Suscripciones
                     </h2>
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{allSubscriptions.length} Empresas Registradas</span>
                 </div>

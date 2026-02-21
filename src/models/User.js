@@ -38,7 +38,12 @@ const userSchema = new mongoose.Schema({
             delete: { type: Boolean, default: false }
         }
     }],
-    isActive: { type: Boolean, default: true },
+    status: {
+        type: String,
+        enum: ['Pending', 'Active', 'Blocked', 'Suspended'],
+        default: 'Pending'
+    },
+    country: { type: String, default: 'CL' },
     resetPasswordToken: String,
     resetPasswordExpire: Date
 }, { timestamps: true });
