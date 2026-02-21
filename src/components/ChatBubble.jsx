@@ -4,8 +4,12 @@ import io from 'socket.io-client';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
-// Initialize Socket outside component to prevent multiple connections
-const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5005');
+// Initialize Socket with reconnection limits to avoid console spam
+const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5005', {
+    reconnectionAttempts: 5,
+    reconnectionDelay: 5000,
+    timeout: 10000
+});
 
 const ChatBubble = ({ auth }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -26,8 +30,15 @@ const ChatBubble = ({ auth }) => {
     useEffect(() => {
         if (!auth) return;
 
-        socket.on('connect', () => setIsConnected(true));
+        socket.on('connect', () => {
+            setIsConnected(true);
+        });
         socket.on('disconnect', () => setIsConnected(false));
+        socket.on('connect_error', () => {
+            setIsConnected(false);
+            // Quiet warning instead of browser spam
+            console.warn('Socket.io: Servidor de chat no disponible.');
+        });
 
         // Join both rooms if they exist
         if (internalRoom) socket.emit('join_room', internalRoom);

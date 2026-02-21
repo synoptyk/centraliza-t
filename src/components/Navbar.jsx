@@ -10,29 +10,29 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
         {
             category: "Flujo de Talento",
             items: [
-                { name: "Gestión de Proyectos", desc: "Administración central de vacantes", icon: ClipboardList },
-                { name: "Captura de Talento", desc: "Seguimiento integral de postulantes", icon: UserPlus },
-                { name: "Entrevistas Filtro", desc: "Coordinación de evaluaciones", icon: Calendar },
-                { name: "Evaluación Técnica", desc: "Medición de competencias", icon: BrainCircuit },
-                { name: "Seguridad & Prevención", desc: "Cumplimiento normativo", icon: ShieldCheck },
-                { name: "Gestión Documental", desc: "Expedientes digitales", icon: FileText },
-                { name: "Maestro de Personal", desc: "Vista 360 laboral", icon: Users },
+                { name: "Gestión de Proyectos", desc: "No pierdas tiempo gestionando vacantes. Nosotros hacemos lo difícil, tú lideras el equipo.", icon: ClipboardList },
+                { name: "Captura de Talento", desc: "Registro integral sin burocracia. Democratizamos el acceso al mejor talento de la región.", icon: UserPlus },
+                { name: "Entrevistas Filtro", desc: "Filtros reales, no manuales. Coordinación inteligente para decisiones rápidas.", icon: Calendar },
+                { name: "Evaluación Técnica", desc: "Mide lo que importa. Olvida las certificaciones de papel, evalúa competencias reales.", icon: BrainCircuit },
+                { name: "Seguridad & Prevención", desc: "Blindaje total. Cumplimiento normativo automático mientras tú te enfocas en crecer.", icon: ShieldCheck },
+                { name: "Gestión Documental", desc: "Cero papeles, cero enredos. Expedientes digitales validados al instante.", icon: FileText },
+                { name: "Maestro de Personal", desc: "Vista 360 de tu equipo. El control que mereces sin la complejidad de siempre.", icon: Users },
             ]
         },
         {
             category: "Control & Gestión",
             items: [
-                { name: "Aprobación de Contrato", desc: "Flujo digital de contratación", icon: FileCheck },
-                { name: "Dashboard Empresa", desc: "Analítica en tiempo real", icon: Activity },
-                { name: "Capital Humano 360", desc: "Monitorización de desempeño", icon: Users },
-                { name: "Contenedor", desc: "Portal para clientes finales", icon: Folder },
+                { name: "Aprobación de Contrato", desc: "Digitalización real. Valida y contrata en segundos, no en días.", icon: FileCheck },
+                { name: "Dashboard Empresa", desc: "Analítica para ejecutivos, no para académicos. KPIs claros para resultados directos.", icon: Activity },
+                { name: "Capital Humano 360", desc: "Monitoreo integral. Porque gestionar personas no debería ser una carrera universitaria.", icon: Users },
+                { name: "Contenedor", desc: "Portal de cliente transparente. Innovación compartida con tus socios estratégicos.", icon: Folder },
             ]
         },
         {
             category: "Administración",
             items: [
-                { name: "Ajustes del Sistema", desc: "Configuración global", icon: Settings },
-                { name: "Planes & Facturas", desc: "Gestión comercial", icon: CreditCard },
+                { name: "Ajustes del Sistema", desc: "Configuración master. Tú tienes el poder, nosotros la infraestructura.", icon: Settings },
+                { name: "Planes & Facturas", desc: "Transparencia comercial. Sin letras chicas ni certificaciones obligatorias.", icon: CreditCard },
             ]
         }
     ];

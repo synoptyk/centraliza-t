@@ -174,7 +174,7 @@ const seedAdmin = async () => {
         console.error('--- SEED ERROR:', error.message);
     }
 };
-seedAdmin();
+// 177: seedAdmin call removed from here to move inside connectDB.then()
 
 // Servir archivos estáticos del frontend React en producción
 const path = require('path');
@@ -201,15 +201,20 @@ app.use(errorHandler);
 const PORT = process.env.PORT || process.env.SERVER_PORT || 5000;
 
 // Connect to Database first, then start server
-connectDB().then(() => {
-    startNotificationWorker();
+connectDB().then(async () => {
+    // START SERVICES ONLY AFTER SUCCESSFUL DB CONNECTION
+    console.log('--- DATABASE CONNECTION VERIFIED ---');
 
-    // Nodemailer SMTP removed. Email delivery utilizes Resend HTTP API natively.
+    // Seed admin if needed
+    await seedAdmin();
+
+    // Start workers
+    startNotificationWorker();
 
     server.listen(PORT, () => {
         console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
     });
 }).catch((err) => {
-    console.error('Failed to connect to MongoDB:', err);
+    console.error('CRITICAL: Failed to connect to MongoDB:', err.message);
     process.exit(1);
 });

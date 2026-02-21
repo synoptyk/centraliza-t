@@ -481,41 +481,47 @@ const LandingPage = ({ auth }) => {
                             </div>
                             <span className="text-xl font-black text-white tracking-tighter">CENTRALIZA-T</span>
                         </div>
-                        <p className="text-slate-400 max-w-sm leading-relaxed mb-4">
-                            Transformando la gestión empresarial con tecnología de vanguardia y un ecosistema diseñado para la eficiencia máxima.
+                        <p className="text-slate-400 max-w-sm leading-relaxed mb-6 font-medium">
+                            Transformando la gestión empresarial con tecnología de vanguardia y un ecosistema diseñado para la eficiencia máxima en el mercado latinoamericano.
                         </p>
-                        <p className="text-indigo-400 text-xs font-black uppercase tracking-widest mb-8">
-                            Ecosistema Centraliza-t, un desarrollo inteligente de Empresa Synoptyk.
+                        <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+                            Un producto de elite de Empresa Synoptyk.
                         </p>
                         <div className="flex gap-4">
-                            {/* Social Icons Placeholders */}
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center hover:bg-indigo-600 transition-colors cursor-pointer">
-                                    <div className="w-4 h-4 bg-slate-400 rounded-sm" />
-                                </div>
-                            ))}
+                            <a href="https://synoptyk.cl" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-xl text-slate-400 group">
+                                <Building2 size={20} className="group-hover:scale-110 transition-transform" />
+                            </a>
+                            <a href="mailto:centraliza-t@synoptyk.cl" className="w-12 h-12 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-xl text-slate-400 group">
+                                <Mail size={20} className="group-hover:scale-110 transition-transform" />
+                            </a>
+                            <a href="#" className="w-12 h-12 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-xl text-slate-400 group">
+                                <Activity size={20} className="group-hover:scale-110 transition-transform" />
+                            </a>
                         </div>
                     </div>
 
                     <div className="grid gap-6">
-                        <p className="text-white font-black uppercase tracking-widest text-[10px]">Producto</p>
-                        <a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">Funcionalidades</a>
-                        <a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">Planes</a>
-                        <a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">Seguridad</a>
+                        <p className="text-white font-black uppercase tracking-widest text-[10px] italic underline decoration-indigo-500 underline-offset-8">Ecosistema</p>
+                        <a href="#features" className="text-slate-400 text-sm font-bold hover:text-indigo-400 transition-colors">Funcionalidades</a>
+                        <a href="#pricing" className="text-slate-400 text-sm font-bold hover:text-indigo-400 transition-colors">Planes Corporativos</a>
+                        <a href="#modulos" className="text-slate-400 text-sm font-bold hover:text-indigo-400 transition-colors">Maestro de Módulos</a>
                     </div>
 
                     <div className="grid gap-6">
-                        <p className="text-white font-black uppercase tracking-widest text-[10px]">Empresa</p>
-                        <a href="#nosotros" className="text-slate-400 text-sm hover:text-white transition-colors">Sobre Nosotros</a>
-                        <a href="mailto:centraliza-t@synoptyk.cl" className="text-slate-400 text-sm hover:text-white transition-colors">Contacto</a>
-                        <a href="#" className="text-slate-400 text-sm hover:text-white transition-colors">Blog</a>
+                        <p className="text-white font-black uppercase tracking-widest text-[10px] italic underline decoration-indigo-500 underline-offset-8">Corporativo</p>
+                        <a href="https://synoptyk.cl" target="_blank" rel="noopener noreferrer" className="text-slate-400 text-sm font-bold hover:text-indigo-400 transition-colors">Sobre Synoptyk</a>
+                        <a href="mailto:centraliza-t@synoptyk.cl" className="text-slate-400 text-sm font-bold hover:text-indigo-400 transition-colors">Soporte Técnico</a>
+                        <a href="#" className="text-slate-400 text-sm font-bold hover:text-indigo-400 transition-colors">Base de Conocimiento</a>
                     </div>
                 </div>
-                <div className="max-w-7xl mx-auto pt-20 mt-20 border-t border-slate-800 flex flex-col md:flex-row justify-between gap-8">
-                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">© 2026 Centraliza-t. Todos los derechos reservados.</p>
+                <div className="max-w-7xl mx-auto pt-20 mt-20 border-t border-white/5 flex flex-col md:flex-row justify-between gap-8 items-center">
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest leading-loose text-center md:text-left">
+                        © 2026 CENTRALIZA-T. TECNOLOGÍA PROPIETARIA DE EMPRESA SYNOPTYK. <br className="hidden md:block" />
+                        TODOS LOS DERECHOS RESERVADOS.
+                    </p>
                     <div className="flex gap-10">
-                        <a href="#" className="text-slate-500 text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors">Privacidad</a>
-                        <a href="#" className="text-slate-500 text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors">Términos</a>
+                        <a href="#" className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all">Privacidad</a>
+                        <a href="#" className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all">Términos Legales</a>
                     </div>
                 </div>
             </footer>

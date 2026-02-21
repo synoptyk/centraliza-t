@@ -186,9 +186,9 @@ const ContactExecutiveModal = ({ isOpen, onClose }) => {
                                     <CheckCircle2 size={40} />
                                 </motion.div>
                                 <div className="space-y-2">
-                                    <h3 className="text-xl font-black text-slate-900 uppercase italic">¡Solicitud Registrada!</h3>
-                                    <p className="text-slate-500 text-sm leading-relaxed">
-                                        Hemos recibido tus datos. Un ejecutivo comercial de **Synoptyk** se pondrá en contacto contigo a la brevedad.
+                                    <h3 className="text-xl font-black text-slate-900 uppercase italic">¡Prioridad Asignada!</h3>
+                                    <p className="text-slate-500 text-sm leading-relaxed px-4 font-medium">
+                                        Tu solicitud ha sido inyectada en nuestro sistema de atención preferencial. Un ejecutivo senior de <b className="text-indigo-600">Synoptyk</b> procesará tu requerimiento hoy mismo.
                                     </p>
                                 </div>
                                 <div className="pt-6">
