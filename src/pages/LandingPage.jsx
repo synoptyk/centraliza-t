@@ -159,7 +159,7 @@ const LandingPage = ({ auth }) => {
                             <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Funcionalidades</a>
                             <a href="#modulos" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Módulos</a>
                             <a href="#pricing" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Planes</a>
-                            <a href="#nosotros" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Nosotros</a>
+                            <a href="#nosotros" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Nuestro CEO</a>
                             <button
                                 onClick={() => navigate(auth ? '/dashboard' : '/login')}
                                 className="bg-indigo-600 text-white w-full py-4 rounded-2xl text-sm font-bold uppercase tracking-widest"

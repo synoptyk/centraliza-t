@@ -92,7 +92,7 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
 
                     <a href="/#features" className={`text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-white hover:text-indigo-200'}`}>Funcionalidades</a>
                     <a href="/#pricing" className={`text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-white hover:text-indigo-200'}`}>Planes</a>
-                    <a href="/#nosotros" className={`text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-white hover:text-indigo-200'}`}>Nosotros</a>
+                    <a href="#nosotros" className="text-sm font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Nuestro CEO</a>
 
                     {auth ? (
                         <button
