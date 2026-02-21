@@ -218,11 +218,15 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Manifesto Section (Disruptive) - MOVED UP & COLOR HARMONIZED */}
-            <section className="py-40 bg-gradient-to-b from-slate-950 via-indigo-950/30 to-slate-950 relative overflow-hidden border-y border-white/5">
+            {/* Manifesto Section (Disruptive) - VIBRANT BLUE RETURNED */}
+            <section className="py-40 bg-indigo-600 relative overflow-hidden">
                 <div className="absolute inset-0">
-                    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] -ml-40 -mt-40"></div>
-                    <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-slate-900/40 rounded-full blur-[120px] -mr-40 -mb-40"></div>
+                    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#020617] to-transparent opacity-40"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#020617] to-transparent opacity-40"></div>
+
+                    {/* Decorative blobs */}
+                    <div className="absolute top-1/2 left-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -translate-y-1/2 -ml-48"></div>
+                    <div className="absolute top-1/2 right-0 w-96 h-96 bg-slate-900/40 rounded-full blur-[100px] -translate-y-1/2 -mr-48"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -294,8 +298,8 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Features section moved down - COLOR HARMONIZED */}
-            <section id="features" className="py-40 bg-slate-950 relative">
+            {/* Features section moved down - DARK SLATE */}
+            <section id="features" className="py-40 bg-[#0f172a] relative">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20">
                         <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">¿Por qué Centraliza-t?</p>
@@ -320,8 +324,8 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Modules section */}
-            <section id="modulos" className="py-32 bg-[#01040a] relative">
+            {/* Modules section - DARKEST SLATE */}
+            <section id="modulos" className="py-40 bg-[#020617] relative">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20">
                         <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">Ecosistema Completo</p>
@@ -364,8 +368,8 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Pricing Section - COLOR HARMONIZED */}
-            <section id="pricing" className="py-40 px-6 bg-slate-950 border-t border-white/5">
+            {/* Pricing Section - SLATE 900 SLIGHT CONTRAST */}
+            <section id="pricing" className="py-40 px-6 bg-[#0f172a] border-t border-white/5">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-20">
                         <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">Inversión Inteligente</p>
