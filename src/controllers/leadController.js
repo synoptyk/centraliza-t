@@ -43,6 +43,7 @@ const handleContactLead = asyncHandler(async (req, res) => {
 
     await sendEmail({
         from: 'centraliza-t@synoptyk.cl',
+        fromName: 'Centraliza-T',
         email: 'centraliza-t@synoptyk.cl',
         subject: `Nuevo Lead: ${companyName} - Solicitud de Ejecutivo`,
         html: salesEmailHtml
@@ -77,6 +78,7 @@ const handleContactLead = asyncHandler(async (req, res) => {
 
     await sendEmail({
         from: 'centraliza-t@synoptyk.cl',
+        fromName: 'Centraliza-T',
         email: email,
         subject: 'Hemos recibido tu solicitud - Centraliza-t',
         html: clientEmailHtml
