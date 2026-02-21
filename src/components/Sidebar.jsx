@@ -35,12 +35,12 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
     const [counts, setCounts] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    // State for sections
     const [sections, setSections] = useState({
-        centralizat: true, // New Parent Module
-        talent: false,
-        management: false,
-        supervision: false
+        ceo: true,
+        centralizat: true,
+        talent: true,
+        management: true,
+        supervision: true
     });
 
     const toggleSection = (section) => {
@@ -51,7 +51,6 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
 
     // --- TOP LEVEL ITEMS ---
     const topLevelItems = [
-        { id: 'dashboard', name: 'Dashboard Principal', icon: LayoutDashboard, path: '/dashboard' },
         ...(auth?.role === 'Ceo_Centralizat' ? [{ id: 'admin-command', name: 'Centro de Mando CEO', icon: ShieldCheck, path: '/admin/command-center' }] : []),
         ...(auth?.role === 'Ceo_Centralizat' ? [{ id: 'comercial', name: 'Mando Comercial', icon: Trophy, path: '/comercial' }] : []),
     ];
@@ -74,7 +73,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
     ];
 
     const supervisionItems = [
-        { id: 'dashboard-empresa', name: 'Dashboard Empresa', icon: Activity, path: '/dashboard-empresa' },
+        { id: 'dashboard', name: 'Módulo de Cliente', icon: LayoutDashboard, path: '/dashboard' },
         { id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano' },
         { id: 'contenedor', name: 'Contenedor (Portal Cliente)', icon: FolderOpen, path: '/contenedor' },
     ];
@@ -187,89 +186,111 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout }) => {
             </div>
 
             {/* Navigation Menu Perfeccionado */}
-            <nav className="flex-1 px-6 space-y-2 overflow-y-auto sidebar-scrollbar scroll-smooth">
+            <nav className="flex-1 px-6 space-y-4 overflow-y-auto sidebar-scrollbar scroll-smooth pt-4">
 
-                {/* Level 1: Top Level Items */}
-                {topLevelItems.filter(checkPermission).map(item => <NavItem key={item.path} item={item} level={0} />)}
+                {/* Dashboard Principal - MOVIDO A SUPERVISIÓN COMO MÓDULO DE CLIENTE */}
 
-                {/* Level 1: CENTRALIZA-T MODULE WRAPPER */}
-                <div className="space-y-1 mt-6 pt-6 border-t border-white/5">
-                    <button
-                        onClick={() => toggleSection('centralizat')}
-                        className="w-full flex items-center justify-between px-5 py-3 rounded-2xl transition-all duration-300 hover:bg-white/[0.03] group bg-white/[0.02]"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-110 transition-transform duration-300">
-                                <Building2 size={16} className="text-white" />
+                {/* SECCIÓN: ECOSISTEMA CEO */}
+                {auth?.role === 'Ceo_Centralizat' && (
+                    <div className="space-y-1">
+                        <button
+                            onClick={() => toggleSection('ceo')}
+                            className="w-full flex items-center justify-between px-6 py-5 rounded-2xl transition-all duration-500 group bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 active:scale-[0.98]"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-600/20 group-hover:scale-110 transition-transform">
+                                    <Zap size={20} className="text-white" />
+                                </div>
+                                <span className="font-black text-[13px] uppercase tracking-[0.15em] text-white">Ecosistema CEO</span>
                             </div>
-                            <span className="font-black text-[12px] uppercase tracking-[0.15em] text-indigo-200 group-hover:text-white transition-colors">CENTRALIZA-T</span>
+                            <ChevronRight
+                                size={14}
+                                className={`text-slate-500 transition-transform duration-300 ${sections.ceo ? 'rotate-90' : ''}`}
+                            />
+                        </button>
+
+                        <div className={`space-y-1 overflow-hidden transition-all duration-500 ${sections.ceo ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
+                            {topLevelItems.slice(1).map(item => <NavItem key={item.path} item={item} level={1} />)}
                         </div>
-                        <ChevronRight
-                            size={14}
-                            className={`text-slate-600 transition-transform duration-300 ${sections.centralizat ? 'rotate-90' : ''}`}
-                        />
-                    </button>
-
-                    <div className={`space-y-1 overflow-hidden transition-all duration-500 pl-2 ${sections.centralizat ? 'max-h-[2000px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
-
-                        {/* Level 2: Settings & Billing */}
-                        {checkPermission(settingsItem) && <NavItem item={settingsItem} level={1} />}
-                        {checkPermission(subscriptionItem) && <NavItem item={subscriptionItem} level={1} />}
-
-                        {/* Level 2: Flujo de Talento */}
-                        <div className="space-y-1 mt-2">
-                            <button
-                                onClick={() => toggleSection('talent')}
-                                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 hover:bg-white/[0.03] group ml-2"
-                            >
-                                <span className="font-black text-[10px] uppercase tracking-[0.15em] text-slate-400 group-hover:text-indigo-300 transition-colors">Flujo de Talento</span>
-                                <ChevronRight
-                                    size={12}
-                                    className={`text-slate-600 transition-transform duration-300 ${sections.talent ? 'rotate-90' : ''}`}
-                                />
-                            </button>
-                            <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-4 ${sections.talent ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                                {talentFlowItems.filter(checkPermission).map((item) => <NavItem key={item.path} item={item} level={2} />)}
-                            </div>
-                        </div>
-
-                        {/* Level 2: Gestión & Aprobaciones */}
-                        <div className="space-y-1 mt-2">
-                            <button
-                                onClick={() => toggleSection('management')}
-                                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 hover:bg-white/[0.03] group ml-2"
-                            >
-                                <span className="font-black text-[10px] uppercase tracking-[0.15em] text-slate-400 group-hover:text-indigo-300 transition-colors">Gestión & Aprobaciones</span>
-                                <ChevronRight
-                                    size={12}
-                                    className={`text-slate-600 transition-transform duration-300 ${sections.management ? 'rotate-90' : ''}`}
-                                />
-                            </button>
-                            <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-4 ${sections.management ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                                {managementItems.filter(checkPermission).map((item) => <NavItem key={item.path} item={item} level={2} />)}
-                            </div>
-                        </div>
-
-                        {/* Level 2: Supervisión */}
-                        <div className="space-y-1 mt-2">
-                            <button
-                                onClick={() => toggleSection('supervision')}
-                                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 hover:bg-white/[0.03] group ml-2"
-                            >
-                                <span className="font-black text-[10px] uppercase tracking-[0.15em] text-slate-400 group-hover:text-indigo-300 transition-colors">Supervisión</span>
-                                <ChevronRight
-                                    size={12}
-                                    className={`text-slate-600 transition-transform duration-300 ${sections.supervision ? 'rotate-90' : ''}`}
-                                />
-                            </button>
-                            <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-4 ${sections.supervision ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                                {supervisionItems.filter(checkPermission).map((item) => <NavItem key={item.path} item={item} level={2} />)}
-                            </div>
-                        </div>
-
                     </div>
-                </div>
+                )}
 
+                {/* SECCIONES OPERATIVAS: CENTRALIZA-T */}
+                <div className="space-y-4 mt-8 pt-8 border-t border-white/5">
+
+                    {/* Flujo de Talento */}
+                    <div className="space-y-1">
+                        <button
+                            onClick={() => toggleSection('talent')}
+                            className="w-full flex items-center justify-between px-6 py-5 rounded-2xl transition-all duration-500 group bg-white/[0.02] hover:bg-white/[0.05] border border-white/5"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
+                                    <Users size={20} className="text-white" />
+                                </div>
+                                <span className="font-black text-[13px] uppercase tracking-[0.15em] text-white">Flujo de Talento</span>
+                            </div>
+                            <ChevronRight
+                                size={14}
+                                className={`text-slate-500 transition-transform duration-300 ${sections.talent ? 'rotate-90' : ''}`}
+                            />
+                        </button>
+                        <div className={`space-y-1 overflow-hidden transition-all duration-500 ${sections.talent ? 'max-h-[1000px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
+                            {talentFlowItems.filter(checkPermission).map((item) => <NavItem key={item.path} item={item} level={1} />)}
+                        </div>
+                    </div>
+
+                    {/* Gestión & Aprobaciones */}
+                    <div className="space-y-1">
+                        <button
+                            onClick={() => toggleSection('management')}
+                            className="w-full flex items-center justify-between px-6 py-5 rounded-2xl transition-all duration-500 group bg-white/[0.02] hover:bg-white/[0.05] border border-white/5"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-600/20 group-hover:scale-110 transition-transform">
+                                    <FileCheck size={20} className="text-white" />
+                                </div>
+                                <span className="font-black text-[13px] uppercase tracking-[0.15em] text-white">Gestión & Aprobaciones</span>
+                            </div>
+                            <ChevronRight
+                                size={14}
+                                className={`text-slate-500 transition-transform duration-300 ${sections.management ? 'rotate-90' : ''}`}
+                            />
+                        </button>
+                        <div className={`space-y-1 overflow-hidden transition-all duration-500 ${sections.management ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
+                            {managementItems.filter(checkPermission).map((item) => <NavItem key={item.path} item={item} level={1} />)}
+                        </div>
+                    </div>
+
+                    {/* Supervisión */}
+                    <div className="space-y-1">
+                        <button
+                            onClick={() => toggleSection('supervision')}
+                            className="w-full flex items-center justify-between px-6 py-5 rounded-2xl transition-all duration-500 group bg-white/[0.02] hover:bg-white/[0.05] border border-white/5"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform">
+                                    <Activity size={20} className="text-white" />
+                                </div>
+                                <span className="font-black text-[13px] uppercase tracking-[0.15em] text-white">Supervisión</span>
+                            </div>
+                            <ChevronRight
+                                size={14}
+                                className={`text-slate-500 transition-transform duration-300 ${sections.supervision ? 'rotate-90' : ''}`}
+                            />
+                        </button>
+                        <div className={`space-y-1 overflow-hidden transition-all duration-500 ${sections.supervision ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
+                            {supervisionItems.filter(checkPermission).map((item) => <NavItem key={item.path} item={item} level={1} />)}
+                        </div>
+                    </div>
+
+                    {/* AJUSTES Y PLANES (AL FINAL DE SUPERVISIÓN) */}
+                    <div className="space-y-1 pt-6 border-t border-white/5">
+                        {checkPermission(settingsItem) && <NavItem item={settingsItem} level={0} />}
+                        {checkPermission(subscriptionItem) && <NavItem item={subscriptionItem} level={0} />}
+                    </div>
+
+                </div>
             </nav>
 
             {/* User Access Profile Section (Interactive) */}
