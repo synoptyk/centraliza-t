@@ -53,7 +53,14 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
                         onMouseEnter={() => setIsModulesOpen(true)}
                         onMouseLeave={() => setIsModulesOpen(false)}
                     >
-                        <button className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-slate-400 hover:text-indigo-400'}`}>
+                        <button
+                            onClick={() => {
+                                const el = document.getElementById('modulos');
+                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                else navigate('/#modulos');
+                            }}
+                            className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 ${light ? 'text-slate-500 hover:text-indigo-600' : 'text-slate-400 hover:text-indigo-400'}`}
+                        >
                             Módulos Centraliza-T
                             <ChevronDown size={14} className={`transition-transform duration-300 ${isModulesOpen ? 'rotate-180' : ''}`} />
                         </button>

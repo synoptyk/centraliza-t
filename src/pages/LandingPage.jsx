@@ -164,12 +164,29 @@ const LandingPage = ({ auth }) => {
                                 Ver Planes
                                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </button>
-                            <button
+                            <motion.button
                                 onClick={() => setIsContactModalOpen(true)}
-                                className="bg-slate-900/40 border-2 border-white/10 text-white px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:border-indigo-600 transition-all flex items-center justify-center gap-3"
+                                animate={{
+                                    boxShadow: ["0 0 0 0px rgba(99, 102, 241, 0)", "0 0 0 10px rgba(99, 102, 241, 0)", "0 0 0 0px rgba(99, 102, 241, 0)"],
+                                    scale: [1, 1.02, 1]
+                                }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                                className="bg-slate-900/40 border-2 border-indigo-500/50 text-white px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:border-indigo-400 hover:bg-indigo-600/10 transition-all flex items-center justify-center gap-3 relative overflow-hidden group"
                             >
-                                Contactar Ejecutivo
-                            </button>
+                                <span className="relative z-10 flex items-center gap-3">
+                                    Contactar Ejecutivo
+                                    <Zap size={16} className="text-amber-400 animate-pulse" />
+                                </span>
+                                <motion.div
+                                    className="absolute inset-0 bg-indigo-500/20"
+                                    animate={{ opacity: [0, 0.2, 0] }}
+                                    transition={{ duration: 1, repeat: Infinity }}
+                                />
+                            </motion.button>
                         </div>
                     </motion.div>
 
@@ -201,33 +218,7 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* Features section */}
-            <section id="features" className="py-32 bg-slate-950/40 relative">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-20">
-                        <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">¿Por qué Centraliza-t?</p>
-                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Diseñado para la Excelencia Operativa</h2>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {features.map((f, i) => (
-                            <motion.div
-                                key={i}
-                                whileHover={{ y: -10 }}
-                                className="bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-sm hover:shadow-indigo-500/10 transition-all group"
-                            >
-                                <div className="w-16 h-16 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-500">
-                                    <f.icon size={30} />
-                                </div>
-                                <h3 className="text-xl font-black text-white mb-4">{f.title}</h3>
-                                <p className="text-slate-400 leading-relaxed text-sm">{f.desc}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Manifesto Section (Disruptive) */}
+            {/* Manifesto Section (Disruptive) - MOVED UP */}
             <section className="py-32 bg-indigo-600 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -ml-20 -mt-20"></div>
@@ -299,6 +290,32 @@ const LandingPage = ({ auth }) => {
                                 </div>
                             </div>
                         </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Features section moved down */}
+            <section id="features" className="py-32 bg-slate-950/40 relative">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-20">
+                        <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">¿Por qué Centraliza-t?</p>
+                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Diseñado para la Excelencia Operativa</h2>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {features.map((f, i) => (
+                            <motion.div
+                                key={i}
+                                whileHover={{ y: -10 }}
+                                className="bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-sm hover:shadow-indigo-500/10 transition-all group"
+                            >
+                                <div className="w-16 h-16 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-500">
+                                    <f.icon size={30} />
+                                </div>
+                                <h3 className="text-xl font-black text-white mb-4">{f.title}</h3>
+                                <p className="text-slate-400 leading-relaxed text-sm">{f.desc}</p>
+                            </motion.div>
+                        ))}
                     </div>
                 </div>
             </section>
