@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, User, Mail, Phone, Send, Loader2, CheckCircle2 } from 'lucide-react';
+import { X, Building2, User, Mail, Phone, Send, Loader2, CheckCircle2, Globe } from 'lucide-react';
+import { COUNTRIES, validateTaxId } from '../utils/intlUtils';
+import InternationalInput from './InternationalInput';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
@@ -10,13 +12,21 @@ const ContactExecutiveModal = ({ isOpen, onClose }) => {
 
     const [formData, setFormData] = useState({
         companyName: '',
+        rutEmpresa: '',
         fullName: '',
         email: '',
-        phone: ''
+        phone: '',
+        country: 'CL'
     });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateTaxId(formData.rutEmpresa, formData.country)) {
+            const countryData = COUNTRIES.find(c => c.code === formData.country);
+            return toast.error(`${countryData.taxIdName} inválido`);
+        }
+
         setLoading(true);
         try {
             await api.post('/auth/contact-lead', formData);
@@ -28,7 +38,7 @@ const ContactExecutiveModal = ({ isOpen, onClose }) => {
             setTimeout(() => {
                 onClose();
                 setSubmitted(false);
-                setFormData({ companyName: '', fullName: '', email: '', phone: '' });
+                setFormData({ companyName: '', rutEmpresa: '', fullName: '', email: '', phone: '', country: 'CL' });
             }, 3000);
 
         } catch (error) {
@@ -79,33 +89,55 @@ const ContactExecutiveModal = ({ isOpen, onClose }) => {
                                 </div>
 
                                 <form onSubmit={handleSubmit} className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4">Nombre Empresa</label>
-                                        <div className="relative">
-                                            <Building2 className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                                            <input
-                                                type="text"
-                                                required
-                                                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/30 transition-all"
-                                                placeholder="Ej: InnovaTech SPA"
-                                                value={formData.companyName}
-                                                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4">País</label>
+                                            <InternationalInput
+                                                selectedCountry={formData.country}
+                                                onCountryChange={(code) => setFormData({ ...formData, country: code })}
+                                                value={COUNTRIES.find(c => c.code === formData.country).name}
+                                                icon={Globe}
+                                                onChange={() => { }}
                                             />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4">Nombre Empresa</label>
+                                            <div className="relative">
+                                                <Building2 className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/30 transition-all"
+                                                    placeholder="Ej: InnovaTech SPA"
+                                                    value={formData.companyName}
+                                                    onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4">Nombre y Apellido</label>
-                                        <div className="relative">
-                                            <User className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                                            <input
-                                                type="text"
-                                                required
-                                                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/30 transition-all"
-                                                placeholder="Tu nombre completo"
-                                                value={formData.fullName}
-                                                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                            />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <InternationalInput
+                                            label={COUNTRIES.find(c => c.code === formData.country).taxIdName}
+                                            name="rutEmpresa"
+                                            value={formData.rutEmpresa}
+                                            onChange={(e) => setFormData({ ...formData, rutEmpresa: e.target.value })}
+                                            selectedCountry={formData.country}
+                                            icon={Building2}
+                                        />
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4">Nombre y Apellido</label>
+                                            <div className="relative">
+                                                <User className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/30 transition-all"
+                                                    placeholder="Tu nombre completo"
+                                                    value={formData.fullName}
+                                                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -124,20 +156,15 @@ const ContactExecutiveModal = ({ isOpen, onClose }) => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4">Celular / WhatsApp</label>
-                                            <div className="relative">
-                                                <Phone className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                                                <input
-                                                    type="tel"
-                                                    required
-                                                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/30 transition-all"
-                                                    placeholder="+56 9 1234 5678"
-                                                    value={formData.phone}
-                                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                />
-                                            </div>
-                                        </div>
+                                        <InternationalInput
+                                            label="Celular"
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                            selectedCountry={formData.country}
+                                            isPhone={true}
+                                            onCountryChange={(code) => setFormData({ ...formData, country: code })}
+                                        />
                                     </div>
 
                                     <button
