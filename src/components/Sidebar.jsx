@@ -27,7 +27,8 @@ import {
     Zap,
     Trophy,
     FilePlus,
-    LifeBuoy
+    LifeBuoy,
+    CircleDollarSign
 } from 'lucide-react';
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -87,6 +88,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
 
     const managementItems = [
         { id: 'contratos', name: 'CONTRATACIONES', icon: FilePlus, path: '/contratos' },
+        { id: 'nomina', name: 'NÓMINA (PAYROLL)', icon: CircleDollarSign, path: '/nomina' },
     ];
 
     const administrationItems = [

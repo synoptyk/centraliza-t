@@ -33,6 +33,7 @@ import BillingAndSubscription from './pages/BillingAndSubscription';
 import LandingPage from './pages/LandingPage';
 import ContractManager from './pages/ContractManager';
 import HelpCenter from './pages/HelpCenter';
+import Payroll from './pages/Payroll';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth }) => {
@@ -212,6 +213,12 @@ function AppContent() {
                         <Route path="/ayuda" element={
                             <ProtectedRoute auth={auth}>
                                 <HelpCenter auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/nomina" element={
+                            <ProtectedRoute auth={auth}>
+                                <Payroll auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
