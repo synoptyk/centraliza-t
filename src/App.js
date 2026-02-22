@@ -34,6 +34,7 @@ import LandingPage from './pages/LandingPage';
 import ContractManager from './pages/ContractManager';
 import HelpCenter from './pages/HelpCenter';
 import Payroll from './pages/Payroll';
+import GlobalSettings from './pages/GlobalSettings';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth }) => {
@@ -219,6 +220,12 @@ function AppContent() {
                         <Route path="/nomina" element={
                             <ProtectedRoute auth={auth}>
                                 <Payroll auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/parametros-legales" element={
+                            <ProtectedRoute auth={auth} allowedRoles={['Ceo_Centralizat', 'Admin_Empresa']}>
+                                <GlobalSettings auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 

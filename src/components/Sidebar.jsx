@@ -28,7 +28,8 @@ import {
     Trophy,
     FilePlus,
     LifeBuoy,
-    CircleDollarSign
+    CircleDollarSign,
+    Scale
 } from 'lucide-react';
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -73,6 +74,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     ];
 
     const settingsItem = { id: 'configuracion', name: 'Ajustes del Sistema', icon: Settings, path: '/configuracion' };
+    const legalSettingsItem = { id: 'parametros-legales', name: 'Parámetros Legales', icon: Scale, path: '/parametros-legales' };
     const subscriptionItem = { id: 'suscripcion', name: 'Planes & Facturas', icon: CreditCard, path: '/suscripcion' };
 
     const recruitmentItems = [

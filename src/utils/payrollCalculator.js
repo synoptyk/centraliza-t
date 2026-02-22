@@ -1,17 +1,18 @@
 /**
- * Motor de Cálculo de Remuneraciones - Chile (Actualizado a Feb 2026)
- * Basado en las normativas actuales del Código del Trabajo, SII, y Previred.
+ * Motor de Cálculo de Remuneraciones - Chile (v2.0)
+ * Ahora soporta Inyección Dinámica de Parámetros Globales (Sueldo Mínimo, UF, UTM, SIS).
  */
 
-// --- CONSTANTES LEGALES (FEB 2026) ---
-const IMM = 500000; // Ingreso Mínimo Mensual
-const TOPE_IMPONIBLE_AFP = 84.3; // UF
-const TOPE_IMPONIBLE_AFC = 126.6; // UF
-const VALOR_UF = 38500; // Valor aproximado de UF en CLP para cálculos si no se inyecta desde API
-const VALOR_UTM = 65000; // Valor aproximado de UTM en CLP para el Impuesto Único
+// Estas son solo constantes DEFAULT por seguridad en caso de que fallen las inyecciones de DB/API
+const DEFAULT_IMM = 539000; // Ingreso Mínimo Mensual (Proyectado a 2026)
+const DEFAULT_TOPE_AFP = 84.3; // UF
+const DEFAULT_TOPE_AFC = 126.6; // UF
+const DEFAULT_VALOR_UF = 38500;
+const DEFAULT_VALOR_UTM = 65000;
+const DEFAULT_SIS_RATE = 1.49; // %
+const DEFAULT_MUTUAL_BASE = 0.90; // %
 
-// Tasas de AFP (%)
-const TASAS_AFP = {
+const DEFAULT_TASAS_AFP = {
     'Capital': 11.44,
     'Cuprum': 11.44,
     'Habitat': 11.27,
@@ -21,90 +22,113 @@ const TASAS_AFP = {
     'UNO': 10.69
 };
 
-// Fonasa legal
-const TASA_FONASA = 7.0; // %
-
-// --- TRAMOS IMPUESTO ÚNICO DE SEGUNDA CATEGORÍA (Mensual, basado en factores UTM) ---
-// Las bases imponibles tributarias (Renta Neta) se dividen en tramos.
-// Renta Tributable = Total Imponible - AFP - Salud - AFC
-// Estructura: [Desde, Hasta, Factor, Rebaja]
 const TRAMOS_IMPUESTO_UNICO = [
-    { desde: 0, hasta: 13.5 * VALOR_UTM, factor: 0.0, cantidadRebajar: 0 },
-    { desde: 13.5 * VALOR_UTM, hasta: 30 * VALOR_UTM, factor: 0.04, cantidadRebajar: 0.54 * VALOR_UTM },
-    { desde: 30 * VALOR_UTM, hasta: 50 * VALOR_UTM, factor: 0.08, cantidadRebajar: 1.74 * VALOR_UTM },
-    { desde: 50 * VALOR_UTM, hasta: 70 * VALOR_UTM, factor: 0.135, cantidadRebajar: 4.49 * VALOR_UTM },
-    { desde: 70 * VALOR_UTM, hasta: 90 * VALOR_UTM, factor: 0.23, cantidadRebajar: 11.14 * VALOR_UTM },
-    { desde: 90 * VALOR_UTM, hasta: 120 * VALOR_UTM, factor: 0.304, cantidadRebajar: 17.8 * VALOR_UTM },
-    { desde: 120 * VALOR_UTM, hasta: 310 * VALOR_UTM, factor: 0.35, cantidadRebajar: 23.32 * VALOR_UTM },
-    { desde: 310 * VALOR_UTM, hasta: Infinity, factor: 0.40, cantidadRebajar: 38.82 * VALOR_UTM },
+    { desde: 0, hasta: 13.5, factor: 0.0, cantidadRebajar: 0 },
+    { desde: 13.5, hasta: 30, factor: 0.04, cantidadRebajar: 0.54 },
+    { desde: 30, hasta: 50, factor: 0.08, cantidadRebajar: 1.74 },
+    { desde: 50, hasta: 70, factor: 0.135, cantidadRebajar: 4.49 },
+    { desde: 70, hasta: 90, factor: 0.23, cantidadRebajar: 11.14 },
+    { desde: 90, hasta: 120, factor: 0.304, cantidadRebajar: 17.8 },
+    { desde: 120, hasta: 310, factor: 0.35, cantidadRebajar: 23.32 },
+    { desde: 310, hasta: Infinity, factor: 0.40, cantidadRebajar: 38.82 },
 ];
 
-/**
- * Calcula la Gratificación Legal. Art 50. Tope mensual de 4.75 IMM anualizado dividido en 12.
- */
-export const calcularGratificacion = (sueldoBase) => {
+export const calcularGratificacion = (sueldoBase, params) => {
+    const imm = params?.sueldoMinimo || DEFAULT_IMM;
     const gratificacionNormal = sueldoBase * 0.25;
-    const topeGratificacionMensual = (4.75 * IMM) / 12; // ~ $197.917
+    const topeGratificacionMensual = (4.75 * imm) / 12;
     return Math.min(gratificacionNormal, topeGratificacionMensual);
 };
 
-/**
- * Calcula la cotización de AFP obligatoria (+ comisión) aplicando el tope máximo imponible.
- */
-export const calcularAFP = (baseImponible, pAfpName, valorUfActual = VALOR_UF) => {
-    const topeCLP = TOPE_IMPONIBLE_AFP * valorUfActual;
+export const calcularAFP = (baseImponible, pAfpName, params) => {
+    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const topeUF = params?.topeImponibleAFP || DEFAULT_TOPE_AFP;
+    const topeCLP = topeUF * uf;
     const imponibleTopeado = Math.min(baseImponible, topeCLP);
 
-    // Normalizar nombre de AFP
-    const normalName = Object.keys(TASAS_AFP).find(k => k.toLowerCase() === (pAfpName || '').toLowerCase()) || 'Habitat'; // Default Habitat si no existe
-    const tasaAfp = TASAS_AFP[normalName];
+    const tasas = params?.afpRates || DEFAULT_TASAS_AFP;
+    const normalName = Object.keys(tasas).find(k => k.toLowerCase() === (pAfpName || '').toLowerCase()) || 'Habitat';
+    const tasaAfp = tasas[normalName];
 
     return Math.round(imponibleTopeado * (tasaAfp / 100));
 };
 
-/**
- * Calcula la cotización de Salud (Fonasa al 7% legal topado o Isapre)
- * healthSystem: { provider: 'Fonasa' | 'Isapre', ufAmount?: number }
- */
-export const calcularSalud = (baseImponible, healthSystem, valorUfActual = VALOR_UF) => {
-    const topeCLP = TOPE_IMPONIBLE_AFP * valorUfActual;
+export const calcularSalud = (baseImponible, healthSystem, params) => {
+    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const topeUF = params?.topeImponibleAFP || DEFAULT_TOPE_AFP;
+    const topeCLP = topeUF * uf;
     const imponibleTopeado = Math.min(baseImponible, topeCLP);
 
     const fonasaLegal = Math.round(imponibleTopeado * 0.07);
 
     if (healthSystem?.provider?.toLowerCase() === 'isapre' && healthSystem?.ufAmount) {
-        const pactadoIsapre = Math.round(healthSystem.ufAmount * valorUfActual);
-        // La Isapre descuenta el 7% legal o el pacto UF si es mayor
+        const pactadoIsapre = Math.round(healthSystem.ufAmount * uf);
         return Math.max(fonasaLegal, pactadoIsapre);
     }
 
-    // Si es Fonasa o no hay datos, aplica el 7% legal topado
     return fonasaLegal;
 };
 
-/**
- * Calcula el Seguro de Cesantía (AFC) del trabajador.
- * Depende de si es Contrato Indefinido (0.6%) o Fijo (0%).
- */
-export const calcularAFC = (baseImponible, tipoContrato = 'Indefinido', valorUfActual = VALOR_UF) => {
-    // Si el contrato es Fijo/Por Obra, el trabajador paga 0%.
+// AFC Trabajador (Liquidación) -> 0.6% si es Indefinido
+export const calcularAFC_Trabajador = (baseImponible, tipoContrato, params) => {
     if (tipoContrato?.toLowerCase().includes('fijo') || tipoContrato?.toLowerCase().includes('obra')) {
         return 0;
     }
-
-    const topeCLP = TOPE_IMPONIBLE_AFC * valorUfActual;
+    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const topeUF = params?.topeImponibleAFC || DEFAULT_TOPE_AFC;
+    const topeCLP = topeUF * uf;
     const imponibleTopeado = Math.min(baseImponible, topeCLP);
 
-    return Math.round(imponibleTopeado * 0.006); // 0.6% cargo trabajador
+    return Math.round(imponibleTopeado * 0.006);
 };
 
-/**
- * Calcula Impuesto Único de Segunda Categoría.
- */
-export const calcularImpuestoUnico = (baseTributable) => {
-    if (baseTributable <= 0) return 0;
+// AFC Empleador (Costo Empresa) -> 2.4% si es Indefinido, 3.0% si es Fijo
+export const calcularAFC_Empleador = (baseImponible, tipoContrato, params) => {
+    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const topeUF = params?.topeImponibleAFC || DEFAULT_TOPE_AFC;
+    const topeCLP = topeUF * uf;
+    const imponibleTopeado = Math.min(baseImponible, topeCLP);
 
-    const tramo = TRAMOS_IMPUESTO_UNICO.find(t => baseTributable > t.desde && baseTributable <= t.hasta);
+    const tasa = (tipoContrato?.toLowerCase().includes('fijo') || tipoContrato?.toLowerCase().includes('obra')) ? 0.03 : 0.024;
+    return Math.round(imponibleTopeado * tasa);
+};
+
+// Seguro Invalidez y Sobrevivencia (SIS) - Cargo exclusivo del empleador
+export const calcularSIS = (baseImponible, params) => {
+    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const topeUF = params?.topeImponibleAFP || DEFAULT_TOPE_AFP;
+    const topeCLP = topeUF * uf;
+    const imponibleTopeado = Math.min(baseImponible, topeCLP);
+
+    const sisRate = params?.sisRate || DEFAULT_SIS_RATE;
+    return Math.round(imponibleTopeado * (sisRate / 100));
+};
+
+// Mutual de Seguridad (Ley de Accidentes de Trabajo) - Empleador
+export const calcularMutual = (baseImponible, params) => {
+    // La mutual no tiene "tope" per se como la AFP (o sí, en algunos casos se usa el de 84.3 UF), 
+    // pero legalmente se calcula sobre remuneración imponible con el mismo tope de AFP en la práctica.
+    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const topeUF = params?.topeImponibleAFP || DEFAULT_TOPE_AFP;
+    const topeCLP = topeUF * uf;
+    const imponibleTopeado = Math.min(baseImponible, topeCLP);
+
+    const mutualRate = params?.mutualBaseRate || DEFAULT_MUTUAL_BASE;
+    return Math.round(imponibleTopeado * (mutualRate / 100));
+};
+
+export const calcularImpuestoUnico = (baseTributable, params) => {
+    if (baseTributable <= 0) return 0;
+    const utm = params?.utm || DEFAULT_VALOR_UTM;
+
+    const tramosCalculados = TRAMOS_IMPUESTO_UNICO.map(t => ({
+        desde: t.desde * utm,
+        hasta: t.hasta * utm,
+        factor: t.factor,
+        cantidadRebajar: t.cantidadRebajar * utm
+    }));
+
+    const tramo = tramosCalculados.find(t => baseTributable > t.desde && baseTributable <= t.hasta);
     if (!tramo || tramo.factor === 0) return 0;
 
     const impuestoCalculado = (baseTributable * tramo.factor) - tramo.cantidadRebajar;
@@ -112,9 +136,10 @@ export const calcularImpuestoUnico = (baseTributable) => {
 };
 
 /**
- * Función Maestra: Calcula Liquidación Completa.
+ * Función Maestra V2: Integra cálculos de trabajador (Líquido) y cálculos de empresa (Patronal).
+ * Se inyectan `globalParams` obtenidos idealmente de DB/API.
  */
-export const calcularLiquidacionReal = (workerData, ajustesPeriodo = {}) => {
+export const calcularLiquidacionReal = (workerData, ajustesPeriodo = {}, globalParams = {}) => {
     const {
         baseSalary = 0,
         afp = 'Habitat',
@@ -122,62 +147,64 @@ export const calcularLiquidacionReal = (workerData, ajustesPeriodo = {}) => {
         contractType = 'Indefinido'
     } = workerData;
 
-    // 1. Extraer Ajustes Proporcionados Manualmente en la UI
-    // ajustesPeriodo = { bonosImponibles: number, bonosNoImponibles: number, descuentosVarios: number }
     const bonosImponibles = ajustesPeriodo.bonosImponibles || 0;
-    const bonosNoImponibles = ajustesPeriodo.bonosNoImponibles || 0; // Colación, movilización, etc.
+    const bonosNoImponibles = ajustesPeriodo.bonosNoImponibles || 0;
     const descuentosVarios = ajustesPeriodo.descuentosVarios || 0;
 
-    // 2. Cálculo Gratificación (Habitualmente Art 50 25%)
-    const gratificacionLegal = calcularGratificacion(baseSalary);
-
-    // 3. Determinar Total Imponible
+    const gratificacionLegal = calcularGratificacion(baseSalary, globalParams);
     const totalImponible = baseSalary + gratificacionLegal + bonosImponibles;
 
-    // 4. Determinar Descuentos Legales (Leyes Sociales)
-    const descuentoAFP = calcularAFP(totalImponible, afp);
-    const descuentoSalud = calcularSalud(totalImponible, health);
-    const descuentoAFC = calcularAFC(totalImponible, contractType);
-    const totalLeyesSociales = descuentoAFP + descuentoSalud + descuentoAFC;
+    // --- DESCUENTOS TRABAJADOR ---
+    const descuentoAFP = calcularAFP(totalImponible, afp, globalParams);
+    const descuentoSalud = calcularSalud(totalImponible, health, globalParams);
+    const descuentoAFC_Trabajador = calcularAFC_Trabajador(totalImponible, contractType, globalParams);
+    const totalLeyesSociales = descuentoAFP + descuentoSalud + descuentoAFC_Trabajador;
 
-    // 5. Determinar Base Tributable (Lo que queda tras descontar leyes sociales)
     const baseTributable = totalImponible - totalLeyesSociales;
+    const impuestoUnico = calcularImpuestoUnico(baseTributable, globalParams);
 
-    // 6. Cálculo de Impuesto Único
-    const impuestoUnico = calcularImpuestoUnico(baseTributable);
-
-    // 7. Agrupar Totales
     const totalHaberes = totalImponible + bonosNoImponibles;
     const totalDescuentosLegales = totalLeyesSociales + impuestoUnico;
     const totalDescuentosGenerales = totalDescuentosLegales + descuentosVarios;
-
-    // 8. Líquido a Pagar
     const liquido = totalHaberes - totalDescuentosGenerales;
 
+    // --- COSTOS PATRONALES (EMPRESA) ---
+    const afcEmpleador = calcularAFC_Empleador(totalImponible, contractType, globalParams);
+    const sisEmpleador = calcularSIS(totalImponible, globalParams);
+    const mutualEmpleador = calcularMutual(totalImponible, globalParams);
+    const totalAportesPatronales = afcEmpleador + sisEmpleador + mutualEmpleador;
+
+    // Costo Empresa Real = Total Haberes + Aportes Patronales
+    const costoEmpresa = totalHaberes + totalAportesPatronales;
+
     return {
-        // Entradas y Parciales
+        // --- LIQUIDACIÓN TRABAJADOR ---
         sueldoBase: baseSalary,
         gratificacion: gratificacionLegal,
         bonosImponibles,
         bonosNoImponibles,
         totalImponible,
 
-        // Descuentos Legales
         afp: descuentoAFP,
         salud: descuentoSalud,
-        afc: descuentoAFC,
+        afc: descuentoAFC_Trabajador,
         totalLeyesSociales,
 
-        // Impuestos
         baseTributable,
         impuestoUnico,
-
-        // Descuentos Varios
         descuentosVarios,
 
-        // Finales
         totalHaberes,
         totalDescuentos: totalDescuentosGenerales,
-        liquidoAPagar: Math.max(0, liquido) // Prevenir líquidos negativos
+        liquidoAPagar: Math.max(0, liquido),
+
+        // --- APORTE EMPRESA (PREVIRED) ---
+        aportesPatronales: {
+            afc: afcEmpleador,
+            sis: sisEmpleador,
+            mutual: mutualEmpleador,
+            total: totalAportesPatronales,
+            costoFinalEmpresa: costoEmpresa
+        }
     };
 };
