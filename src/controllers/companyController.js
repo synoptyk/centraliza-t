@@ -9,6 +9,7 @@ const registerCompany = asyncHandler(async (req, res) => {
         name, rut, address, phone, email, web, industry,
         // New Fields
         businessLine,
+        serviceMode,
         legalRepresentatives, // Expecting Array
         commercialContacts,   // Expecting Array
         contractStartDate, contractDurationMonths, contractedUsersLimit,
@@ -41,6 +42,7 @@ const registerCompany = asyncHandler(async (req, res) => {
 
         // New Fields
         businessLine,
+        serviceMode: serviceMode || 'FULL_HR_360',
         legalRepresentatives: legalRepresentatives || [],
         commercialContacts: commercialContacts || [],
 
@@ -79,6 +81,7 @@ const updateCompany = asyncHandler(async (req, res) => {
 
         // New Fields
         company.businessLine = req.body.businessLine || company.businessLine;
+        if (req.body.serviceMode) company.serviceMode = req.body.serviceMode;
 
         // Update Arrays if provided (User sends full array to replace)
         if (req.body.legalRepresentatives) {

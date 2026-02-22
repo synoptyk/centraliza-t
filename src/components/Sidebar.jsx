@@ -83,6 +83,8 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         { id: 'ficha-colaborador', name: 'Ficha y Validación', icon: UserPlus, path: '/ficha-colaborador', badge: counts.ficha },
     ];
 
+    const isRecruitmentOnly = auth?.company?.serviceMode === 'RECRUITMENT_ONLY';
+
     const managementItems = [
         { id: 'contratos', name: 'CONTRATACIONES', icon: FilePlus, path: '/contratos' },
     ];
@@ -91,7 +93,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         { id: 'dashboard', name: 'Módulo de Cliente', icon: LayoutDashboard, path: '/dashboard' },
         { id: 'proyectos', name: 'Gestión de Proyectos', icon: ClipboardList, path: '/proyectos' },
         { id: 'contratacion', name: 'APROBACIONES', icon: FileCheck, path: '/contratacion', badge: counts.contratacion },
-        { id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano' },
+        ...(isRecruitmentOnly ? [] : [{ id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano' }]),
         { id: 'contenedor', name: 'Contenedor (Portal Cliente)', icon: FolderOpen, path: '/contenedor' },
     ];
 
@@ -310,24 +312,26 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                             </div>
 
                             {/* 3. GESTIÓN & APROBACIONES */}
-                            <div className="space-y-1">
-                                <button
-                                    onClick={() => toggleSection('management')}
-                                    className="w-full flex items-center justify-between px-6 py-4 rounded-xl transition-all duration-500 group bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 ml-2"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <FileCheck size={16} className="text-emerald-400" />
-                                        <span className="font-black text-[11px] uppercase tracking-[0.15em] text-slate-300 group-hover:text-white transition-colors">CONTRATACIONES</span>
+                            {!isRecruitmentOnly && (
+                                <div className="space-y-1">
+                                    <button
+                                        onClick={() => toggleSection('management')}
+                                        className="w-full flex items-center justify-between px-6 py-4 rounded-xl transition-all duration-500 group bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 ml-2"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <FileCheck size={16} className="text-emerald-400" />
+                                            <span className="font-black text-[11px] uppercase tracking-[0.15em] text-slate-300 group-hover:text-white transition-colors">CONTRATACIONES</span>
+                                        </div>
+                                        <ChevronRight
+                                            size={12}
+                                            className={`text-slate-600 transition-transform duration-300 ${sections.management ? 'rotate-90' : ''}`}
+                                        />
+                                    </button>
+                                    <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-6 ${sections.management ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
+                                        {managementItems.filter(checkPermission).map((item) => <NavItem key={item.path} item={item} level={1} />)}
                                     </div>
-                                    <ChevronRight
-                                        size={12}
-                                        className={`text-slate-600 transition-transform duration-300 ${sections.management ? 'rotate-90' : ''}`}
-                                    />
-                                </button>
-                                <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-6 ${sections.management ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
-                                    {managementItems.filter(checkPermission).map((item) => <NavItem key={item.path} item={item} level={1} />)}
                                 </div>
-                            </div>
+                            )}
 
                             {/* 4. AJUSTES Y PLANES */}
                             <div className="space-y-1 pt-4 border-t border-white/5 ml-2">

@@ -15,6 +15,11 @@ const companySchema = new mongoose.Schema({
 
     // --- New Fields ---
     businessLine: String, // Giro Comercial
+    serviceMode: {
+        type: String,
+        enum: ['RECRUITMENT_ONLY', 'FULL_HR_360'],
+        default: 'FULL_HR_360'
+    },
 
     // Legal Representatives (Array)
     legalRepresentatives: [{

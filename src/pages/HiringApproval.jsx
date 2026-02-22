@@ -57,9 +57,11 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
             return;
         }
         setSaving(true);
+        const isRecruitmentOnly = auth?.company?.serviceMode === 'RECRUITMENT_ONLY';
         try {
+            const finalStatus = isRecruitmentOnly ? 'Candidato Entregado' : 'Aprobado para Contratación';
             const payload = {
-                status: status === 'Aprobado' ? 'Aprobado para Contratación' : 'Rechazado',
+                status: status === 'Aprobado' ? finalStatus : 'Rechazado',
                 workerData: {
                     ...selectedApplicant.workerData,
                     validationStatus: status === 'Aprobado' ? 'Aprobado' : 'Rechazado'
@@ -72,7 +74,12 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                 }
             };
             await api.put(`/applicants/${selectedApplicant._id}`, payload);
-            toast.success(status === 'Aprobado' ? 'Aprobación Exitosa. Proceda a CONTRATACIONES.' : 'Postulante Desestimado');
+
+            const successMessage = isRecruitmentOnly
+                ? 'Aprobación Exitosa. Candidato Entregado al Cliente Final.'
+                : 'Aprobación Exitosa. Proceda a CONTRATACIONES.';
+
+            toast.success(status === 'Aprobado' ? successMessage : 'Postulante Desestimado');
             fetchAwaitingApproval();
             setSelectedApplicant(null);
         } catch (error) {
