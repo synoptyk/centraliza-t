@@ -653,8 +653,8 @@ const LandingPage = ({ auth }) => {
                         <div className="flex items-center gap-2 mb-8 cursor-pointer"
                             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                         >
-                            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-                                <Rocket className="text-white" size={24} />
+                            <div className="w-10 h-10 bg-transparent rounded-xl flex items-center justify-center overflow-hidden border border-white/5">
+                                <img src="/logo_centralizat.png" alt="Logo" className="w-full h-full object-contain filter brightness-110 contrast-125" />
                             </div>
                             <span className="text-xl font-black text-white tracking-tighter">CENTRALIZA-T</span>
                         </div>

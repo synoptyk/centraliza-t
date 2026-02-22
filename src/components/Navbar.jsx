@@ -46,8 +46,8 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
                         navigate('/');
                     }}
                 >
-                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                        <Rocket className="text-white" size={24} />
+                    <div className="w-10 h-10 bg-transparent rounded-xl flex items-center justify-center overflow-hidden">
+                        <img src="/logo_centralizat.png" alt="Logo" className="w-full h-full object-contain filter brightness-110 contrast-125" />
                     </div>
                     <span className={`text-xl font-black tracking-tighter ${light ? 'text-slate-900' : 'text-white'}`}>CENTRALIZA-T</span>
                 </div>

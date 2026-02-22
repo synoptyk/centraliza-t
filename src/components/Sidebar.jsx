@@ -156,8 +156,8 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                 {/* Branding Header ... */}
                 <div className="p-10">
                     <div className="flex items-center gap-4 group cursor-default">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-600 to-fuchsia-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-500 ring-1 ring-white/20">
-                            <Building2 className="text-white" size={24} />
+                        <div className="w-12 h-12 rounded-2xl bg-transparent flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ring-1 ring-white/10 overflow-hidden">
+                            <img src="/logo_centralizat.png" alt="Logo" className="w-full h-full object-contain filter brightness-110 contrast-125" />
                         </div>
                         <div className="space-y-0.5">
                             <h1 className="text-xl font-black text-white tracking-[0.2em] uppercase italic leading-none">CENTRALIZA-T</h1>
