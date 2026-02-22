@@ -19,7 +19,7 @@ const MODULES_LIST = [
     { id: 'tests', name: 'Evaluación Técnica' },
     { id: 'documentos', name: 'Gestión Documental' },
     { id: 'acreditacion-prevencion', name: 'Seguridad & Prevención' },
-    { id: 'ficha-colaborador', name: 'Maestro de Personal' },
+    { id: 'ficha-colaborador', name: 'Ficha y Validación' },
     { id: 'contratacion', name: 'Aprobación de Contrato' },
     { id: 'historial', name: 'Expediente Maestro' },
     { id: 'contratados', name: 'Nómina de Contratados' },

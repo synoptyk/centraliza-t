@@ -31,6 +31,8 @@ import HumanCapitalMaster from './pages/HumanCapitalMaster';
 import CommercialAdmin from './pages/CommercialAdmin';
 import BillingAndSubscription from './pages/BillingAndSubscription';
 import LandingPage from './pages/LandingPage';
+import ContractManager from './pages/ContractManager';
+import HelpCenter from './pages/HelpCenter';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth }) => {
@@ -198,6 +200,18 @@ function AppContent() {
                         <Route path="/contratados" element={
                             <ProtectedRoute auth={auth}>
                                 <ContractedPersonal onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/contratos" element={
+                            <ProtectedRoute auth={auth}>
+                                <ContractManager auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/ayuda" element={
+                            <ProtectedRoute auth={auth}>
+                                <HelpCenter auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 

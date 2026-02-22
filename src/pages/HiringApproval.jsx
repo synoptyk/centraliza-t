@@ -96,7 +96,7 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     return (
         <PageWrapper
             className="space-y-8 animate-in fade-in duration-500"
-            title="APROBACIÓN EJECUTIVA FINAL"
+            title="APROBACIONES"
             subtitle="Revisión de gerencia para formalización de contrato"
             icon={FileCheck}
             auth={auth}

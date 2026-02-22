@@ -109,6 +109,7 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/comments', require('./routes/commentRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/config', require('./routes/configRoutes'));
+app.use('/api/contracts', require('./routes/contractRoutes'));
 app.use('/api/subscriptions', require('./routes/subscriptionRoutes'));
 
 // Diagnostic Route for Email

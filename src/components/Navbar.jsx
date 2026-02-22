@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Rocket, Menu, X, ChevronDown, ClipboardList, UserPlus, Calendar, BrainCircuit, ShieldCheck, FileText, Users, FileCheck, Activity, Folder, Settings, CreditCard } from 'lucide-react';
+import { Rocket, Menu, X, ChevronDown, ClipboardList, UserPlus, Calendar, BrainCircuit, ShieldCheck, FileText, Users, FileCheck, Activity, Folder, Settings, CreditCard, LifeBuoy } from 'lucide-react';
 
 const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
     const navigate = useNavigate();
@@ -16,13 +16,13 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
                 { name: "Evaluación Técnica", desc: "Mide lo que importa. Olvida las certificaciones de papel, evalúa competencias reales.", icon: BrainCircuit },
                 { name: "Seguridad & Prevención", desc: "Blindaje total. Cumplimiento normativo automático mientras tú te enfocas en crecer.", icon: ShieldCheck },
                 { name: "Gestión Documental", desc: "Cero papeles, cero enredos. Expedientes digitales validados al instante.", icon: FileText },
-                { name: "Maestro de Personal", desc: "Vista 360 de tu equipo. El control que mereces sin la complejidad de siempre.", icon: Users },
+                { name: "Ficha y Validación", desc: "Vista 360 de tu equipo. El control que mereces sin la complejidad de siempre.", icon: Users },
             ]
         },
         {
             category: "Control & Gestión",
             items: [
-                { name: "Aprobación de Contrato", desc: "Digitalización real. Valida y contrata en segundos, no en días.", icon: FileCheck },
+                { name: "CONTRATACIONES", desc: "Inteligencia Contractual. Generación automatizada y editor inteligente.", icon: FileText },
                 { name: "Dashboard Empresa", desc: "Analítica para ejecutivos, no para académicos. KPIs claros para resultados directos.", icon: Activity },
                 { name: "Capital Humano 360", desc: "Monitoreo integral. Porque gestionar personas no debería ser una carrera universitaria.", icon: Users },
                 { name: "Contenedor", desc: "Portal de cliente transparente. Innovación compartida con tus socios estratégicos.", icon: Folder },
@@ -31,6 +31,8 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
         {
             category: "Administración",
             items: [
+                { name: "APROBACIONES", desc: "Digitalización real. Valida y contrata en segundos, no en días.", icon: FileCheck },
+                { name: "Centro de Ayuda", desc: "Manuales profesionales y flujos estratégicos integrados.", icon: LifeBuoy },
                 { name: "Ajustes del Sistema", desc: "Configuración master. Tú tienes el poder, nosotros la infraestructura.", icon: Settings },
                 { name: "Planes & Facturas", desc: "Transparencia comercial. Sin letras chicas ni certificaciones obligatorias.", icon: CreditCard },
             ]

@@ -55,7 +55,7 @@ const LandingPage = ({ auth }) => {
                 { name: "Evaluación Técnica", desc: "Mide lo que importa. Olvida las certificaciones obsoletas, evalúa la competencia real.", icon: BrainCircuit },
                 { name: "Seguridad & Prevención", desc: "Blindaje normativo total. Cumplimiento de estándares internacionales sin fricción.", icon: ShieldCheck },
                 { name: "Gestión Documental", desc: "Cero papeles, cero demoras. Expedientes validados y listos en segundos.", icon: FileText },
-                { name: "Maestro de Personal", desc: "Vista 360 de tu infraestructura humana. El control absoluto en una sola pantalla.", icon: Users },
+                { name: "Ficha y Validación", desc: "Vista 360 de tu infraestructura humana. El control absoluto en una sola pantalla.", icon: Users },
             ]
         },
         {

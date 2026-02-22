@@ -25,7 +25,9 @@ import {
     FolderOpen,
     CreditCard,
     Zap,
-    Trophy
+    Trophy,
+    FilePlus,
+    LifeBuoy
 } from 'lucide-react';
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -74,20 +76,21 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
 
     const recruitmentItems = [
         { id: 'ingreso', name: 'Captura de Talento', icon: UserPlus, path: '/ingreso' },
-        { id: 'entrevista', name: 'Entrevistas Filtro', icon: Calendar, badge: counts.entrevista },
+        { id: 'entrevista', name: 'Entrevistas Filtro', icon: Calendar, path: '/entrevista', badge: counts.entrevista },
         { id: 'tests', name: 'Evaluación Técnica', icon: BrainCircuit, path: '/tests', badge: counts.tests },
         { id: 'acreditacion-prevencion', name: 'Seguridad & Prevención', icon: ShieldCheck, path: '/acreditacion-prevencion', badge: counts.acreditacion },
         { id: 'documentos', name: 'Gestión Documental', icon: FileText, path: '/documentos', badge: counts.documentos },
-        { id: 'ficha-colaborador', name: 'Maestro de Personal', icon: UserPlus, path: '/ficha-colaborador', badge: counts.ficha },
+        { id: 'ficha-colaborador', name: 'Ficha y Validación', icon: UserPlus, path: '/ficha-colaborador', badge: counts.ficha },
     ];
 
     const managementItems = [
-        { id: 'contratacion', name: 'Aprobación de Contrato', icon: FileCheck, path: '/contratacion', badge: counts.contratacion },
+        { id: 'contratos', name: 'CONTRATACIONES', icon: FilePlus, path: '/contratos' },
     ];
 
     const administrationItems = [
         { id: 'dashboard', name: 'Módulo de Cliente', icon: LayoutDashboard, path: '/dashboard' },
         { id: 'proyectos', name: 'Gestión de Proyectos', icon: ClipboardList, path: '/proyectos' },
+        { id: 'contratacion', name: 'APROBACIONES', icon: FileCheck, path: '/contratacion', badge: counts.contratacion },
         { id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano' },
         { id: 'contenedor', name: 'Contenedor (Portal Cliente)', icon: FolderOpen, path: '/contenedor' },
     ];
@@ -314,7 +317,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                                 >
                                     <div className="flex items-center gap-3">
                                         <FileCheck size={16} className="text-emerald-400" />
-                                        <span className="font-black text-[11px] uppercase tracking-[0.15em] text-slate-300 group-hover:text-white transition-colors">APROBACION CDT</span>
+                                        <span className="font-black text-[11px] uppercase tracking-[0.15em] text-slate-300 group-hover:text-white transition-colors">CONTRATACIONES</span>
                                     </div>
                                     <ChevronRight
                                         size={12}
@@ -330,6 +333,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                             <div className="space-y-1 pt-4 border-t border-white/5 ml-2">
                                 {checkPermission(settingsItem) && <NavItem item={settingsItem} level={1} />}
                                 {checkPermission(subscriptionItem) && <NavItem item={subscriptionItem} level={1} />}
+                                <NavItem item={{ id: 'ayuda', name: 'Centro de Ayuda', icon: LifeBuoy, path: '/ayuda' }} level={1} />
                             </div>
 
                         </div>
