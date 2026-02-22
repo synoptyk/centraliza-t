@@ -11,6 +11,7 @@ const LandingPage = ({ auth }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
     const [plans, setPlans] = useState([
         {
             _id: 'default_startup',
@@ -114,10 +115,24 @@ const LandingPage = ({ auth }) => {
         fetchPlans();
 
         const timer = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % slides.length);
-        }, 6000);
+            if (!isPaused) {
+                setCurrentSlide((prev) => (prev + 1) % slides.length);
+            }
+        }, 10000);
         return () => clearInterval(timer);
-    }, []);
+    }, [isPaused, slides.length]);
+
+    const handleNext = () => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+        setIsPaused(true);
+        setTimeout(() => setIsPaused(false), 5000); // Resume auto-play after 5s of inactivity
+    };
+
+    const handlePrev = () => {
+        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+        setIsPaused(true);
+        setTimeout(() => setIsPaused(false), 5000);
+    };
 
     const features = [
         {
@@ -178,6 +193,10 @@ const LandingPage = ({ auth }) => {
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8 }}
+                        onMouseEnter={() => setIsPaused(true)}
+                        onMouseLeave={() => setIsPaused(false)}
+                        onTouchStart={() => setIsPaused(true)}
+                        onTouchEnd={() => setIsPaused(false)}
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
                             <Zap size={14} className="text-indigo-400" />
@@ -224,7 +243,13 @@ const LandingPage = ({ auth }) => {
                     </motion.div>
 
                     {/* Image Carousel */}
-                    <div className="relative h-[300px] sm:h-[450px] lg:h-[600px] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/10">
+                    <div
+                        className="relative h-[300px] sm:h-[450px] lg:h-[600px] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/10 group/carousel"
+                        onMouseEnter={() => setIsPaused(true)}
+                        onMouseLeave={() => setIsPaused(false)}
+                        onTouchStart={() => setIsPaused(true)}
+                        onTouchEnd={() => setIsPaused(false)}
+                    >
                         <AnimatePresence mode="wait">
                             <motion.img
                                 key={currentSlide}
@@ -233,17 +258,40 @@ const LandingPage = ({ auth }) => {
                                 animate={{ opacity: 1, scale: 1, x: 0 }}
                                 exit={{ opacity: 0, scale: 0.95, x: slides[currentSlide].special ? -50 : 0 }}
                                 transition={{ duration: slides[currentSlide].special ? 1.2 : 0.8, ease: "easeOut" }}
-                                className="absolute inset-0 w-full h-full object-cover"
+                                drag="x"
+                                dragConstraints={{ left: 0, right: 0 }}
+                                onDragEnd={(e, { offset, velocity }) => {
+                                    if (offset.x > 100) handlePrev();
+                                    else if (offset.x < -100) handleNext();
+                                }}
+                                className="absolute inset-0 w-full h-full object-cover cursor-grab active:cursor-grabbing"
                             />
                         </AnimatePresence>
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 to-transparent pointer-events-none" />
+
+                        {/* Manual Controls */}
+                        <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover/carousel:opacity-100 transition-opacity pointer-events-none">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                                className="p-4 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-indigo-600 transition-all pointer-events-auto"
+                            >
+                                <ChevronRight size={24} className="rotate-180" />
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                                className="p-4 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-indigo-600 transition-all pointer-events-auto"
+                            >
+                                <ChevronRight size={24} />
+                            </button>
+                        </div>
 
                         {/* Dots */}
-                        <div className="absolute bottom-10 left-10 flex gap-3">
+                        <div className="absolute bottom-10 left-10 flex gap-3 z-10">
                             {slides.map((_, i) => (
-                                <div
+                                <button
                                     key={i}
-                                    className={`h-2 rounded-full transition-all duration-500 ${currentSlide === i ? 'w-10 bg-white' : 'w-2 bg-white/40'}`}
+                                    onClick={() => { setCurrentSlide(i); setIsPaused(true); }}
+                                    className={`h-2 rounded-full transition-all duration-500 ${currentSlide === i ? 'w-10 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                                 />
                             ))}
                         </div>
