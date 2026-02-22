@@ -13,7 +13,8 @@ const {
     getCommercialStats,
     getAllSubscriptions,
     updateSubscriptionStatus,
-    notifyClientPayment
+    notifyClientPayment,
+    handleWebhook
 } = require('../controllers/subscriptionController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -25,6 +26,7 @@ router.get('/test', (req, res) => res.json({ message: 'Rutas de suscripción act
 router.get('/plans', getActivePlans);
 router.get('/my-subscription', protect, getMySubscription);
 router.post('/checkout', protect, createCheckoutSession);
+router.post('/webhook', handleWebhook); // Public for MP
 
 // Admin Routes (CEO Centralizat Only)
 router.get('/stats', protect, authorize('Ceo_Centralizat'), getCommercialStats);

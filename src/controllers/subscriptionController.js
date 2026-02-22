@@ -3,6 +3,9 @@ const Subscription = require('../models/Subscription');
 const Company = require('../models/Company');
 const PromoCode = require('../models/PromoCode');
 const asyncHandler = require('express-async-handler');
+const { Preference, Payment } = require('mercadopago');
+const mpClient = require('../utils/mercadopago');
+const sendEmail = require('../utils/sendEmail');
 
 // @desc    Get all active plans (Public)
 // @route   GET /api/subscriptions/plans
@@ -205,7 +208,7 @@ const initializeTrial = asyncHandler(async (req, res) => {
     res.status(201).json(subscription);
 });
 
-// @desc    Simulate Payment / Integration with Mercado Pago (Skeleton)
+// @desc    Initialize Mercado Pago Preference
 // @route   POST /api/subscriptions/checkout
 const createCheckoutSession = asyncHandler(async (req, res) => {
     const { planId, promoCode } = req.body;
@@ -223,18 +226,105 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
     }
 
     // --- INTEGRACIÓN PRODUCCIÓN: MERCADO PAGO ---
-    // En producción, aquí se generaría la preferencia real usando el SDK de Mercado Pago:
-    // const preference = await mercadopago.preferences.create({ ... });
-    // const checkoutUrl = preference.body.init_point;
+    try {
+        const preference = new Preference(mpClient);
 
-    res.json({
-        success: true,
-        message: 'Sesión de Pago Generada Correctamente',
-        plan: plan.name,
-        amountUF: finalPrice,
-        checkoutUrl: 'https://www.mercadopago.cl/checkout/simulado', // Reemplazar por init_point en producción
-        isSimulation: process.env.NODE_ENV !== 'production'
-    });
+        const response = await preference.create({
+            body: {
+                parent_id: "CENTRALIZA-T-V1",
+                items: [
+                    {
+                        id: plan._id.toString(),
+                        title: `Plan ${plan.name} - Centraliza-T`,
+                        unit_price: Math.round(finalPrice * 38000), // Conversión aproximada UF a CLP (ajustar según API real si es necesario)
+                        quantity: 1,
+                        currency_id: "CLP",
+                        description: `Suscripción mensual: ${plan.description}`
+                    }
+                ],
+                external_reference: req.user.companyId.toString(),
+                back_urls: {
+                    success: `${process.env.FRONTEND_URL}/billing?payment=success`,
+                    failure: `${process.env.FRONTEND_URL}/billing?payment=failure`,
+                    pending: `${process.env.FRONTEND_URL}/billing?payment=pending`
+                },
+                auto_return: "approved",
+                notification_url: `${process.env.BACKEND_URL || 'https://api.centraliza-t.cl'}/api/subscriptions/webhook`
+            }
+        });
+
+        res.json({
+            success: true,
+            checkoutUrl: response.init_point,
+            preferenceId: response.id,
+            isSimulation: false
+        });
+
+    } catch (error) {
+        console.error('Error creando preferencia MP:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al conectar con la pasarela de pagos',
+            error: error.message
+        });
+    }
+});
+
+// @desc    Handle Mercado Pago Webhook Notifications
+// @route   POST /api/subscriptions/webhook
+const handleWebhook = asyncHandler(async (req, res) => {
+    const { action, data, type } = req.body;
+
+    console.log('--- MERCADO PAGO WEBHOOK RECEIVED ---');
+    console.log('Action:', action || 'N/A');
+    console.log('Type:', type || req.query.topic || 'N/A');
+    console.log('Data:', data || req.query.id || 'N/A');
+
+    // Manejar tanto notificaciones v1 (topic/id) como v2 (action/data/type)
+    const resourceId = (data && data.id) || req.query.id;
+    const resourceType = type || req.query.topic;
+
+    if (resourceType === 'payment' || action === 'payment.updated') {
+        try {
+            const payment = new Payment(mpClient);
+            const paymentInfo = await payment.get({ id: resourceId });
+
+            if (paymentInfo.status === 'approved') {
+                const companyId = paymentInfo.external_reference;
+                const planId = paymentInfo.additional_info?.items?.[0]?.id;
+
+                console.log(`✅ Pago Aprobado! ID: ${resourceId} - Empresa: ${companyId} - Plan: ${planId}`);
+
+                // 1. Buscar suscripción existente o crear una nueva
+                let subscription = await Subscription.findOne({ companyId });
+
+                if (!subscription) {
+                    subscription = new Subscription({
+                        companyId,
+                        planId,
+                        status: 'Active',
+                        startDate: new Date(),
+                        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días
+                    });
+                } else {
+                    subscription.planId = planId;
+                    subscription.status = 'Active';
+                    subscription.startDate = new Date();
+                    subscription.endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                }
+
+                await subscription.save();
+                console.log(`🚀 Suscripción ACTIVADA para la empresa ${companyId}`);
+
+                // 2. Notificar al cliente (Opcional)
+                // await notifyActivation(companyId, planId);
+            }
+        } catch (error) {
+            console.error('❌ Error procesando Webhook MP:', error.message);
+        }
+    }
+
+    res.status(200).send('OK');
 });
 
 // --- PROMO CODES MANAGEMENT ---
@@ -279,6 +369,7 @@ module.exports = {
     notifyClientPayment,
     initializeTrial,
     createCheckoutSession,
+    handleWebhook,
     getPromoCodes,
     createPromoCode
 };

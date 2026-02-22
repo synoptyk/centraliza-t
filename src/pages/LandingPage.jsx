@@ -46,31 +46,31 @@ const LandingPage = ({ auth }) => {
 
     const modules = [
         {
-            category: "Flujo de Talento",
+            category: "Gestión Centraliza-T",
             items: [
-                { name: "Gestión de Proyectos", desc: "No pierdas tiempo gestionando vacantes. Nosotros hacemos lo difícil, tú lideras el equipo.", icon: ClipboardList },
-                { name: "Captura de Talento", desc: "Registro integral sin burocracia. Democratizamos el acceso al mejor talento de la región.", icon: UserPlus },
-                { name: "Entrevistas Filtro", desc: "Filtros reales, no manuales. Coordinación inteligente para decisiones rápidas.", icon: Calendar },
-                { name: "Evaluación Técnica", desc: "Mide lo que importa. Olvida las certificaciones de papel, evalúa competencias reales.", icon: BrainCircuit },
-                { name: "Seguridad & Prevención", desc: "Blindaje total. Cumplimiento normativo automático mientras tú te enfocas en crecer.", icon: ShieldCheck },
-                { name: "Gestión Documental", desc: "Cero papeles, cero enredos. Expedientes digitales validados al instante.", icon: FileText },
-                { name: "Maestro de Personal", desc: "Vista 360 de tu equipo. El control que mereces sin la complejidad de siempre.", icon: Users },
+                { name: "Gestión de Proyectos", desc: "No pierdas tiempo operando vacantes. Nosotros hacemos lo difícil, tú lideras el avance técnico.", icon: ClipboardList },
+                { name: "Captura de Talento", desc: "Registro inteligente sin burocracia. Democratizamos el acceso al mejor talento del mercado.", icon: UserPlus },
+                { name: "Entrevistas Filtro", desc: "Filtros reales, no manuales. Coordinación de élite para decisiones que no esperan.", icon: Calendar },
+                { name: "Evaluación Técnica", desc: "Mide lo que importa. Olvida las certificaciones obsoletas, evalúa la competencia real.", icon: BrainCircuit },
+                { name: "Seguridad & Prevención", desc: "Blindaje normativo total. Cumplimiento de estándares internacionales sin fricción.", icon: ShieldCheck },
+                { name: "Gestión Documental", desc: "Cero papeles, cero demoras. Expedientes validados y listos en segundos.", icon: FileText },
+                { name: "Maestro de Personal", desc: "Vista 360 de tu infraestructura humana. El control absoluto en una sola pantalla.", icon: Users },
             ]
         },
         {
-            category: "Control & Gestión",
+            category: "Control Administrativo",
             items: [
-                { name: "Aprobación de Contrato", desc: "Digitalización real. Valida y contrata en segundos, no en días.", icon: FileCheck },
-                { name: "Dashboard Empresa", desc: "Analítica para ejecutivos, no para académicos. KPIs claros para resultados directos.", icon: Activity },
-                { name: "Capital Humano 360", desc: "Monitoreo integral. Porque gestionar personas no debería ser una carrera universitaria.", icon: Users },
-                { name: "Contenedor", desc: "Portal de cliente transparente. Innovación compartida con tus socios estratégicos.", icon: Folder },
+                { name: "APROBACIÓN CDT", desc: "Digitalización real. Valida, aprueba y contrata con velocidad disruptiva.", icon: FileCheck },
+                { name: "Dashboard Operativo", desc: "Analítica para resultados, no para reportes. KPIs críticos para el éxito directo.", icon: Activity },
+                { name: "Capital Humano 360", desc: "Monitoreo integral. Porque gestionar personas no debe ser una carga administrativa.", icon: Users },
+                { name: "Contenedor", desc: "Transparencia absoluta. Innovación compartida con tus socios estratégicos.", icon: Folder },
             ]
         },
         {
-            category: "Administración",
+            category: "Nivel Enterprise",
             items: [
-                { name: "Ajustes del Sistema", desc: "Configuración master. Tú tienes el poder, nosotros la infraestructura.", icon: Settings },
-                { name: "Planes & Facturas", desc: "Transparencia comercial. Sin letras chicas ni certificaciones obligatorias.", icon: CreditCard },
+                { name: "Configuración Master", desc: "Control total del ecosistema. Tú defines las reglas, nosotros la potencia.", icon: Settings },
+                { name: "Facturación & Planes", desc: "Transparencia comercial absoluta. Sin letras chicas ni enredos burocráticos.", icon: CreditCard },
             ]
         }
     ];
@@ -78,23 +78,23 @@ const LandingPage = ({ auth }) => {
     const slides = [
         {
             image: '/assets/landing/hero1.png',
-            title: "DEMOCRATIZANDO LA POTENCIA TECNOLÓGICA",
-            subtitle: "Mientras 'LA COMPETENCIA' te entierra en burocracia y manuales antiguos, Centraliza-T libera tu capacidad operativa con herramientas diseñadas para los que ejecutan."
+            title: "LIBERA TU POTENCIA OPERATIVA HOY",
+            subtitle: "Mientras 'LA COMPETENCIA' te entierra en burocracia y manuales arcaicos, Centraliza-T desbloquea tu capacidad con herramientas diseñadas para los que ejecutan resultados."
         },
         {
             image: '/assets/landing/hero2.png',
-            title: "Dile Adiós al Infierno de las Certificaciones",
-            subtitle: "No somos una academia, somos tu motor de crecimiento. Rompemos las barreras de la competencia para que tu equipo rinda desde el segundo uno."
+            title: "MIENTRAS ELLOS SE CREEN UNIVERSIDAD...",
+            subtitle: "Nosotros trabajamos para tu empresa. Deja de acumular diplomas de software y empieza a producir resultados reales. Cambialos hoy y CENTRALIZA-T."
         },
         {
             image: '/assets/landing/hero3.png',
-            title: "Innovación Real vs. Burocracia Académica",
-            subtitle: "Democratizamos el acceso al talento de élite eliminando los filtros obsoletos de las plataformas tradicionales. El futuro es ágil, no certificado."
+            title: "INNOVACIÓN REAL VS. LENTITUD ACADÉMICA",
+            subtitle: "Democratizamos el acceso al talento de élite eliminando los filtros obsoletos del pasado. El futuro pertenece a los ágiles, no solo a los certificados."
         },
         {
             image: '/assets/landing/hero4.png',
-            title: "Un Ecosistema Diseñado para Ganar",
-            subtitle: "Centraliza-T es la respuesta disruptiva frente a sistemas rígidos y lentos. Hacemos lo difícil, para que tu éxito sea lo importante.",
+            title: "UN ECOSISTEMA BLINDADO PARA GANAR",
+            subtitle: "Centraliza-T es la respuesta disruptiva frente a sistemas rígidos. Hacemos lo difícil, para que tu éxito sea lo único importante.",
             special: true
         }
     ];
@@ -150,10 +150,10 @@ const LandingPage = ({ auth }) => {
             <AnimatePresence>
                 {isMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="fixed inset-0 z-40 bg-indigo-600 pt-24 px-6 md:hidden shadow-2xl"
+                        initial={{ opacity: 0, x: '100%' }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: '100%' }}
+                        className="fixed inset-0 z-40 bg-[#020617]/95 backdrop-blur-2xl pt-24 px-8 md:hidden shadow-2xl flex flex-col justify-between pb-12"
                     >
                         <div className="flex flex-col gap-8">
                             <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-white uppercase tracking-widest">Funcionalidades</a>
@@ -172,8 +172,8 @@ const LandingPage = ({ auth }) => {
             </AnimatePresence>
 
             {/* Hero Section - DEEPEST BACKGROUND */}
-            <section className="pt-32 pb-32 px-6 relative overflow-hidden bg-[#020617]">
-                <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+            <section className="pt-24 pb-20 md:pt-32 md:pb-32 px-6 relative overflow-hidden bg-[#020617]">
+                <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -183,7 +183,7 @@ const LandingPage = ({ auth }) => {
                             <Zap size={14} className="text-indigo-400" />
                             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Lanzamiento Ecosistema v1.0</span>
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight">
+                        <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tight uppercase">
                             {slides[currentSlide].title}
                         </h1>
                         <p className="text-lg text-slate-400 leading-relaxed mb-10 max-w-xl">
@@ -224,7 +224,7 @@ const LandingPage = ({ auth }) => {
                     </motion.div>
 
                     {/* Image Carousel */}
-                    <div className="relative h-[500px] md:h-[600px] rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/10">
+                    <div className="relative h-[300px] sm:h-[450px] lg:h-[600px] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/10">
                         <AnimatePresence mode="wait">
                             <motion.img
                                 key={currentSlide}
@@ -252,7 +252,7 @@ const LandingPage = ({ auth }) => {
             </section>
 
             {/* Manifesto Section (Disruptive) - VIBRANT BLUE RETURNED */}
-            <section className="py-40 bg-indigo-600 relative overflow-hidden">
+            <section className="py-24 md:py-40 bg-indigo-600 relative overflow-hidden">
                 <div className="absolute inset-0">
                     <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#020617] to-transparent opacity-40"></div>
                     <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#020617] to-transparent opacity-40"></div>
@@ -270,7 +270,7 @@ const LandingPage = ({ auth }) => {
                             viewport={{ once: true }}
                         >
                             <p className="text-xs font-black text-indigo-200 uppercase tracking-[0.5em] mb-6">Nuestra Filosofía</p>
-                            <h2 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8 italic tracking-tighter uppercase">
+                            <h2 className="text-2xl sm:text-4xl lg:text-6xl font-black text-white leading-tight mb-8 italic tracking-tighter uppercase">
                                 Nosotros haremos lo difícil<br />
                                 <span className="text-slate-900">para que tú hagas lo importante.</span>
                             </h2>
@@ -305,25 +305,39 @@ const LandingPage = ({ auth }) => {
                             <h3 className="text-2xl font-black text-white mb-10 italic uppercase border-b border-white/10 pb-6 tracking-tighter">
                                 Innovación vs Copia
                             </h3>
-                            <div className="space-y-8">
-                                <div className="space-y-3">
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">LA COMPETENCIA</p>
-                                    <div className="h-4 bg-slate-900 rounded-full overflow-hidden border border-white/5">
-                                        <div className="h-full bg-slate-700 w-[60%]"></div>
+                            <div className="space-y-10">
+                                <div className="space-y-4 opacity-50">
+                                    <p className="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">LA COMPETENCIA</p>
+                                    <div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                        <div className="h-full bg-slate-700 w-[35%]"></div>
                                     </div>
-                                    <p className="text-[9px] font-medium text-slate-400 italic">"Te confunden con burocracia y certificaciones académicas."</p>
+                                    <p className="text-sm font-medium text-slate-400 italic font-mono">"Te confunden con burocracia y certificaciones académicas."</p>
                                 </div>
-                                <div className="space-y-3">
-                                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic">Ecosistema Centraliza-T</p>
-                                    <div className="h-4 bg-slate-900 rounded-full overflow-hidden border border-indigo-500/30">
+
+                                <div className="space-y-5 pt-4">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-black text-indigo-400 uppercase tracking-[0.3em] flex items-center gap-3">
+                                            <Zap size={18} className="fill-indigo-400" /> Ecosistema Centraliza-T
+                                        </p>
+                                        <span className="text-[10px] font-black text-indigo-400/50 uppercase tracking-widest">Poder Absoluto</span>
+                                    </div>
+                                    <div className="h-5 bg-slate-900 rounded-full overflow-hidden border border-indigo-500/30 shadow-[0_0_25px_rgba(79,70,229,0.2)]">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             whileInView={{ width: '100%' }}
                                             transition={{ duration: 1.5, delay: 0.5 }}
-                                            className="h-full bg-indigo-600 shadow-[0_0_20px_rgba(79,70,229,0.5)]"
-                                        ></motion.div>
+                                            className="h-full bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.6)] relative"
+                                        >
+                                            <motion.div
+                                                animate={{ x: ['-100%', '100%'] }}
+                                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                                            />
+                                        </motion.div>
                                     </div>
-                                    <p className="text-[9px] font-black text-indigo-400 italic uppercase">"Hacemos lo difícil. Resultados reales sin manuales."</p>
+                                    <p className="text-lg md:text-2xl font-black text-white leading-tight tracking-tight">
+                                        "Hacemos lo difícil. <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">Resultados reales sin manuales.</span>"
+                                    </p>
                                 </div>
                             </div>
                         </motion.div>
@@ -331,12 +345,34 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
+            {/* Trust Banner - NEW Signals of Authority */}
+            <div className="bg-slate-900 border-y border-white/5 py-12 px-6 overflow-hidden">
+                <div className="max-w-7xl mx-auto flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-60 hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-3">
+                        <ShieldCheck className="text-indigo-400" size={24} />
+                        <span className="text-xs font-black uppercase tracking-[0.2em] text-white">Seguridad de Grado Bancario</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Database className="text-indigo-400" size={24} />
+                        <span className="text-xs font-black uppercase tracking-[0.2em] text-white">Infraestructura Multi-Region</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Activity className="text-indigo-400" size={24} />
+                        <span className="text-xs font-black uppercase tracking-[0.2em] text-white">99.9% Uptime Garantizado</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Users className="text-indigo-400" size={24} />
+                        <span className="text-xs font-black uppercase tracking-[0.2em] text-white">Soporte Synoptyk Directo</span>
+                    </div>
+                </div>
+            </div>
+
             {/* Features section moved down - DARK SLATE */}
-            <section id="features" className="py-40 bg-[#0f172a] relative">
+            <section id="features" className="py-24 md:py-40 bg-[#0f172a] relative">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20">
                         <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">¿Por qué Centraliza-t?</p>
-                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Diseñado para la Excelencia Operativa</h2>
+                        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">Diseñado para la Excelencia Operativa</h2>
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -358,11 +394,11 @@ const LandingPage = ({ auth }) => {
             </section>
 
             {/* Modules section - DARKEST SLATE */}
-            <section id="modulos" className="py-40 bg-[#020617] relative">
+            <section id="modulos" className="py-24 md:py-40 bg-[#020617] relative">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20">
                         <p className="text-xs font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">Ecosistema Completo</p>
-                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">Módulos Centraliza-T</h2>
+                        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">Módulos Centraliza-T</h2>
                         <div className="h-1.5 w-24 bg-indigo-600 mx-auto mt-6 rounded-full"></div>
                     </div>
 
@@ -402,7 +438,7 @@ const LandingPage = ({ auth }) => {
             </section>
 
             {/* CEO Visionary Section - PREMIUM DISRUPTIVE ARCHITECT STYLE */}
-            <section id="nosotros" className="py-40 bg-slate-950 relative overflow-hidden">
+            <section id="nosotros" className="py-24 md:py-40 bg-slate-950 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_70%_50%,rgba(79,70,229,0.2),transparent_50%)]"></div>
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -440,7 +476,7 @@ const LandingPage = ({ auth }) => {
                                     <BrainCircuit size={14} className="text-indigo-400" />
                                     <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">El Cerebro Detrás del Ecosistema</span>
                                 </div>
-                                <h2 className="text-4xl md:text-6xl font-black text-white leading-tight italic uppercase tracking-tighter">
+                                <h2 className="text-2xl sm:text-4xl lg:text-6xl font-black text-white leading-tight italic uppercase tracking-tighter">
                                     De la Resistencia al <span className="text-indigo-500">Poder Absoluto</span>
                                 </h2>
                             </div>
@@ -474,81 +510,9 @@ const LandingPage = ({ auth }) => {
                 </div>
             </section>
 
-            {/* CEO Visionary Section - PREMIUM DISRUPTIVE ARCHITECT STYLE */}
-            <section id="nosotros" className="py-40 bg-slate-950 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_70%_50%,rgba(79,70,229,0.2),transparent_50%)]"></div>
-
-                <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="grid lg:grid-cols-2 gap-20 items-center">
-                        {/* Visual Column */}
-                        <motion.div
-                            initial={{ opacity: 0, x: -50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 1 }}
-                            className="relative group lg:order-last"
-                        >
-                            <div className="absolute -inset-4 bg-indigo-600/20 rounded-[4rem] blur-3xl group-hover:bg-indigo-600/30 transition-all duration-700"></div>
-                            <div className="relative rounded-[3.5rem] overflow-hidden border-2 border-white/10 shadow-2xl">
-                                <img
-                                    src="/assets/landing/ceo_visionary.png"
-                                    alt="Mauricio Barrientos - CEO Empresa Synoptyk"
-                                    className="w-full grayscale hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
-                                />
-                                <div className="absolute inset-x-0 bottom-0 p-10 bg-gradient-to-t from-slate-950/90 to-transparent">
-                                    <p className="text-white font-black text-2xl uppercase tracking-tighter italic">Mauricio Barrientos</p>
-                                    <p className="text-indigo-400 text-xs font-black uppercase tracking-[0.3em]">Fundador & Visionario Arquitecto</p>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* Text Column */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 1, delay: 0.2 }}
-                            className="space-y-10"
-                        >
-                            <div className="space-y-4">
-                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
-                                    <BrainCircuit size={14} className="text-indigo-400" />
-                                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">El Cerebro Detrás del Ecosistema</span>
-                                </div>
-                                <h2 className="text-4xl md:text-6xl font-black text-white leading-tight italic uppercase tracking-tighter">
-                                    De la Resistencia al <span className="text-indigo-500">Poder Absoluto</span>
-                                </h2>
-                            </div>
-
-                            <div className="space-y-6 text-slate-400 text-base leading-relaxed font-medium">
-                                <p>
-                                    <b className="text-white">Empresa Synoptyk</b> es el ecosistema padre de <b className="text-indigo-400 font-black">CENTRALIZA-T</b>, y Mauricio "Mauro" Barrientos es el cerebro detrás de cada línea de código, cada innovación y cada idea que hoy impulsa tu crecimiento.
-                                </p>
-                                <p>
-                                    Con más de 15 años de experiencia liderando flujos administrativos, financieros y operativos, Mauro detectó una verdad incómoda: <i className="text-slate-300">las empresas mueren por la lentitud en sus decisiones.</i> En 2010, cuando la tecnología era un lujo para pocos, él ya diseñaba procesos integrales para obtener datos en línea, sabiendo que la eficiencia no es una opción, sino un arma de supervivencia.
-                                </p>
-                                <p className="border-l-4 border-indigo-600 pl-8 italic py-4 bg-indigo-600/5 rounded-r-3xl">
-                                    "Me cansé de las limitaciones de 'los señores del Excel' y de las visiones administrativas que frenan la innovación. Decidí que mi objetivo transversal no tendría más escalas intermedias."
-                                </p>
-                                <p>
-                                    CENTRALIZA-T nace de esa independencia. Es la democratización de la gestión empresarial. Es el fin de la burocracia académica para dar paso a herramientas amigables pero letalmente eficientes. Mauro no solo creó un software; diseñó una revolución para que tú nunca más tengas que pedir permiso para innovar.
-                                </p>
-                            </div>
-
-                            <div className="pt-6">
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    className="px-10 py-5 bg-white text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-indigo-600 hover:text-white transition-all shadow-xl"
-                                    onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}
-                                >
-                                    Únete a la Revolución
-                                </motion.button>
-                            </div>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
 
             {/* Pricing Section - VIBRANT BLUE */}
-            <section id="pricing" className="py-40 px-6 bg-indigo-600 relative overflow-hidden">
+            <section id="pricing" className="py-24 px-6 bg-indigo-600 relative overflow-hidden">
                 <div className="absolute inset-0">
                     <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#020617] to-transparent opacity-40"></div>
                     <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#020617] to-transparent opacity-40"></div>
@@ -556,7 +520,7 @@ const LandingPage = ({ auth }) => {
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="text-center mb-20">
                         <p className="text-xs font-black text-indigo-100 uppercase tracking-[0.4em] mb-4">Inversión Inteligente</p>
-                        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-6">Planes que se Adaptan a tu Crecimiento</h2>
+                        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-6">Planes que se Adaptan a tu Crecimiento</h2>
                         <p className="text-indigo-50 max-w-2xl mx-auto">Selecciona la solución que mejor se adapte a las necesidades de tu empresa. Todos nuestros planes incluyen soporte técnico prioritario.</p>
                     </div>
 
@@ -578,12 +542,18 @@ const LandingPage = ({ auth }) => {
                                         <span className="text-5xl font-black text-white tracking-tighter">UF {plan.priceUF}</span>
                                         <span className="text-slate-500 font-bold text-sm">/mes</span>
                                     </div>
+                                    <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                                        <Zap size={10} className="text-amber-400" />
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Retorno de Inversión Inmediato</span>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-4 mb-10">
                                     <div className="flex items-center gap-3">
                                         <CheckCircle2 size={18} className="text-indigo-400 flex-shrink-0" />
-                                        <span className="text-sm font-bold text-slate-300">{plan.limits.adminUsers} Usuarios Administrativos</span>
+                                        <span className="text-sm font-bold text-slate-300">
+                                            {plan.limits.adminUsers === 50 ? 'Acceso Ilimitado' : `${plan.limits.adminUsers} Usuarios Administrativos`}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <CheckCircle2 size={18} className="text-indigo-400 flex-shrink-0" />
@@ -607,12 +577,23 @@ const LandingPage = ({ auth }) => {
 
                                 <button
                                     onClick={() => navigate(`/register?plan=${plan._id}`)}
-                                    className={`w-full py-5 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${plan.isTrial ? 'bg-indigo-600 text-white hover:bg-white hover:text-indigo-600 shadow-xl shadow-indigo-500/20' : 'bg-white text-slate-950 hover:bg-indigo-600 hover:text-white'}`}
+                                    className={`w-full py-5 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${plan.isTrial ? 'bg-indigo-600 text-white hover:bg-white hover:text-indigo-600 shadow-xl shadow-indigo-500/20 scale-105' : 'bg-white text-slate-950 hover:bg-indigo-600 hover:text-white'}`}
                                 >
-                                    Contratar Ahora
+                                    {plan.name === 'Plan Enterprise' ? 'Contactar Especialista' : 'Comenzar Ahora'}
                                 </button>
+
+                                <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-center gap-2 grayscale opacity-40">
+                                    <ShieldCheck size={14} />
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Garantía de Potencia Synoptyk</span>
+                                </div>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="mt-20 text-center">
+                        <p className="text-indigo-200/50 text-xs font-medium italic">
+                            * Precios expresados en Unidades de Fomento (UF). Facturación mensual exenta de IVA según normativa vigente.
+                        </p>
                     </div>
                 </div>
             </section>

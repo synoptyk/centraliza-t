@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Sidebar from './components/Sidebar';
+import { Rocket, Menu } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import ProjectRegistration from './pages/ProjectRegistration';
 import ApplicantEntry from './pages/ApplicantEntry';
@@ -46,6 +47,7 @@ function AppContent() {
     const [auth, setAuth] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedCENTRALIZATApplicant, setSelectedCENTRALIZATApplicant] = useState(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const location = useLocation();
 
     // Check auth on mount
@@ -75,9 +77,34 @@ function AppContent() {
 
     return (
         <div className={`flex min-h-screen ${isAppRoute ? 'bg-slate-50' : 'bg-white'}`}>
-            {auth && isAppRoute && <Sidebar onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} setAuth={setAuth} onLogout={handleLogout} />}
+            {auth && isAppRoute && (
+                <Sidebar
+                    onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant}
+                    auth={auth}
+                    setAuth={setAuth}
+                    onLogout={handleLogout}
+                    isOpen={isMenuOpen}
+                    setIsOpen={setIsMenuOpen}
+                />
+            )}
 
-            <main className={`flex-1 ${auth && isAppRoute ? 'ml-80' : ''} transition-all print:ml-0 print:p-0 overflow-hidden`}>
+            <main className={`flex-1 transition-all duration-300 print:ml-0 print:p-0 overflow-hidden ${auth && isAppRoute ? 'md:ml-80' : ''}`}>
+                {auth && isAppRoute && (
+                    <div className="md:hidden bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                                <Rocket className="text-white" size={18} />
+                            </div>
+                            <span className="text-sm font-black tracking-tighter text-slate-900">CENTRALIZA-T</span>
+                        </div>
+                        <button
+                            onClick={() => setIsMenuOpen(true)}
+                            className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-600"
+                        >
+                            <Menu size={24} />
+                        </button>
+                    </div>
+                )}
                 <AnimatePresence mode="wait">
                     <Routes location={location} key={location.pathname}>
                         {/* Public Routes */}

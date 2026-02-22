@@ -44,28 +44,29 @@ const MasterProfileModal = ({ applicant, onClose }) => {
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose}></div>
 
             {/* Modal */}
-            <div className="relative bg-slate-50 w-full max-w-5xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">
+            <div className="relative bg-slate-50 w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] rounded-[1.5rem] sm:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">
                 {/* Header */}
-                <div className="bg-white p-8 border-b border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-3xl bg-slate-900 text-white flex items-center justify-center text-2xl font-black">
+                <div className="bg-white p-5 sm:p-8 border-b border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-slate-900 text-white flex items-center justify-center text-lg sm:text-2xl font-black shrink-0">
                             {applicant.fullName.charAt(0)}
                         </div>
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{applicant.fullName}</h3>
-                                <StatusBadge status={applicant.status} />
+                        <div className="min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                <h3 className="text-sm sm:text-2xl font-black text-slate-900 tracking-tighter uppercase truncate">{applicant.fullName}</h3>
+                                <div className="w-fit"><StatusBadge status={applicant.status} /></div>
                             </div>
-                            <p className="text-slate-400 font-bold text-sm tracking-tight mt-0.5">{applicant.position} • {applicant.rut}</p>
+                            <p className="text-slate-400 font-bold text-[10px] sm:text-sm tracking-tight mt-0.5 truncate">{applicant.position} • {applicant.rut}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-3 bg-slate-100 text-slate-400 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all">
-                        <X size={24} />
+                    <button onClick={onClose} className="p-2 sm:p-3 bg-slate-100 text-slate-400 rounded-xl sm:rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all ml-2">
+                        <X size={20} className="sm:hidden" />
+                        <X size={24} className="hidden sm:block" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-5 sm:p-8 custom-scrollbar">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                         {/* Contact Info */}
@@ -156,7 +157,7 @@ const MasterProfileModal = ({ applicant, onClose }) => {
                     </div>
 
                     {/* Timeline / Audit Trail */}
-                    <div className="mt-8 bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden">
+                    <div className="mt-8 bg-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] p-5 sm:p-8 text-white relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-5">
                             <History size={150} />
                         </div>
@@ -208,11 +209,11 @@ const MasterProfileModal = ({ applicant, onClose }) => {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="bg-white p-6 border-t border-slate-100 flex justify-end gap-4">
-                    <button className="px-8 py-3.5 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2">
-                        <FileText size={16} /> Ver Expediente Maestro
+                <div className="bg-white p-5 sm:p-6 border-t border-slate-100 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+                    <button className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-slate-100 text-slate-500 rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
+                        <FileText size={16} /> <span className="hidden xs:inline">Ver Expediente Maestro</span><span className="xs:hidden">Expediente</span>
                     </button>
-                    <button onClick={onClose} className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-all">
+                    <button onClick={onClose} className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-slate-900 text-white rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-all">
                         Cerrar CENTRALIZAT View
                     </button>
                 </div>

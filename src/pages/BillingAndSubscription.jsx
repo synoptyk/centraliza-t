@@ -22,7 +22,21 @@ const BillingAndSubscription = () => {
 
     useEffect(() => {
         fetchData();
+        checkPaymentStatus();
     }, []);
+
+    const checkPaymentStatus = () => {
+        const params = new URLSearchParams(window.location.search);
+        const paymentStatus = params.get('payment');
+
+        if (paymentStatus === 'success') {
+            toast.success('¡Pago Aprobado! Tu suscripción se activará en segundos.', { duration: 6000 });
+        } else if (paymentStatus === 'failure') {
+            toast.error('El pago no pudo procesarse. Por favor, reintenta.');
+        } else if (paymentStatus === 'pending') {
+            toast.loading('Pago pendiente de validación bancaria...');
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -40,12 +54,20 @@ const BillingAndSubscription = () => {
     };
 
     const handleCheckout = async (planId) => {
+        const loadingToast = toast.loading('Generando sesión de pago segura...');
         try {
             const { data } = await api.post('/subscriptions/checkout', { planId });
-            toast.success('Iniciando proceso de pago...');
-            window.open(data.checkoutUrl, '_blank');
+            toast.dismiss(loadingToast);
+
+            if (data.checkoutUrl) {
+                // Redirigir a Mercado Pago
+                window.location.href = data.checkoutUrl;
+            } else {
+                toast.error('No se pudo obtener la URL de pago');
+            }
         } catch (error) {
-            toast.error('Error al iniciar pago');
+            toast.dismiss(loadingToast);
+            toast.error(error.response?.data?.message || 'Error al conectar con la pasarela');
         }
     };
 
@@ -59,23 +81,23 @@ const BillingAndSubscription = () => {
         <div className="p-10 space-y-10 max-w-7xl mx-auto bg-slate-50/30 min-h-screen">
             {/* Header with Company Context */}
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">PLANES & FACTURACIÓN</h1>
-                    <p className="text-indigo-600 font-bold uppercase tracking-[0.3em] text-[10px] mt-2">Gestión de Suscripción Corporativa</p>
+                <div className="space-y-1">
+                    <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">PLANES & FACTURACIÓN</h1>
+                    <p className="text-indigo-600 font-bold uppercase tracking-[0.2em] text-[8px] sm:text-[10px] mt-1">Gestión de Suscripción Corporativa</p>
                 </div>
                 {subscription?.status === 'Trial' && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-2xl px-6 py-4 flex items-center gap-4 shadow-sm animate-pulse">
-                        <Clock className="text-amber-600" size={20} />
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 shadow-sm animate-pulse">
+                        <Clock className="text-amber-600" size={18} />
                         <div>
-                            <p className="text-slate-900 font-black text-xs uppercase tracking-widest">En Periodo de Prueba</p>
-                            <p className="text-amber-600 text-[10px] font-bold">Vence en {Math.ceil((new Date(subscription.endDate) - new Date()) / (1000 * 60 * 60 * 24))} días</p>
+                            <p className="text-slate-900 font-black text-[8px] sm:text-[10px] uppercase tracking-widest">En Periodo de Prueba</p>
+                            <p className="text-amber-600 text-[9px] font-bold">Vence en {Math.ceil((new Date(subscription.endDate) - new Date()) / (1000 * 60 * 60 * 24))} días</p>
                         </div>
                     </div>
                 )}
             </div>
 
             {/* Current Subscription Card */}
-            <div className="bg-white border border-slate-200/60 rounded-[3rem] p-10 relative overflow-hidden group shadow-sm">
+            <div className="bg-white border border-slate-200/60 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 relative overflow-hidden group shadow-sm">
                 <div className="absolute top-0 right-0 p-20 opacity-[0.03] bg-indigo-600 rounded-bl-full pointer-events-none"></div>
                 <div className="relative z-10 flex flex-col md:flex-row justify-between gap-10">
                     <div className="space-y-6">
@@ -127,7 +149,7 @@ const BillingAndSubscription = () => {
                     {plans.map((plan) => (
                         <div
                             key={plan._id}
-                            className={`bg-white border ${plan.name === subscription?.planId?.name ? 'border-indigo-600 ring-2 ring-indigo-600/10' : 'border-slate-200/60'} rounded-[3rem] p-10 flex flex-col hover:border-indigo-600/30 transition-all duration-500 group relative shadow-sm hover:shadow-xl hover:-translate-y-1`}
+                            className={`bg-white border ${plan.name === subscription?.planId?.name ? 'border-indigo-600 ring-2 ring-indigo-600/10' : 'border-slate-200/60'} rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-10 flex flex-col hover:border-indigo-600/30 transition-all duration-500 group relative shadow-sm hover:shadow-xl hover:-translate-y-1`}
                         >
                             {plan.name === 'Business' && (
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20">

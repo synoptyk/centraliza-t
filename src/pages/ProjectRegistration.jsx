@@ -329,7 +329,7 @@ const ProjectRegistration = ({ auth, onLogout }) => {
                 {viewMode === 'form' && (
                     <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                         {/* Datos del Cliente y Proyecto */}
-                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-8">
+                        <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 space-y-6 sm:space-y-8">
                             <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
                                 <Building2 className="text-indigo-500" size={20} />
                                 <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Información del Cliente y Proyecto</h3>
@@ -401,8 +401,8 @@ const ProjectRegistration = ({ auth, onLogout }) => {
                         </div>
 
                         {/* Ubicaciones y Regiones */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                            <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 space-y-6">
                                 <div className="flex items-center justify-between border-b border-slate-50 pb-4">
                                     <div className="flex items-center gap-3">
                                         <MapPin className="text-emerald-500" size={20} />
@@ -427,7 +427,7 @@ const ProjectRegistration = ({ auth, onLogout }) => {
                                 </div>
                             </div>
 
-                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-6">
+                            <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 space-y-6">
                                 <div className="flex items-center justify-between border-b border-slate-50 pb-4">
                                     <div className="flex items-center gap-3">
                                         <UserCircle className="text-amber-500" size={20} />
@@ -480,7 +480,7 @@ const ProjectRegistration = ({ auth, onLogout }) => {
 
                             <div className="space-y-6">
                                 {project.requirements.map((req, idx) => (
-                                    <div key={idx} className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm space-y-8 relative animate-in fade-in slide-in-from-top-4">
+                                    <div key={idx} className="bg-white border border-slate-100 rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-8 shadow-sm space-y-6 sm:space-y-8 relative animate-in fade-in slide-in-from-top-4">
                                         <button
                                             type="button" onClick={() => removeRequirement(idx)}
                                             className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
@@ -577,26 +577,26 @@ const ProjectRegistration = ({ auth, onLogout }) => {
                             </div>
                         </div>
 
-                        <div className="flex justify-end sticky bottom-8">
+                        <div className="flex justify-end sticky bottom-4 sm:bottom-8 z-10 px-4 sm:px-0">
                             <button
                                 type="submit"
-                                className="flex items-center gap-3 px-10 py-5 bg-slate-900 text-white rounded-[2rem] hover:bg-slate-800 transition-all font-bold shadow-2xl shadow-slate-300"
+                                className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-5 bg-slate-900 text-white rounded-xl sm:rounded-[2rem] hover:bg-slate-800 transition-all font-bold shadow-2xl shadow-slate-300"
                             >
-                                <Save size={24} /> {editingProject ? 'Actualizar Proyecto' : 'Guardar Proyecto Completo'}
+                                <Save size={20} className="sm:size-6" /> {editingProject ? 'Actualizar Proyecto' : 'Guardar Proyecto'}
                             </button>
                         </div>
-                    </form>
+                        Broadway                    </form>
                 )}
 
                 {/* --- LOCATION DISTRIBUTION MODAL --- */}
                 {showDistributionModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
                         <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
                             {/* Header */}
-                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                                <div>
-                                    <h2 className="text-xl font-black text-slate-800 uppercase tracking-tighter">Distribución de Vacantes por Sede</h2>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Asegúrese de repartir todos los cupos en las Sedes correspondientes.</p>
+                            <div className="p-5 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <div className="min-w-0 pr-4">
+                                    <h2 className="text-sm sm:text-xl font-black text-slate-800 uppercase tracking-tighter truncate">Distribución de Vacantes</h2>
+                                    <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest hidden sm:block">Asegúrese de repartir todos los cupos en las Sedes correspondientes.</p>
                                 </div>
                                 <button onClick={() => setShowDistributionModal(false)} className="p-2 text-slate-400 hover:text-slate-600 bg-white rounded-full shadow-sm hover:shadow-md transition-all">
                                     <X size={20} />
@@ -631,7 +631,7 @@ const ProjectRegistration = ({ auth, onLogout }) => {
                                                 </div>
                                             </div>
 
-                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                                                 {req.locationDistribution.map((dist, locIndex) => (
                                                     <div key={locIndex} className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 line-clamp-1" title={dist.location}>{dist.location}</label>
@@ -652,18 +652,18 @@ const ProjectRegistration = ({ auth, onLogout }) => {
                             </div>
 
                             {/* Footer */}
-                            <div className="p-6 border-t border-slate-100 bg-white flex justify-end gap-3">
+                            <div className="p-4 sm:p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row justify-end gap-3">
                                 <button
                                     onClick={() => setShowDistributionModal(false)}
-                                    className="px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-100 transition-all border border-slate-200"
+                                    className="w-full sm:w-auto px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-100 transition-all border border-slate-200"
                                 >
                                     Volver
                                 </button>
                                 <button
                                     onClick={confirmDistributionAndSave}
-                                    className="px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200"
+                                    className="w-full sm:w-auto px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200"
                                 >
-                                    Confirmar y Guardar Proyecto
+                                    Confirmar y Guardar
                                 </button>
                             </div>
                         </div>

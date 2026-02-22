@@ -234,19 +234,19 @@ const CommercialAdmin = () => {
     );
 
     return (
-        <div className="p-10 space-y-12 bg-slate-50/30 min-h-screen">
+        <div className="p-4 sm:p-10 space-y-8 sm:space-y-12 bg-slate-50/30 min-h-screen">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">CENTRO DE MANDO COMERCIAL</h1>
-                    <p className="text-indigo-600 font-bold uppercase tracking-[0.3em] text-[10px] mt-2">Monetización & Escalabilidad Ecosistema</p>
+                    <h1 className="text-xl sm:text-4xl font-black text-slate-900 tracking-tight uppercase">Centro de Mando Comercial</h1>
+                    <p className="text-indigo-600 font-bold uppercase tracking-[0.2em] text-[8px] sm:text-[10px] mt-1 sm:mt-2">Monetización & Escalabilidad Ecosistema</p>
                 </div>
                 <div className="flex gap-4">
                     <button
                         onClick={() => setShowPlanModal(true)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-600/10 flex items-center gap-3 active:scale-95"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-600/10 flex items-center gap-2 sm:gap-3 active:scale-95"
                     >
-                        <Plus size={18} /> Nuevo Plan
+                        <Plus size={16} /> <span className="hidden xs:inline">Nuevo Plan</span><span className="xs:hidden">Plan</span>
                     </button>
                 </div>
             </div>
@@ -296,8 +296,8 @@ const CommercialAdmin = () => {
                                         </td>
                                         <td className="p-6">
                                             <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${company.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                                    company.status === 'Pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                                        'bg-red-50 text-red-600 border-red-100'
+                                                company.status === 'Pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                                    'bg-red-50 text-red-600 border-red-100'
                                                 }`}>
                                                 {company.status === 'Active' ? 'Aprobada' :
                                                     company.status === 'Pending' ? 'Pendiente' :
@@ -388,8 +388,8 @@ const CommercialAdmin = () => {
                                                 <button
                                                     onClick={() => handleUpdateUserStatus(user._id, user.status === 'Active' ? 'Suspended' : 'Active')}
                                                     className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${user.status === 'Active'
-                                                            ? 'bg-red-50 text-red-600 border border-red-100'
-                                                            : 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
+                                                        ? 'bg-red-50 text-red-600 border border-red-100'
+                                                        : 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
                                                         }`}
                                                 >
                                                     {user.status === 'Active' ? 'Inhabilitar' : 'Activar / Alta'}
