@@ -1016,6 +1016,53 @@ const getTestResults = asyncHandler(async (req, res) => {
     });
 });
 
+// @desc    Procesar Desvinculación y Finiquito
+// @route   PUT /api/applicants/:id/finiquitar
+const processFiniquito = asyncHandler(async (req, res) => {
+    const applicant = await findScopedApplicant(req.params.id, req.user);
+
+    if (!applicant) {
+        res.status(404);
+        throw new Error('Applicant not found');
+    }
+
+    const { finiquitoData } = req.body;
+
+    if (!finiquitoData) {
+        res.status(400);
+        throw new Error('Datos de finiquito son requeridos');
+    }
+
+    applicant.status = 'Desvinculado';
+
+    // Update workerData with finiquito information
+    applicant.workerData = {
+        ...applicant.workerData,
+        finiquito: finiquitoData
+    };
+
+    // Add to history
+    applicant.history.push({
+        status: 'Desvinculado',
+        changedBy: req.user.name,
+        comments: `Colaborador desvinculado. Causal: Ley ${finiquitoData.causal}`
+    });
+
+    const updatedApplicant = await applicant.save();
+
+    // Internal Notification
+    await createInternalNotification({
+        companyId: applicant.companyId,
+        title: 'Desvinculación Procesada',
+        message: `Se ha procesado el finiquito para ${applicant.fullName} bajo la causal ${finiquitoData.causal}.`,
+        type: 'ALERT',
+        applicantId: applicant._id,
+        projectId: applicant.projectId
+    });
+
+    res.json(updatedApplicant);
+});
+
 module.exports = {
     registerApplicant,
     getApplicants,
@@ -1038,6 +1085,7 @@ module.exports = {
     submitTestResponses,
     getTestResults,
     processRemoteApproval,
-    getRemoteApprovalDetails
+    getRemoteApprovalDetails,
+    processFiniquito
 };
 

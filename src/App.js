@@ -35,6 +35,7 @@ import ContractManager from './pages/ContractManager';
 import HelpCenter from './pages/HelpCenter';
 import Payroll from './pages/Payroll';
 import GlobalSettings from './pages/GlobalSettings';
+import Finiquitos from './pages/Finiquitos';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth }) => {
@@ -220,6 +221,12 @@ function AppContent() {
                         <Route path="/nomina" element={
                             <ProtectedRoute auth={auth}>
                                 <Payroll auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/finiquitos" element={
+                            <ProtectedRoute auth={auth}>
+                                <Finiquitos auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 

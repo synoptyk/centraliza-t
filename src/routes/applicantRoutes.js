@@ -23,7 +23,8 @@ const {
     submitTestResponses,
     getTestResults,
     processRemoteApproval,
-    getRemoteApprovalDetails
+    getRemoteApprovalDetails,
+    processFiniquito
 } = require('../controllers/applicantController');
 
 const {
@@ -43,6 +44,8 @@ router.route('/')
 router.route('/:id')
     .put(protect, updateApplicant);
 // .get(protect, getOneApplicant) // If needed later
+
+router.route('/:id/finiquitar').put(protect, processFiniquito);
 
 router.route('/:id/status').put(protect, updateApplicantStatus);
 router.route('/:id/interview').put(protect, registerInterview);

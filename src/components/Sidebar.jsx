@@ -91,6 +91,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     const managementItems = [
         { id: 'contratos', name: 'CONTRATACIONES', icon: FilePlus, path: '/contratos' },
         { id: 'nomina', name: 'NÓMINA (PAYROLL)', icon: CircleDollarSign, path: '/nomina' },
+        { id: 'finiquitos', name: 'FINIQUITOS', icon: Scale, path: '/finiquitos' },
     ];
 
     const administrationItems = [
