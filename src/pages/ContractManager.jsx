@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     FileText, Sparkles, Download, Save, Users, History,
     FilePlus, ChevronRight, Loader2, CheckCircle, AlertCircle,
-    Building2, Calendar, DollarSign, UserCheck
+    Building2, Calendar, DollarSign, UserCheck, Search, X
 } from 'lucide-react';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
@@ -11,6 +11,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import axios from 'axios';
 
 const ContractManager = ({ auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
@@ -22,6 +23,10 @@ const ContractManager = ({ auth, onLogout }) => {
     const [content, setContent] = useState('');
     const [title, setTitle] = useState('');
     const [view, setView] = useState('list'); // 'list' | 'editor'
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingApplicant, setEditingApplicant] = useState(null);
+    const [statusFilter, setStatusFilter] = useState('All');
 
     useEffect(() => {
         fetchApprovedApplicants();
@@ -31,11 +36,11 @@ const ContractManager = ({ auth, onLogout }) => {
     const fetchApprovedApplicants = async () => {
         try {
             const res = await api.get('/applicants');
-            // Solo aquellos aprobados que esperan formalización legal
-            const active = res.data.filter(app =>
-                app.status === 'Aprobado para Contratación'
+            // Traer todos los que tienen relevancia para este módulo
+            const relevant = res.data.filter(app =>
+                ['Aprobado para Contratación', 'Contratado'].includes(app.status)
             );
-            setApplicants(active);
+            setApplicants(relevant);
         } catch (error) {
             toast.error('Error al cargar candidatos');
         }
@@ -136,6 +141,18 @@ const ContractManager = ({ auth, onLogout }) => {
         }
     };
 
+    const handleQuickUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            await api.put(`/applicants/${editingApplicant._id}`, editingApplicant);
+            toast.success('Datos actualizados');
+            setIsEditModalOpen(false);
+            fetchApprovedApplicants();
+        } catch (error) {
+            toast.error('Error al actualizar');
+        }
+    };
+
     const modules = {
         toolbar: [
             [{ 'header': [1, 2, 3, false] }],
@@ -155,99 +172,219 @@ const ContractManager = ({ auth, onLogout }) => {
             onLogout={onLogout}
         >
             {view === 'list' ? (
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    {/* Left: Approved Waiting for Contract */}
-                    <div className="lg:col-span-1 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden flex flex-col">
-                        <div className="p-8 bg-indigo-600 text-white relative overflow-hidden">
-                            <Sparkles className="absolute -right-4 -top-4 opacity-10" size={100} />
-                            <h3 className="text-xl font-black uppercase italic relative z-10">Listos para Contrato</h3>
-                            <p className="text-[10px] font-bold opacity-70 uppercase tracking-widest relative z-10">Aprobados por Gerencia</p>
+                <div className="space-y-6">
+                    {/* Header Controls */}
+                    <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="flex items-center gap-6 flex-1">
+                            <div className="relative flex-1 max-w-md">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="BUSCAR POSTULANTE..."
+                                    className="w-full pl-12 pr-6 py-3.5 bg-slate-50 border-none rounded-2xl text-xs font-black text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 transition-all uppercase tracking-widest"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <select
+                                className="bg-slate-50 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 border-none focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="All">TODOS LOS ESTADOS</option>
+                                <option value="Aprobado para Contratación">PENDIENTES</option>
+                                <option value="Contratado">CONTRATADOS</option>
+                            </select>
                         </div>
-                        <div className="flex-1 overflow-y-auto max-h-[600px] divide-y divide-slate-50">
-                            {applicants.map(app => (
-                                <div key={app._id} className="p-6 hover:bg-slate-50 transition-all flex items-center justify-between group">
-                                    <div>
-                                        <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{app.fullName}</p>
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{app.position}</p>
+                        <div className="flex gap-3">
+                            <div className="px-6 py-3.5 bg-indigo-50 rounded-2xl text-[10px] font-black uppercase text-indigo-600 border border-indigo-100">
+                                Total: {applicants.length} Postulantes
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Table Container */}
+                    <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-900">
+                                    <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Postulante</th>
+                                    <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Cargo / Proyecto</th>
+                                    <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Sueldo Base</th>
+                                    <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Estado</th>
+                                    <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {applicants
+                                    .filter(app => {
+                                        const matchesSearch = app.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || app.rut.includes(searchTerm);
+                                        const matchesStatus = statusFilter === 'All' || app.status === statusFilter;
+                                        return matchesSearch && matchesStatus;
+                                    })
+                                    .map(app => (
+                                        <tr key={app._id} className="group hover:bg-slate-50/80 transition-all">
+                                            <td className="px-10 py-8">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-lg font-black group-hover:scale-110 transition-transform">
+                                                        {app.fullName.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-black text-slate-900 uppercase tracking-tight text-sm">{app.fullName}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{app.rut}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-8">
+                                                <p className="font-bold text-slate-600 text-xs uppercase">{app.position}</p>
+                                                <div className="flex items-center gap-1.5 mt-1">
+                                                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></div>
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Proyecto Centraliza-T</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-8">
+                                                <p className="font-black text-slate-800 text-sm italic">${parseInt(app.workerData?.financial?.liquidSalary || 0).toLocaleString()}</p>
+                                            </td>
+                                            <td className="px-10 py-8">
+                                                <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm ${app.status === 'Contratado'
+                                                    ? 'bg-emerald-500 text-white'
+                                                    : 'bg-amber-100 text-amber-600 border border-amber-200'
+                                                    }`}>
+                                                    {app.status === 'Aprobado para Contratación' ? 'Pendiente Formalización' : app.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-10 py-8">
+                                                <div className="flex justify-end gap-3">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingApplicant(app);
+                                                            setIsEditModalOpen(true);
+                                                        }}
+                                                        className="p-3 bg-white text-slate-400 border border-slate-100 rounded-2xl hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                                                        title="Editar Datos"
+                                                    >
+                                                        <ChevronRight size={18} />
+                                                    </button>
+
+                                                    {app.status === 'Aprobado para Contratación' ? (
+                                                        <button
+                                                            onClick={() => generateInitialContract(app)}
+                                                            className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2 group/btn"
+                                                        >
+                                                            <Sparkles size={14} className="group-hover/btn:animate-pulse" />
+                                                            Formalizar IA
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            className="px-6 py-3 bg-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-default flex items-center gap-2"
+                                                        >
+                                                            <CheckCircle size={14} /> Finalizado
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+
+                        {applicants.length === 0 && (
+                            <div className="py-32 text-center">
+                                <FilePlus size={64} className="mx-auto text-slate-100 mb-6" />
+                                <h4 className="text-xl font-black text-slate-400 uppercase tracking-tighter">Sin Postulantes en el Pipeline</h4>
+                                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-2">Los candidatos aparecerán aquí tras ser aprobados por Gerencia</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Edit Modal (Conditional Rendering) */}
+                    {isEditModalOpen && (
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                            <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl border border-white/20 animate-in zoom-in duration-300 overflow-hidden">
+                                <div className="p-10 bg-slate-900 text-white flex justify-between items-center relative overflow-hidden">
+                                    <Sparkles className="absolute -right-10 -top-10 opacity-10" size={200} />
+                                    <div className="relative z-10">
+                                        <h3 className="text-2xl font-black uppercase italic tracking-tight">Perfeccionar Ficha</h3>
+                                        <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.3em]">Ajuste documental previo a legalidad</p>
                                     </div>
-                                    <button
-                                        onClick={() => generateInitialContract(app)}
-                                        className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm"
-                                        title="Generar con IA"
-                                    >
-                                        <Sparkles size={16} />
+                                    <button onClick={() => setIsEditModalOpen(false)} className="bg-white/10 p-4 rounded-3xl hover:bg-red-500 transition-all relative z-10">
+                                        <X size={20} />
                                     </button>
                                 </div>
-                            ))}
-                            {applicants.length === 0 && (
-                                <div className="p-10 text-center text-slate-300">
-                                    <p className="text-[10px] font-black uppercase">No hay candidatos pendientes</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Right: Existing Documents */}
-                    <div className="lg:col-span-3 space-y-6">
-                        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center">
-                                    <History size={24} />
-                                </div>
-                                <div>
-                                    <h4 className="text-lg font-black text-slate-900 uppercase tracking-tight">Archivo Maestro de Documentos</h4>
-                                    <p className="text-xs font-bold text-slate-400 uppercase">Gestión histórica de anexos y contratos</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-2">
-                                <div className="px-4 py-2 bg-slate-50 rounded-xl text-[10px] font-black uppercase text-slate-400 border border-slate-100">
-                                    Total: {contracts.length} docs
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {contracts.map(contract => (
-                                <div key={contract._id} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all group overflow-hidden relative">
-                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                        <FileText size={80} />
-                                    </div>
-                                    <div className="relative z-10">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${contract.status === 'Firmado' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
-                                                {contract.status}
-                                            </span>
-                                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{contract.type}</span>
+                                <form onSubmit={handleQuickUpdate} className="p-12 space-y-8">
+                                    <div className="grid grid-cols-2 gap-8">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Nombre Completo</label>
+                                            <input
+                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                                value={editingApplicant.fullName}
+                                                onChange={(e) => setEditingApplicant({ ...editingApplicant, fullName: e.target.value })}
+                                            />
                                         </div>
-                                        <h3 className="text-lg font-black text-slate-900 uppercase mb-1 truncate">{contract.title}</h3>
-                                        <div className="flex items-center gap-2 mb-6">
-                                            <div className="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center text-[10px] font-black text-slate-400">
-                                                {contract.applicantId?.fullName.charAt(0)}
-                                            </div>
-                                            <p className="text-xs font-bold text-slate-500">{contract.applicantId?.fullName}</p>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Sueldo Líquido ($)</label>
+                                            <input
+                                                type="number"
+                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                                value={editingApplicant.workerData?.financial?.liquidSalary}
+                                                onChange={(e) => setEditingApplicant({
+                                                    ...editingApplicant,
+                                                    workerData: {
+                                                        ...editingApplicant.workerData,
+                                                        financial: {
+                                                            ...editingApplicant.workerData.financial,
+                                                            liquidSalary: e.target.value
+                                                        }
+                                                    }
+                                                })}
+                                            />
                                         </div>
-                                        <div className="flex gap-3">
-                                            <button
-                                                onClick={() => { setSelectedContract(contract); downloadPDF(contract._id); }}
-                                                className="flex-1 py-3 bg-slate-50 text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all border border-slate-100 flex items-center justify-center gap-2"
-                                            >
-                                                <Download size={14} /> PDF
-                                            </button>
-                                            <button className="flex-1 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2">
-                                                <sparkles size={14} /> Editar IA
-                                            </button>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Cargo</label>
+                                            <input
+                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-indigo-600"
+                                                value={editingApplicant.position}
+                                                onChange={(e) => setEditingApplicant({ ...editingApplicant, position: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Fecha Inicio Contrato</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                                value={editingApplicant.workerData?.contract?.startDate ? new Date(editingApplicant.workerData.contract.startDate).toISOString().split('T')[0] : ''}
+                                                onChange={(e) => setEditingApplicant({
+                                                    ...editingApplicant,
+                                                    workerData: {
+                                                        ...editingApplicant.workerData,
+                                                        contract: {
+                                                            ...editingApplicant.workerData.contract,
+                                                            startDate: e.target.value
+                                                        }
+                                                    }
+                                                })}
+                                            />
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                            {contracts.length === 0 && !loading && (
-                                <div className="col-span-2 py-20 text-center border-2 border-dashed border-slate-100 rounded-[3rem]">
-                                    <FilePlus size={48} className="mx-auto text-slate-100 mb-4" />
-                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No hay documentos registrados aún</p>
-                                </div>
-                            )}
+                                    <div className="flex gap-4 pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsEditModalOpen(false)}
+                                            className="flex-1 py-4 bg-white border border-slate-200 rounded-3xl font-black text-xs uppercase text-slate-400 hover:bg-slate-50 transition-all"
+                                        >
+                                            Descartar Cambios
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="flex-2 py-4 bg-slate-900 text-white rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-indigo-600 shadow-xl shadow-slate-200 transition-all flex items-center justify-center gap-3 px-12"
+                                        >
+                                            <Save size={18} /> Actualizar Master Data
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             ) : (
                 <div className="space-y-6">
