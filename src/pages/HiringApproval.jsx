@@ -40,8 +40,7 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
         try {
             const res = await api.get('/applicants');
             const filtered = res.data.filter(app =>
-                app.workerData?.validationStatus === 'Enviado para Aprobación' ||
-                app.status === 'Contratado'
+                app.workerData?.validationStatus === 'Enviado para Aprobación'
             );
             setApplicants(filtered);
         } catch (error) {
@@ -60,7 +59,7 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
         setSaving(true);
         try {
             const payload = {
-                status: status === 'Aprobado' ? 'Contratado' : 'Rechazado',
+                status: status === 'Aprobado' ? 'Aprobado para Contratación' : 'Rechazado',
                 workerData: {
                     ...selectedApplicant.workerData,
                     validationStatus: status === 'Aprobado' ? 'Aprobado' : 'Rechazado'
@@ -73,7 +72,7 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                 }
             };
             await api.put(`/applicants/${selectedApplicant._id}`, payload);
-            toast.success(status === 'Aprobado' ? 'Contratación Finalizada con Éxito' : 'Postulante Desestimado');
+            toast.success(status === 'Aprobado' ? 'Aprobación Exitosa. Proceda a CONTRATACIONES.' : 'Postulante Desestimado');
             fetchAwaitingApproval();
             setSelectedApplicant(null);
         } catch (error) {
@@ -128,7 +127,7 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                             <div className="flex items-center justify-between mb-4">
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Queue Status</span>
                             </div>
-                            <h3 className="text-2xl font-black tracking-tight uppercase italic">{applicants.filter(a => a.status !== 'Contratado').length} Pendientes</h3>
+                            <h3 className="text-2xl font-black tracking-tight uppercase italic">{applicants.length} Pendientes</h3>
                         </div>
                     </div>
 
@@ -272,7 +271,7 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                         className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-all flex items-center gap-2 disabled:opacity-30"
                                     >
                                         {saving && selectedManager !== 'REJECTING' ? <Loader2 className="animate-spin" size={16} /> : <UserCheck size={18} />}
-                                        Finalizar Contratación
+                                        Conceder Aprobación
                                     </button>
                                 </div>
                             </div>

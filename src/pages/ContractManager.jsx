@@ -31,10 +31,9 @@ const ContractManager = ({ auth, onLogout }) => {
     const fetchApprovedApplicants = async () => {
         try {
             const res = await api.get('/applicants');
-            // Solo aquellos aprobados en el flujo de contratación
+            // Solo aquellos aprobados que esperan formalización legal
             const active = res.data.filter(app =>
-                app.workerData?.validationStatus === 'Aprobado' ||
-                app.status === 'Contratado'
+                app.status === 'Aprobado para Contratación'
             );
             setApplicants(active);
         } catch (error) {
@@ -105,9 +104,15 @@ const ContractManager = ({ auth, onLogout }) => {
                     startDate: selectedApplicant.workerData?.contract?.startDate
                 }
             };
+
             await api.post('/contracts', payload);
-            toast.success('Documento Guardado y Procesado');
+
+            // ACTUALIZACIÓN LÓGICA: Ahora el estado pasa a ser oficialmente 'Contratado'
+            await api.put(`/applicants/${selectedApplicant._id}`, { status: 'Contratado' });
+
+            toast.success('Contrato Formalizado y Archivado');
             fetchContracts();
+            fetchApprovedApplicants();
             setView('list');
         } catch (error) {
             toast.error('Error al guardar documento');
