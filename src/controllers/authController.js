@@ -4,8 +4,8 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (id, version = 0) => {
+    return jwt.sign({ id, version }, process.env.JWT_SECRET, {
         expiresIn: '30d'
     });
 };
@@ -35,6 +35,10 @@ const authUser = asyncHandler(async (req, res) => {
         throw new Error('Su cuenta está pendiente de activación o ha sido suspendida. Por favor, contacte al administrador.');
     }
 
+    // ACTUALIZACIÓN LÓGICA: Incrementar versión para invalidar sesiones previas (Anti-Sharing)
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    await user.save();
+
     res.json({
         _id: user._id,
         name: user.name,
@@ -43,7 +47,7 @@ const authUser = asyncHandler(async (req, res) => {
         company: user.companyId,
         permissions: user.permissions,
         country: user.country,
-        token: generateToken(user._id)
+        token: generateToken(user._id, user.tokenVersion)
     });
 });
 
@@ -124,12 +128,14 @@ const resetPassword = asyncHandler(async (req, res) => {
     user.password = req.body.password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
+    // Incrementar versión en reset de contraseña por seguridad
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
 
     res.status(200).json({
         success: true,
         data: 'Contraseña actualizada exitosamente',
-        token: generateToken(user._id)
+        token: generateToken(user._id, user.tokenVersion)
     });
 });
 

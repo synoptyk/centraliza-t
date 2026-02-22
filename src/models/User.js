@@ -45,7 +45,8 @@ const userSchema = new mongoose.Schema({
     },
     country: { type: String, default: 'CL' },
     resetPasswordToken: String,
-    resetPasswordExpire: Date
+    resetPasswordExpire: Date,
+    tokenVersion: { type: Number, default: 0 }
 }, { timestamps: true });
 
 // Match user entered password to hashed password in database
