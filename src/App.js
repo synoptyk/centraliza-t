@@ -41,6 +41,8 @@ import SIIMirror from './pages/SIIMirror';
 import PreviredMirror from './pages/PreviredMirror';
 import Vacaciones from './pages/Vacaciones';
 import RelacionesLaborales from './pages/RelacionesLaborales';
+import PortfolioPortal from './pages/PortfolioPortal';
+import ProfessionalPortfolio from './pages/ProfessionalPortfolio';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth, blockRecruitmentOnly }) => {
@@ -98,7 +100,7 @@ function AppContent() {
     if (loading) return null;
 
     // Sidebar should only show in dashboard routes
-    const isAppRoute = location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/forgot-password' && !location.pathname.startsWith('/resetpassword') && location.pathname !== '/remote-approval' && !location.pathname.startsWith('/test-psicolaboral');
+    const isAppRoute = location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/forgot-password' && !location.pathname.startsWith('/resetpassword') && location.pathname !== '/remote-approval' && !location.pathname.startsWith('/test-psicolaboral') && !location.pathname.startsWith('/portal-profesional');
 
     return (
         <div className={`flex min-h-screen ${isAppRoute ? 'bg-slate-50' : 'bg-white'}`}>
@@ -124,6 +126,7 @@ function AppContent() {
                         <Route path="/resetpassword/:resettoken" element={<ResetPasswordPage />} />
                         <Route path="/remote-approval" element={<RemoteApproval />} />
                         <Route path="/test-psicolaboral/:token" element={<PublicTestPortal />} />
+                        <Route path="/portal-profesional/:companyId" element={<PortfolioPortal />} />
 
                         {/* Protected App Routes */}
                         <Route path="/dashboard" element={
@@ -249,6 +252,12 @@ function AppContent() {
                         <Route path="/ajustes/conexiones/banco-central" element={
                             <ProtectedRoute auth={auth}>
                                 <BancoCentral auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/cartera-profesional" element={
+                            <ProtectedRoute auth={auth}>
+                                <ProfessionalPortfolio auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
