@@ -10,7 +10,8 @@ import {
     Bell,
     Zap,
     Target,
-    Activity
+    Activity,
+    Building2
 } from 'lucide-react';
 import {
     BarChart,
