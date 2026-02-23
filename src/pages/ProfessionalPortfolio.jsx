@@ -19,7 +19,8 @@ import {
     Calendar,
     Mail,
     ChevronDown,
-    Zap
+    Zap,
+    Phone
 } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 import api from '../utils/api';
