@@ -45,10 +45,10 @@ const ProfessionalPortfolio = ({ auth, onLogout }) => {
         try {
             if (activeTab === 'professionals') {
                 const query = new URLSearchParams({ ...filters, search: searchTerm }).toString();
-                const response = await api.get(`/api/professionals?${query}`);
+                const response = await api.get(`/professionals?${query}`);
                 setProfessionals(response.data);
             } else {
-                const response = await api.get(`/api/professionals/corporate`);
+                const response = await api.get(`/professionals/corporate`);
                 setCorporateRequests(response.data);
             }
         } catch (error) {
@@ -61,7 +61,7 @@ const ProfessionalPortfolio = ({ auth, onLogout }) => {
     const handleDelete = async (id) => {
         if (!window.confirm('¿Estás seguro de eliminar este registro?')) return;
         try {
-            await api.delete(`/api/professionals/${id}`);
+            await api.delete(`/professionals/${id}`);
             setProfessionals(professionals.filter(p => p._id !== id));
         } catch (error) {
             console.error('Error deleting:', error);
