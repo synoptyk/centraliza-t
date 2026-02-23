@@ -12,6 +12,12 @@ const globalSettingsSchema = new mongoose.Schema({
     sisRate: { type: Number, default: 1.49 }, // Seguro de Invalidez y Sobrevivencia %
     mutualBaseRate: { type: Number, default: 0.90 }, // Mutual accident base rate %
 
+    // Oficial Banco Central / SII Indicators (Cached from Mindicador API)
+    ufValue: { type: Number, default: 0 },
+    utmValue: { type: Number, default: 0 },
+    dolarValue: { type: Number, default: 0 },
+    lastIndicatorsUpdate: { type: Date, default: null }, // Last sync date
+
     // Fallback/Override Values (in case MIndicador API is down or User wants fixed rates for a period)
     manualUfValue: { type: Number, default: null }, // e.g. 38500
     manualUtmValue: { type: Number, default: null }, // e.g. 65000

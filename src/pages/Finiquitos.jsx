@@ -84,8 +84,7 @@ const Finiquitos = ({ auth, onLogout }) => {
         fallbackFechaInicio.setFullYear(fallbackFechaInicio.getFullYear() - 1);
 
         const fechaInicio = selectedEmployee.workerData?.contract?.startDate || fallbackFechaInicio.toISOString().split('T')[0];
-
-        const config = { ufValue: globalParams?.manualUfValue || 38500 };
+        const config = { ufValue: globalParams?.ufValue || globalParams?.manualUfValue || 38500 };
 
         const fakeWorkerData = {
             fechaInicio,
@@ -145,9 +144,11 @@ const Finiquitos = ({ auth, onLogout }) => {
                     </p>
                 </div>
                 <div className="flex-shrink-0 flex items-center gap-4">
-                    <div className="bg-indigo-50 border border-indigo-100 px-6 py-4 rounded-3xl">
-                        <p className="text-[10px] font-black uppercase text-indigo-400 tracking-widest mb-1">Valor UF Sistema</p>
-                        <p className="text-2xl font-black text-indigo-900">${globalParams?.manualUfValue?.toLocaleString() || '38.500'}</p>
+                    <div className="bg-indigo-50/50 p-4 border border-indigo-100 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 mb-1">Valor UF Oficial de Hoy (Banco Central)</p>
+                            <p className="text-2xl font-black text-indigo-900">${(globalParams?.ufValue || globalParams?.manualUfValue || 38500).toLocaleString('es-CL')}</p>
+                        </div>
                     </div>
                 </div>
             </div>

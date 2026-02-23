@@ -41,7 +41,7 @@ export const calcularGratificacion = (sueldoBase, params) => {
 };
 
 export const calcularAFP = (baseImponible, pAfpName, params) => {
-    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const uf = params?.ufValue || params?.manualUfValue || DEFAULT_VALOR_UF;
     const topeUF = params?.topeImponibleAFP || DEFAULT_TOPE_AFP;
     const topeCLP = topeUF * uf;
     const imponibleTopeado = Math.min(baseImponible, topeCLP);
@@ -54,7 +54,7 @@ export const calcularAFP = (baseImponible, pAfpName, params) => {
 };
 
 export const calcularSalud = (baseImponible, healthSystem, params) => {
-    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const uf = params?.ufValue || params?.manualUfValue || DEFAULT_VALOR_UF;
     const topeUF = params?.topeImponibleAFP || DEFAULT_TOPE_AFP;
     const topeCLP = topeUF * uf;
     const imponibleTopeado = Math.min(baseImponible, topeCLP);
@@ -74,7 +74,7 @@ export const calcularAFC_Trabajador = (baseImponible, tipoContrato, params) => {
     if (tipoContrato?.toLowerCase().includes('fijo') || tipoContrato?.toLowerCase().includes('obra')) {
         return 0;
     }
-    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const uf = params?.ufValue || params?.manualUfValue || DEFAULT_VALOR_UF;
     const topeUF = params?.topeImponibleAFC || DEFAULT_TOPE_AFC;
     const topeCLP = topeUF * uf;
     const imponibleTopeado = Math.min(baseImponible, topeCLP);
@@ -84,7 +84,7 @@ export const calcularAFC_Trabajador = (baseImponible, tipoContrato, params) => {
 
 // AFC Empleador (Costo Empresa) -> 2.4% si es Indefinido, 3.0% si es Fijo
 export const calcularAFC_Empleador = (baseImponible, tipoContrato, params) => {
-    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const uf = params?.ufValue || params?.manualUfValue || DEFAULT_VALOR_UF;
     const topeUF = params?.topeImponibleAFC || DEFAULT_TOPE_AFC;
     const topeCLP = topeUF * uf;
     const imponibleTopeado = Math.min(baseImponible, topeCLP);
@@ -95,7 +95,7 @@ export const calcularAFC_Empleador = (baseImponible, tipoContrato, params) => {
 
 // Seguro Invalidez y Sobrevivencia (SIS) - Cargo exclusivo del empleador
 export const calcularSIS = (baseImponible, params) => {
-    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const uf = params?.ufValue || params?.manualUfValue || DEFAULT_VALOR_UF;
     const topeUF = params?.topeImponibleAFP || DEFAULT_TOPE_AFP;
     const topeCLP = topeUF * uf;
     const imponibleTopeado = Math.min(baseImponible, topeCLP);
@@ -108,7 +108,7 @@ export const calcularSIS = (baseImponible, params) => {
 export const calcularMutual = (baseImponible, params) => {
     // La mutual no tiene "tope" per se como la AFP (o sí, en algunos casos se usa el de 84.3 UF), 
     // pero legalmente se calcula sobre remuneración imponible con el mismo tope de AFP en la práctica.
-    const uf = params?.uf || DEFAULT_VALOR_UF;
+    const uf = params?.ufValue || params?.manualUfValue || DEFAULT_VALOR_UF;
     const topeUF = params?.topeImponibleAFP || DEFAULT_TOPE_AFP;
     const topeCLP = topeUF * uf;
     const imponibleTopeado = Math.min(baseImponible, topeCLP);
