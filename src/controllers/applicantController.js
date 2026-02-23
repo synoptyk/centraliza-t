@@ -1039,7 +1039,10 @@ const processFiniquito = asyncHandler(async (req, res) => {
     // Update workerData with finiquito information
     applicant.workerData = {
         ...applicant.workerData,
-        finiquito: finiquitoData
+        finiquito: {
+            ...finiquitoData,
+            processedDate: new Date()
+        }
     };
 
     // Add to history
@@ -1057,6 +1060,52 @@ const processFiniquito = asyncHandler(async (req, res) => {
         title: 'Desvinculación Procesada',
         message: `Se ha procesado el finiquito para ${applicant.fullName} bajo la causal ${finiquitoData.causal}.`,
         type: 'ALERT',
+        applicantId: applicant._id,
+        projectId: applicant.projectId
+    });
+
+    res.json(updatedApplicant);
+});
+
+// @desc    Upload Signed Finiquito PDF
+// @route   PUT /api/applicants/:id/finiquito-documento
+const uploadFiniquitoDocument = asyncHandler(async (req, res) => {
+    const applicant = await findScopedApplicant(req.params.id, req.user);
+
+    if (!applicant) {
+        res.status(404);
+        throw new Error('Colaborador no encontrado');
+    }
+
+    if (!req.file) {
+        res.status(400);
+        throw new Error('Por favor adjunte el documento firmado');
+    }
+
+    const url = req.file.path;
+    const public_id = req.file.filename;
+
+    applicant.workerData.finiquito = {
+        ...applicant.workerData.finiquito,
+        documentUrl: url,
+        documentPublicId: public_id,
+        processedDate: new Date()
+    };
+
+    // Registrar en el historial que se subio el documento
+    applicant.history.push({
+        status: 'Desvinculado',
+        changedBy: req.user.name,
+        comments: `Documento de finiquito oficial cargado en sistema (${applicant.workerData.finiquito.method})`
+    });
+
+    const updatedApplicant = await applicant.save();
+
+    await createInternalNotification({
+        companyId: applicant.companyId,
+        title: 'Finiquito Firmado Cargado',
+        message: `El documento firmado de finiquito para ${applicant.fullName} ha sido subido con éxito al expediente digital.`,
+        type: 'PROGRESS',
         applicantId: applicant._id,
         projectId: applicant.projectId
     });
@@ -1160,7 +1209,7 @@ const importLegacyWorkforce = asyncHandler(async (req, res) => {
                     validationStatus: 'Aprobado',
                     contract: {
                         startDate: row.startDate ? new Date(row.startDate) : new Date(),
-                        type: 'Indefinido'
+                        type: row.contractType || 'Indefinido'
                     }
                 }
             });
@@ -1204,6 +1253,7 @@ module.exports = {
     processRemoteApproval,
     getRemoteApprovalDetails,
     processFiniquito,
+    uploadFiniquitoDocument,
     importLegacyWorkforce
 };
 

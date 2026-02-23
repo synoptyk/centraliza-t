@@ -192,3 +192,78 @@ body {
 .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(99, 102, 241, 0.4);
 }
+
+/* PROFESSIONAL PRINT STYLES */
+@media print {
+
+  /* Hide navigation and UI elements */
+  nav,
+  .sidebar,
+  aside,
+  header,
+  .topbar,
+  .no-print,
+  button,
+  .chat-bubble,
+  .toaster {
+    display: none !important;
+  }
+
+  /* Reset main container layout */
+  main,
+  .flex-1,
+  .pt-24,
+  .md\:pt-28 {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    background: white !important;
+    position: static !important;
+  }
+
+  /* Reset body and page settings */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Document scale and margins */
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+
+  /* Ensure background colors and images print if needed (browsers vary) */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Typography for print */
+  h1,
+  h2,
+  h3,
+  h4 {
+    page-break-after: avoid;
+    color: #1e293b !important;
+  }
+
+  table {
+    page-break-inside: auto;
+    width: 100% !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* Specific document types */
+  .printable-document {
+    padding: 20mm !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}

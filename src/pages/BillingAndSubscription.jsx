@@ -193,7 +193,11 @@ const BillingAndSubscription = () => {
                             )}
 
                             <div className="mb-8">
-                                <h3 className="text-slate-900 font-black text-2xl uppercase tracking-tighter mb-3 group-hover:text-indigo-600 transition-colors leading-none">{plan.name}</h3>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="text-slate-900 font-black text-2xl uppercase tracking-tighter group-hover:text-indigo-600 transition-colors leading-none">{plan.name}</h3>
+                                    {plan.targetAudience === 'agency' && <span className="bg-purple-100 text-purple-600 text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Agencia</span>}
+                                    {plan.targetAudience === 'full_hr' && <span className="bg-emerald-100 text-emerald-600 text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Integral</span>}
+                                </div>
                                 <p className="text-slate-500 text-xs font-bold leading-relaxed">{plan.description}</p>
                             </div>
 

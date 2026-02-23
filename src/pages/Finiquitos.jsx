@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Scale, AlertCircle, FileText, CheckCircle, Search, Calendar, DollarSign, Calculator
+    Scale, AlertCircle, FileText, CheckCircle, Search, Calendar, DollarSign, Calculator, Plus, Upload, X, Globe, Printer, Download
 } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 import { calcularFiniquitoReal, calcularTiempoTrabajado } from '../utils/finiquitoCalculator';
+import PrintConfigModal from '../components/PrintConfigModal';
 
 const Finiquitos = ({ auth, onLogout }) => {
     const [employees, setEmployees] = useState([]);
@@ -19,9 +20,21 @@ const Finiquitos = ({ auth, onLogout }) => {
     const [fechaTermino, setFechaTermino] = useState(new Date().toISOString().split('T')[0]);
     const [causal, setCausal] = useState('161'); // Default Necesidades de la Empresa
     const [daAvisoPrevio, setDaAvisoPrevio] = useState(false);
+    const [metodoFiniquito, setMetodoFiniquito] = useState('DT');
+    const [observaciones, setObservaciones] = useState('');
+
+    // Upload State
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [fileToUpload, setFileToUpload] = useState(null);
 
     // Preview
     const [finiquitoPreview, setFiniquitoPreview] = useState(null);
+
+    // Print State
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    const [printMode, setPrintMode] = useState('download');
+    const [printingEmployee, setPrintingEmployee] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -60,6 +73,8 @@ const Finiquitos = ({ auth, onLogout }) => {
         setFechaTermino(new Date().toISOString().split('T')[0]);
         setCausal('161');
         setDaAvisoPrevio(false);
+        setMetodoFiniquito('DT');
+        setObservaciones('');
         setFiniquitoPreview(null);
         setIsFiniquitoModalOpen(true);
     };
@@ -92,7 +107,8 @@ const Finiquitos = ({ auth, onLogout }) => {
             causal,
             daAvisoPrevio,
             sueldoBase,
-            totalImponible: totalImponibleAprox
+            totalImponible: totalImponibleAprox,
+            vacationsTaken: selectedEmployee.workerData?.vacations?.takenDays || 0
         };
 
         const result = calcularFiniquitoReal(fakeWorkerData, config);
@@ -114,7 +130,9 @@ const Finiquitos = ({ auth, onLogout }) => {
             await api.put(`/applicants/${selectedEmployee._id}/finiquitar`, {
                 finiquitoData: {
                     ...finiquitoPreview,
-                    fechaTerminoAprobada: fechaTermino
+                    fechaTerminoAprobada: fechaTermino,
+                    method: metodoFiniquito,
+                    observations: observaciones
                 }
             });
 
@@ -123,6 +141,80 @@ const Finiquitos = ({ auth, onLogout }) => {
             fetchData(); // Refresh list to show them as Desvinculado
         } catch (error) {
             toast.error('Error al procesar el finiquito');
+        }
+    };
+
+    const handleDownloadPDF = async (config, mode = 'download') => {
+        if (!printingEmployee) return;
+
+        const loadingToast = toast.loading(mode === 'print' ? 'Preparando impresión...' : 'Generando PDF...');
+
+        try {
+            const response = await api.post('/exports/finiquito', {
+                employeeData: {
+                    fullName: printingEmployee.fullName,
+                    rut: printingEmployee.rut,
+                    position: printingEmployee.position,
+                    hiringDate: printingEmployee.hiring?.contractStartDate
+                },
+                calculation: printingEmployee.workerData?.finiquito,
+                causalLegal: printingEmployee.workerData?.finiquito?.causalLegal,
+                companyInfo: {
+                    name: 'CENTRALIZA-T SPA',
+                    rut: '77.777.777-7'
+                },
+                config
+            }, { responseType: 'blob' });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+
+            if (mode === 'print') {
+                const printWindow = window.open(url, '_blank');
+                if (printWindow) {
+                    printWindow.onload = () => {
+                        printWindow.print();
+                    };
+                    toast.success('Finiquito listo para impresión', { id: loadingToast });
+                } else {
+                    toast.error('Por favor, permite las ventanas emergentes', { id: loadingToast });
+                }
+            } else {
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Finiquito_${printingEmployee.rut}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                toast.success('PDF descargado exitosamente', { id: loadingToast });
+            }
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            toast.error('Error al generar el documento', { id: loadingToast });
+        } finally {
+            setIsPrintModalOpen(false);
+        }
+    };
+
+    const handleUploadFiniquito = async (e) => {
+        e.preventDefault();
+        if (!fileToUpload || !selectedEmployee) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('file', fileToUpload);
+
+        try {
+            await api.put(`/applicants/${selectedEmployee._id}/finiquito-documento`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            toast.success('Documento de finiquito cargado exitosamente');
+            setIsUploadModalOpen(false);
+            setFileToUpload(null);
+            fetchData();
+        } catch (error) {
+            toast.error('Error al subir el documento');
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -217,9 +309,55 @@ const Finiquitos = ({ auth, onLogout }) => {
                                                     Desvincular
                                                 </button>
                                             ) : (
-                                                <div className="text-right">
-                                                    <p className="text-xs font-black text-rose-900">${emp.workerData?.finiquito?.totalAPagar?.toLocaleString() || 0}</p>
-                                                    <p className="text-[8px] font-bold text-rose-400 uppercase tracking-widest">Finiquito Pagado</p>
+                                                <div className="flex flex-col items-end gap-2">
+                                                    <div className="text-right">
+                                                        <p className="text-xs font-black text-rose-900">${emp.workerData?.finiquito?.totalAPagar?.toLocaleString() || 0}</p>
+                                                        <p className="text-[8px] font-bold text-rose-400 uppercase tracking-widest">Finiquito Pagado ({emp.workerData?.finiquito?.method || 'Notaría'})</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                setPrintingEmployee(emp);
+                                                                setPrintMode('print');
+                                                                setIsPrintModalOpen(true);
+                                                            }}
+                                                            className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all group/btn"
+                                                            title="Imprimir Finiquito"
+                                                        >
+                                                            <Printer size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                setPrintingEmployee(emp);
+                                                                setPrintMode('download');
+                                                                setIsPrintModalOpen(true);
+                                                            }}
+                                                            className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all group/btn"
+                                                            title="Descargar PDF"
+                                                        >
+                                                            <Download size={16} />
+                                                        </button>
+                                                    </div>
+                                                    {emp.workerData?.finiquito?.documentUrl ? (
+                                                        <a
+                                                            href={emp.workerData.finiquito.documentUrl}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-all"
+                                                        >
+                                                            <FileText size={12} /> Ver Finiquito
+                                                        </a>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedEmployee(emp);
+                                                                setIsUploadModalOpen(true);
+                                                            }}
+                                                            className="flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-widest rounded-lg border border-indigo-100 hover:bg-indigo-100 transition-all"
+                                                        >
+                                                            <Plus size={12} /> Subir Firmado
+                                                        </button>
+                                                    )}
                                                 </div>
                                             )}
                                         </td>
@@ -300,6 +438,39 @@ const Finiquitos = ({ auth, onLogout }) => {
                                                 </label>
                                             </div>
                                         )}
+
+                                        <div className="pt-4 border-t border-slate-100">
+                                            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Método de Firma Legal</label>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setMetodoFiniquito('DT')}
+                                                    className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${metodoFiniquito === 'DT' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-white text-slate-400 hover:border-slate-200'}`}
+                                                >
+                                                    <Globe size={20} />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">DT (Electrónico)</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setMetodoFiniquito('Notaría')}
+                                                    className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${metodoFiniquito === 'Notaría' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-white text-slate-400 hover:border-slate-200'}`}
+                                                >
+                                                    <Scale size={20} />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">Notaría (Físico)</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Observaciones de Cierre (Dossier RRHH)</label>
+                                            <textarea
+                                                value={observaciones}
+                                                onChange={e => setObservaciones(e.target.value)}
+                                                rows="3"
+                                                placeholder="Ej: Entrega de EPP completa, devolución de llaves, motivo específico..."
+                                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-rose-500 outline-none transition-all resize-none"
+                                            ></textarea>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -386,6 +557,79 @@ const Finiquitos = ({ auth, onLogout }) => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Modal Carga Documento Firmado */}
+            {isUploadModalOpen && selectedEmployee && (
+                <div className="fixed inset-0 bg-[#020617]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden">
+                        <div className="bg-indigo-900 p-8 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+                                    <Upload className="text-indigo-400" /> Cargar Finiquito Firmado
+                                </h3>
+                                <p className="text-indigo-300 text-xs mt-1">{selectedEmployee.fullName}</p>
+                            </div>
+                            <button onClick={() => setIsUploadModalOpen(false)} className="text-indigo-400 hover:text-white">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleUploadFiniquito} className="p-8 space-y-6">
+                            <div className="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200 text-center">
+                                <input
+                                    type="file"
+                                    id="finiquito-upload"
+                                    className="hidden"
+                                    accept=".pdf"
+                                    onChange={(e) => setFileToUpload(e.target.files[0])}
+                                    required
+                                />
+                                <label htmlFor="finiquito-upload" className="cursor-pointer flex flex-col items-center gap-3">
+                                    <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-indigo-500">
+                                        <FileText size={32} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-black text-slate-700 uppercase tracking-tight">
+                                            {fileToUpload ? fileToUpload.name : 'Seleccionar PDF Firmado'}
+                                        </p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mt-1">
+                                            Click para buscar archivo
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsUploadModalOpen(false)}
+                                    className="flex-1 py-4 text-xs font-black text-slate-500 uppercase tracking-widest hover:text-slate-800 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={!fileToUpload || uploading}
+                                    className={`flex-2 py-4 px-8 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${!fileToUpload || uploading
+                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                        : 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700'
+                                        }`}
+                                >
+                                    {uploading ? 'Subiendo...' : 'Confirmar Carga'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+            {isPrintModalOpen && (
+                <PrintConfigModal
+                    isOpen={isPrintModalOpen}
+                    onClose={() => setIsPrintModalOpen(false)}
+                    onConfirm={handleDownloadPDF}
+                    mode={printMode}
+                />
             )}
         </PageWrapper>
     );

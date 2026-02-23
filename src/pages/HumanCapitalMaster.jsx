@@ -10,6 +10,9 @@ import PageWrapper from '../components/PageWrapper';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
+import { exportToExcel } from '../utils/excelHelper';
+import PrintConfigModal from '../components/PrintConfigModal';
+
 const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -18,7 +21,69 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
     const [viewMode, setViewMode] = useState('list'); // 'list' or 'detail'
     const [detailTab, setDetailTab] = useState('summary'); // 'summary', 'dossier', 'history'
     const [bulkLoading, setBulkLoading] = useState(false);
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    const [printingEmployee, setPrintingEmployee] = useState(null);
+    const [printMode, setPrintMode] = useState('download');
     const fileInputRef = useRef(null);
+
+    const handleDownloadPDF = async (employee, config = { format: 'A4', margin: '20mm' }, mode = 'download') => {
+        if (!employee) return;
+        setIsPrintModalOpen(false);
+        const loadingToast = toast.loading(`${mode === 'print' ? 'Preparando impresión' : 'Generando PDF'} para \${employee.fullName}...`);
+        try {
+            const queryParams = new URLSearchParams({
+                format: config.format,
+                margin: config.margin,
+                fitToPage: config.fitToPage
+            }).toString();
+
+            const res = await api.get(`/exports/profile/\${employee._id}?\${queryParams}`, { responseType: 'blob' });
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+
+            if (mode === 'print') {
+                const printWindow = window.open(url, '_blank');
+                if (printWindow) {
+                    printWindow.onload = () => {
+                        printWindow.print();
+                    };
+                    toast.success('Ficha lista para impresión', { id: loadingToast });
+                } else {
+                    toast.error('Por favor, permite las ventanas emergentes', { id: loadingToast });
+                }
+            } else {
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Ficha_\${employee.rut}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                toast.success('Ficha PDF generada con éxito', { id: loadingToast });
+            }
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
+            toast.error('Error al procesar la ficha', { id: loadingToast });
+        }
+    };
+
+    const handleExportExcel = () => {
+        const headers = {
+            fullName: 'Nombre Completo',
+            rut: 'RUT',
+            email: 'Email',
+            phone: 'Teléfono',
+            position: 'Cargo',
+            status: 'Estado',
+            hiring: 'Fecha Inicio'
+        };
+
+        const exportData = filteredEmployees.map(emp => ({
+            ...emp,
+            hiring: emp.hiring?.contractStartDate ? new Date(emp.hiring.contractStartDate).toLocaleDateString() : 'N/A'
+        }));
+
+        exportToExcel(exportData, `Nomina_Capital_Humano_\${new Date().toISOString().split('T')[0]}`, 'Colaboradores', headers);
+    };
 
     useEffect(() => {
         fetchData();
@@ -32,6 +97,9 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
             // Actually, for "Human Capital", we focus on "Contratado" status
             const contracted = res.data.filter(app => app.status === 'Contratado');
 
+            const vacRes = await api.get('/vacations?status=Aprobado');
+            const activeVacations = vacRes.data;
+
             const processed = contracted.map(emp => {
                 const expiryDate = emp.hiring?.contractEndDate ? new Date(emp.hiring.contractEndDate) : null;
                 const today = new Date();
@@ -40,7 +108,15 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
                     const diffTime = expiryDate - today;
                     daysToExpire = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 }
-                return { ...emp, daysToExpire };
+
+                // Check if currently on vacation
+                const isOnVacation = activeVacations.some(v =>
+                    v.applicantId._id === emp._id &&
+                    new Date(v.startDate) <= today &&
+                    new Date(v.endDate) >= today
+                );
+
+                return { ...emp, daysToExpire, isOnVacation };
             });
 
             setEmployees(processed);
@@ -73,7 +149,8 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
                     phone: row['Teléfono'],
                     position: row['Cargo'],
                     project: row['Proyecto'], // Optional, blank is fine
-                    startDate: row['Fecha Inicio Contrato'] || row['Fecha Modificacion'] || null
+                    startDate: row['Fecha Inicio Contrato'] || row['Fecha Modificacion'] || null,
+                    contractType: row['Tipo de Contrato'] || 'Indefinido' // Map contract type directly
                 }));
 
                 const { data: results } = await api.post('/applicants/bulk-legacy', mappedData);
@@ -106,13 +183,14 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
     const activeAlerts = employees.filter(e => e.daysToExpire !== null && e.daysToExpire <= 30 && e.daysToExpire > 0).length;
     const totalActive = employees.length;
 
-    const StatusBadge = ({ status }) => {
+    const StatusBadge = ({ status, isOnVacation }) => {
+        if (isOnVacation) return <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center gap-1"><Plane size={10} /> En Vacaciones</span>;
         let styles = "bg-slate-100 text-slate-600";
         if (status === 'Contratado') styles = "bg-emerald-50 text-emerald-600 border border-emerald-100";
         return <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${styles}`}>{status}</span>;
     };
 
-    const EmployeeDetail = ({ employee, onBack }) => {
+    const EmployeeDetail = ({ employee, onBack, onDownloadPDF }) => {
         if (!employee) return null;
 
         return (
@@ -131,7 +209,7 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
                         <div className="flex-1 text-center md:text-left">
                             <div className="flex flex-col md:flex-row md:items-center gap-4 mb-2">
                                 <h2 className="text-3xl font-black text-slate-800 uppercase tracking-tight">{employee.fullName}</h2>
-                                <StatusBadge status={employee.status} />
+                                <StatusBadge status={employee.status} isOnVacation={employee.isOnVacation} />
                             </div>
                             <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm font-bold text-slate-400 uppercase tracking-widest">
                                 <div className="flex items-center gap-2"><Briefcase size={16} className="text-indigo-400" /> {employee.position}</div>
@@ -140,6 +218,12 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
                             </div>
                         </div>
                         <div className="flex gap-3">
+                            <button
+                                onClick={onDownloadPDF}
+                                className="px-6 py-4 bg-indigo-50 text-indigo-600 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-100 transition-all border border-indigo-100 flex items-center gap-2"
+                            >
+                                <FileText size={16} /> Descargar PDF
+                            </button>
                             <button
                                 onClick={() => onOpenCENTRALIZAT(employee)}
                                 className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 group"
@@ -183,7 +267,7 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Tipo de Contrato</p>
-                                        <p className="text-lg font-black text-slate-700">{employee.hiring?.contractType || 'No Definido'}</p>
+                                        <p className="text-lg font-black text-slate-700">{employee.workerData?.contract?.type || 'No Definido'}</p>
                                     </div>
                                     <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Duración</p>
@@ -411,7 +495,10 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
                                 >
                                     <Users size={16} /> {bulkLoading ? 'Procesando...' : 'Importar Dotación Existente'}
                                 </button>
-                                <button className="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
+                                <button
+                                    onClick={handleExportExcel}
+                                    className="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2"
+                                >
                                     <FileText size={16} /> Exportar Reporte
                                 </button>
                             </div>
@@ -462,10 +549,10 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
                                             </div>
 
                                             <div className="flex items-center justify-between relative z-10">
-                                                <StatusBadge status={emp.status} />
+                                                <StatusBadge status={emp.status} isOnVacation={emp.isOnVacation} />
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-                                                    <span className="text-[9px] font-black text-slate-500 uppercase">Activo</span>
+                                                    <div className={`w-2 h-2 rounded-full \${emp.isOnVacation ? 'bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)]' : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]'}`}></div>
+                                                    <span className="text-[9px] font-black text-slate-500 uppercase">{emp.isOnVacation ? 'Ausente' : 'Activo'}</span>
                                                 </div>
                                             </div>
 
@@ -482,11 +569,27 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
             ) : (
                 <EmployeeDetail
                     employee={selectedEmployee}
+                    onDownloadPDF={() => {
+                        setPrintingEmployee(selectedEmployee);
+                        setPrintMode('download');
+                        setIsPrintModalOpen(true);
+                    }}
                     onBack={() => {
                         setViewMode('list');
                         setSelectedEmployee(null);
                         setDetailTab('summary');
                     }}
+                />
+            )}
+            {isPrintModalOpen && (
+                <PrintConfigModal
+                    isOpen={isPrintModalOpen}
+                    onClose={() => {
+                        setIsPrintModalOpen(false);
+                        setPrintingEmployee(null);
+                    }}
+                    onConfirm={(config, m) => handleDownloadPDF(printingEmployee, config, m)}
+                    mode={printMode}
                 />
             )}
         </PageWrapper>

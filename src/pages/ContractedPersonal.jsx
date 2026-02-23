@@ -92,7 +92,12 @@ const ContractedPersonal = ({ auth, onLogout }) => {
                 <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                     <h3 className="font-bold text-slate-800">Nómina de Trabajadores</h3>
                     <div className="flex gap-2">
-                        <button className="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-all">Exportar PDF</button>
+                        <button
+                            onClick={() => window.print()}
+                            className="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-all"
+                        >
+                            Exportar PDF
+                        </button>
                     </div>
                 </div>
                 <div className="p-6">

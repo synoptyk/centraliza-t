@@ -25,6 +25,7 @@ const {
     processRemoteApproval,
     getRemoteApprovalDetails,
     processFiniquito,
+    uploadFiniquitoDocument,
     importLegacyWorkforce
 } = require('../controllers/applicantController');
 
@@ -37,10 +38,11 @@ const {
 
 const { protect } = require('../middleware/authMiddleware');
 const { checkSubscriptionStatus, checkResourceLimits } = require('../middleware/subscriptionMiddleware');
+const { validate, createApplicantSchema } = require('../middleware/validators');
 
 router.route('/')
     .get(protect, getApplicants)
-    .post(protect, checkSubscriptionStatus, checkResourceLimits('applicants'), registerApplicant);
+    .post(protect, checkSubscriptionStatus, checkResourceLimits('applicants'), validate(createApplicantSchema), registerApplicant);
 
 router.route('/bulk-legacy').post(protect, importLegacyWorkforce);
 
@@ -49,6 +51,7 @@ router.route('/:id')
 // .get(protect, getOneApplicant) // If needed later
 
 router.route('/:id/finiquitar').put(protect, processFiniquito);
+router.route('/:id/finiquito-documento').put(protect, upload.single('file'), uploadFiniquitoDocument);
 
 router.route('/:id/status').put(protect, updateApplicantStatus);
 router.route('/:id/interview').put(protect, registerInterview);

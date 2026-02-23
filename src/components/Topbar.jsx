@@ -9,7 +9,7 @@ const Topbar = ({ title, subtitle, icon: Icon, actions, auth, onLogout }) => {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed top-0 right-0 left-0 md:left-80 z-40 flex flex-col"
+            className="fixed top-0 right-0 left-0 md:left-80 z-40 flex flex-col no-print"
         >
             {/* Mini Promo Banner */}
             <div className="w-full bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] py-1.5 px-2 text-center z-50 flex justify-center items-center gap-1.5 sm:gap-2 border-b border-white/10 shadow-md overflow-hidden">

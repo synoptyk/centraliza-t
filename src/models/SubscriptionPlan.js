@@ -39,6 +39,11 @@ const subscriptionPlanSchema = new mongoose.Schema({
     isTrial: {
         type: Boolean,
         default: false
+    },
+    targetAudience: {
+        type: String,
+        enum: ['agency', 'full_hr', 'both'],
+        default: 'both'
     }
 }, { timestamps: true });
 

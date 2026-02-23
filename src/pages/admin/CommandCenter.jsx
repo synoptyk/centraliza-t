@@ -68,7 +68,8 @@ const CommandCenter = ({ auth, onLogout }) => {
         legalRepresentatives: [], // Array of { rut, name, email, phone }
         commercialContacts: [],   // Array of { name, phone, email }
         contractStartDate: '', contractDurationMonths: '', contractEndDate: '',
-        contractedUsersLimit: 5, userValueUF: '', monthlyTotalUF: ''
+        contractedUsersLimit: 5, userValueUF: '', monthlyTotalUF: '',
+        serviceMode: 'FULL_HR_360'
     });
 
     // Auto-calculate Contract End Date
@@ -159,7 +160,8 @@ const CommandCenter = ({ auth, onLogout }) => {
                 legalRepresentatives: [],
                 commercialContacts: [],
                 contractStartDate: '', contractDurationMonths: '', contractEndDate: '',
-                contractedUsersLimit: 5, userValueUF: '', monthlyTotalUF: ''
+                contractedUsersLimit: 5, userValueUF: '', monthlyTotalUF: '',
+                serviceMode: 'FULL_HR_360'
             });
             fetchData();
         } catch (error) {
@@ -1089,6 +1091,17 @@ const CommandCenter = ({ auth, onLogout }) => {
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Total Mensual (UF)</label>
                                             <input type="number" step="0.01" value={companyForm.monthlyTotalUF} onChange={e => setCompanyForm({ ...companyForm, monthlyTotalUF: e.target.value })} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">Modo de Servicio</label>
+                                            <select
+                                                value={companyForm.serviceMode}
+                                                onChange={e => setCompanyForm({ ...companyForm, serviceMode: e.target.value })}
+                                                className="w-full px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-xl focus:border-indigo-500 outline-none transition-all text-xs font-bold text-indigo-700"
+                                            >
+                                                <option value="FULL_HR_360">HR 360 (Integral)</option>
+                                                <option value="RECRUITMENT_ONLY">AGENCIA (Solo Reclutamiento)</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

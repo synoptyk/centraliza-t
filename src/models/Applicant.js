@@ -341,9 +341,25 @@ const applicantSchema = new mongoose.Schema({
         },
         contract: {
             startDate: Date,
-            type: String, // 'Plazo Fijo', 'Indefinido', 'Por Obra o Faena'
+            type: { type: String, enum: ['Plazo Fijo', 'Indefinido', 'Por Obra o Faena', 'Honorarios'], default: 'Indefinido' }, // Expanded Contract Types
             durationMonths: Number,
             endDate: Date
+        },
+        finiquito: {
+            method: { type: String, enum: ['DT', 'Notaría'], default: 'Notaría' },
+            documentUrl: String,
+            documentPublicId: String,
+            observations: String,
+            processedDate: Date,
+            totalAPagar: Number,
+            causal: String,
+            desglose: mongoose.Schema.Types.Mixed
+        },
+        vacations: {
+            accruedDays: { type: Number, default: 0 },
+            takenDays: { type: Number, default: 0 },
+            pendingDays: { type: Number, default: 0 }, // Current Balance
+            lastCalculationDate: Date
         },
         validationStatus: {
             type: String,

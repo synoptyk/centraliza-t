@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     User, HardHat, CreditCard, ShoppingBag, Save, UserCheck, UserPlus,
     Upload, Trash2, Plus, Loader2, Search, Info, CheckCircle2,
-    Calendar, Phone, Mail, MapPin, Camera, DollarSign, Briefcase,
+    Calendar, Plane, Briefcase, Phone, Mail, MapPin, Camera, DollarSign,
     Clock, Building2, LayoutGrid, ExternalLink
 } from 'lucide-react';
 import api from '../utils/api';
@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import Topbar from '../components/Topbar';
 import usePermissions from '../hooks/usePermissions';
 import PageWrapper from '../components/PageWrapper';
+import PrintConfigModal from '../components/PrintConfigModal';
 
 const ChileanData = {
     afps: ['PlanVital', 'Provida', 'Capital', 'Cuprum', 'Habitat', 'Modelo', 'Uno'],
@@ -43,12 +44,12 @@ const SolicitudContratacion = ({ applicant, formData }) => {
         <div className="max-w-4xl mx-auto bg-white p-8 font-sans print:p-0">
             {/* Header */}
             <div className="flex border border-slate-900 mb-6">
-                <div className="w-40 border-r border-slate-900 p-4 flex items-center justify-center text-center text-[10px] font-bold text-indigo-500">
-                    Aquí va el logo del cliente
+                <div className="w-40 border-r border-slate-900 p-4 flex items-center justify-center text-center text-[10px] font-bold text-slate-300">
+                    LOGO EMPRESA
                 </div>
                 <div className="flex-1 p-4 text-center">
                     <h1 className="text-xl font-black text-slate-700 uppercase">Solicitud de Contratación</h1>
-                    <p className="text-[10px] font-bold text-slate-400">Aquí va el nombre del formato de cliente</p>
+                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Documento Oficial de Registro</p>
                 </div>
             </div>
 
@@ -153,7 +154,7 @@ const SolicitudContratacion = ({ applicant, formData }) => {
             <p className="text-[10px] italic text-slate-500 mb-12">Los datos aquí expresados son de exclusiva responsabilidad del trabajador.</p>
 
             <div className="border-t border-slate-200 pt-2 flex justify-end">
-                <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Aquí va nombre de cliente.</span>
+                <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">CENTRALIZA-T ECOSYSTEM</span>
             </div>
         </div>
     );
@@ -164,7 +165,9 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [selectedId, setSelectedId] = useState('');
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState('personal'); // personal, prevision, financial, logistics
+    const [activeTab, setActiveTab] = useState('personal');
+    const [disciplinaryRecords, setDisciplinaryRecords] = useState([]);
+    const [commendationRecords, setCommendationRecords] = useState([]); // personal, prevision, financial, logistics
 
     const [formData, setFormData] = useState({
         personal: {
@@ -186,8 +189,11 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
         emergencyContact: { name: '', phone: '' },
         financial: { liquidSalary: 0, bonuses: [], bankData: { bank: '', accountType: 'Cuenta Vista / RUT', accountNumber: '' } },
         logistics: { shift: [], clothingSizes: { shirt: '', jacket: '', pants: '', shoes: '' } },
-        contract: { startDate: '', type: 'Plazo Fijo', durationMonths: 1, endDate: '' }
+        contract: { startDate: '', type: 'Plazo Fijo', durationMonths: 1, endDate: '' },
+        vacations: { accruedDays: 0, takenDays: 0, lastCalculationDate: null }
     });
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    const [printMode, setPrintMode] = useState('download'); // 'print' or 'download'
     const [form, setForm] = useState({ bank: '', accountType: '', accountNumber: '', healthSystem: '', pensionSystem: '' });
     const { canUpdate } = usePermissions('ficha-colaborador');
 
@@ -206,6 +212,48 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
             toast.error('Error al cargar postulantes');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDownloadPDF = async (config, mode = 'download') => {
+        if (!selectedId) return;
+        setIsPrintModalOpen(false);
+        const applicant = applicants.find(a => a._id === selectedId);
+        const loadingToast = toast.loading(`${mode === 'print' ? 'Preparando impresión' : 'Generando PDF'} para ${applicant.fullName}...`);
+
+        try {
+            const queryParams = new URLSearchParams({
+                format: config.format,
+                margin: config.margin,
+                fitToPage: config.fitToPage
+            }).toString();
+
+            const res = await api.get(`/exports/profile/${selectedId}?${queryParams}`, { responseType: 'blob' });
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+
+            if (mode === 'print') {
+                const printWindow = window.open(url, '_blank');
+                if (printWindow) {
+                    printWindow.onload = () => {
+                        printWindow.print();
+                    };
+                    toast.success('Documento listo para impresión', { id: loadingToast });
+                } else {
+                    toast.error('Por favor, permite las ventanas emergentes para imprimir', { id: loadingToast });
+                }
+            } else {
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Ficha_${applicant.rut}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                toast.success('PDF generado con éxito', { id: loadingToast });
+            }
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
+            toast.error('Error al procesar el documento', { id: loadingToast });
         }
     };
 
@@ -242,6 +290,18 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
             }
 
             setFormData(prev => ({ ...prev, ...wd }));
+
+            // Fetch Labor Records
+            try {
+                const [discRes, commRes] = await Promise.all([
+                    api.get(`/records/disciplinary?applicantId=${id}`),
+                    api.get(`/records/commendations?applicantId=${id}`)
+                ]);
+                setDisciplinaryRecords(discRes.data);
+                setCommendationRecords(commRes.data);
+            } catch (error) {
+                console.error('Error fetching records:', error);
+            }
         }
     };
 
@@ -342,17 +402,37 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
             headerActions={
                 <div className="flex items-center gap-4">
                     {selectedId && (
-                        <button
-                            onClick={() => {
-                                const app = applicants.find(a => a._id === selectedId);
-                                if (app) onOpenCENTRALIZAT(app);
-                            }}
-                            className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2 text-xs font-bold text-white uppercase tracking-widest"
-                            title="Ver CENTRALIZAT"
-                        >
-                            <ExternalLink size={16} />
-                            CENTRALIZAT
-                        </button>
+                        <>
+                            <button
+                                onClick={() => {
+                                    setPrintMode('download');
+                                    setIsPrintModalOpen(true);
+                                }}
+                                className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2 text-xs font-bold text-white uppercase tracking-widest"
+                            >
+                                <FileText size={16} /> Descargar PDF
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setPrintMode('print');
+                                    setIsPrintModalOpen(true);
+                                }}
+                                className="bg-emerald-500 px-4 py-2 rounded-xl border border-emerald-400 hover:bg-emerald-600 transition-all flex items-center gap-2 text-xs font-bold text-white uppercase tracking-widest shadow-lg shadow-emerald-500/20"
+                            >
+                                <Plus size={16} /> Imprimir
+                            </button>
+                            <button
+                                onClick={() => {
+                                    const app = applicants.find(a => a._id === selectedId);
+                                    if (app) onOpenCENTRALIZAT(app);
+                                }}
+                                className="bg-indigo-600 px-4 py-2 rounded-xl border border-indigo-500 hover:bg-indigo-700 transition-all flex items-center gap-2 text-xs font-bold text-white uppercase tracking-widest"
+                                title="Ver CENTRALIZAT"
+                            >
+                                <ExternalLink size={16} />
+                                CENTRALIZAT
+                            </button>
+                        </>
                     )}
                     <div className="relative w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={16} />
@@ -380,6 +460,8 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                             { id: 'prevision', label: 'Previsión y Salud', icon: HardHat },
                             { id: 'financial', label: 'Remuneraciones', icon: CreditCard },
                             { id: 'logistics', label: 'Logística y Tallas', icon: ShoppingBag },
+                            { id: 'vacations', label: 'Vacaciones/Descansos', icon: Plane },
+                            { id: 'conducta', label: 'Conducta y Méritos', icon: Trophy },
                             { id: 'preview_solicitud', label: 'Previsualizar Solicitud', icon: LayoutGrid },
                         ].map(tab => (
                             <button
@@ -750,6 +832,132 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                 </div>
                             </div>
                         )}
+
+                        {activeTab === 'vacations' && (
+                            <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
+                                <SectionTitle title="Control de Vacaciones y Descansos" icon={Plane} />
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                                    <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 flex flex-col items-center text-center">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Días Devengados</p>
+                                        <p className="text-4xl font-black text-slate-900 tracking-tighter">{(formData.vacations?.accruedDays || 0).toFixed(2)}</p>
+                                        <p className="text-[10px] font-bold text-slate-400 mt-2 italic">Acumulado a la fecha</p>
+                                    </div>
+                                    <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 flex flex-col items-center text-center">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 text-rose-500">Días Tomados</p>
+                                        <p className="text-4xl font-black text-rose-500 tracking-tighter">{(formData.vacations?.takenDays || 0).toFixed(1)}</p>
+                                        <div className="mt-4 w-full">
+                                            <Label>Carga Manual</Label>
+                                            <Input
+                                                type="number"
+                                                step="0.5"
+                                                className="text-center bg-white"
+                                                value={formData.vacations?.takenDays || 0}
+                                                onChange={(e) => setFormData({
+                                                    ...formData,
+                                                    vacations: { ...formData.vacations, takenDays: parseFloat(e.target.value) || 0 }
+                                                })}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="bg-indigo-600 p-8 rounded-[2.5rem] shadow-xl shadow-indigo-100 flex flex-col items-center text-center text-white">
+                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2 text-white">Saldo Disponible</p>
+                                        <p className="text-4xl font-black tracking-tighter text-white">
+                                            {((formData.vacations?.accruedDays || 0) - (formData.vacations?.takenDays || 0)).toFixed(2)}
+                                        </p>
+                                        <p className="text-[10px] font-bold mt-2 italic opacity-60 text-white">Días para el finiquito</p>
+                                    </div>
+                                </div>
+
+                                <div className="p-8 bg-amber-50 rounded-3xl border border-amber-100 flex gap-6">
+                                    <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 shrink-0">
+                                        <Info size={24} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-black text-amber-900 uppercase tracking-wider mb-2">Nota Importante</p>
+                                        <p className="text-xs font-bold text-amber-800 leading-relaxed uppercase tracking-widest opacity-70">
+                                            El sistema calcula automáticamente el devengo de 1.25 días por cada mes completo trabajado desde el {formData.contract?.startDate ? new Date(formData.contract.startDate).toLocaleDateString() : 'la fecha de contrato'}.
+                                            Si registra días tomados manualmente, estos se descontarán del próximo cálculo de finiquito.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'conducta' && (
+                            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter flex items-center gap-3 mb-2">
+                                        <Trophy className="text-emerald-500" /> Méritos y Reconocimientos
+                                    </h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Historial de excelencia y cultura organizacional</p>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {commendationRecords.length === 0 ? (
+                                            <div className="col-span-2 p-10 bg-slate-50 border border-dashed border-slate-200 rounded-[2.5rem] text-center">
+                                                <Trophy size={40} className="mx-auto text-slate-200 mb-3" />
+                                                <p className="text-xs font-black text-slate-400 uppercase">Sin reconocimientos registrados</p>
+                                            </div>
+                                        ) : commendationRecords.map(comm => (
+                                            <div key={comm._id} className="p-6 bg-emerald-50/50 border border-emerald-100 rounded-[2rem] flex gap-4">
+                                                <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600">
+                                                    <Award size={24} />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">{comm.category}</p>
+                                                    <p className="text-sm font-black text-slate-800 tracking-tight">{comm.title}</p>
+                                                    <p className="text-xs font-bold text-slate-500 mt-2 italic">"{comm.reason}"</p>
+                                                    <p className="text-[10px] font-bold text-slate-400 mt-4 uppercase tracking-tighter">{new Date(comm.date).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="pt-8">
+                                    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter flex items-center gap-3 mb-2">
+                                        <ShieldAlert className="text-rose-500" /> Medidas Disciplinarias
+                                    </h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Registro legal según Art. 154 Reglamento Interno</p>
+
+                                    <div className="space-y-4">
+                                        {disciplinaryRecords.length === 0 ? (
+                                            <div className="p-10 bg-slate-50 border border-dashed border-slate-200 rounded-[2.5rem] text-center">
+                                                <CheckCircle2 size={40} className="mx-auto text-slate-200 mb-3" />
+                                                <p className="text-xs font-black text-slate-400 uppercase">Conducta ejemplar: Sin amonestaciones</p>
+                                            </div>
+                                        ) : disciplinaryRecords.map(action => (
+                                            <div key={action._id} className="p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm flex items-start justify-between">
+                                                <div className="flex gap-6">
+                                                    <div className={`p-4 rounded-2xl ${action.type === 'Multa' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'}`}>
+                                                        <ShieldAlert size={24} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-3 mb-1">
+                                                            <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${action.type === 'Multa' ? 'bg-amber-100 border-amber-200' : 'bg-rose-100 border-rose-200'
+                                                                }`}>{action.type}</span>
+                                                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{action.internalRegArticle}</span>
+                                                        </div>
+                                                        <p className="text-sm font-black text-slate-800 tracking-tight">{action.reason}</p>
+                                                        <p className="text-xs font-bold text-slate-400 mt-2 max-w-xl">{action.incidentDetails}</p>
+                                                        <div className="flex items-center gap-6 mt-6">
+                                                            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                                <Calendar size={12} /> {new Date(action.date).toLocaleDateString()}
+                                                            </div>
+                                                            <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${action.status === 'Firmado' ? 'text-emerald-500' : 'text-amber-500'
+                                                                }`}>
+                                                                {action.status === 'Firmado' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
+                                                                {action.status}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             ) : (
@@ -762,6 +970,14 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                 </div>
             )
             }
+            {isPrintModalOpen && (
+                <PrintConfigModal
+                    isOpen={isPrintModalOpen}
+                    onClose={() => setIsPrintModalOpen(false)}
+                    onConfirm={handleDownloadPDF}
+                    mode={printMode}
+                />
+            )}
         </PageWrapper>
     );
 };

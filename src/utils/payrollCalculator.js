@@ -11,6 +11,7 @@ const DEFAULT_VALOR_UF = 39731; // UF referencia enero 2026
 const DEFAULT_VALOR_UTM = 68000; // UTM referencia 2026
 const DEFAULT_SIS_RATE = 1.54; // % SIS vigente enero 2026 (licitación AFP)
 const DEFAULT_MUTUAL_BASE = 0.90; // %
+const RETENCION_HONORARIOS = 13.75; // % Retención legal para boletas de honorarios 2024-2026
 
 // Tasas AFP 2026 (10% legal + comisión administradora) según Sup. de Pensiones
 const DEFAULT_TASAS_AFP = {
@@ -151,7 +152,47 @@ export const calcularLiquidacionReal = (workerData, ajustesPeriodo = {}, globalP
     const bonosImponibles = ajustesPeriodo.bonosImponibles || 0;
     const bonosNoImponibles = ajustesPeriodo.bonosNoImponibles || 0;
     const descuentosVarios = ajustesPeriodo.descuentosVarios || 0;
+    const diasVacaciones = ajustesPeriodo.diasVacaciones || 0;
 
+    // --- CASO ESPECIAL: HONORARIOS ---
+    if (contractType?.toLowerCase() === 'honorarios') {
+        const totalBruto = baseSalary + bonosImponibles + bonosNoImponibles;
+        const retencionLegal = Math.round(totalBruto * (RETENCION_HONORARIOS / 100));
+        const totalDescuentosGenerales = retencionLegal + descuentosVarios;
+        const liquido = totalBruto - totalDescuentosGenerales;
+
+        return {
+            sueldoBase: baseSalary,
+            gratificacion: 0,
+            bonosImponibles,
+            bonosNoImponibles,
+            totalImponible: totalBruto,
+
+            afp: 0,
+            salud: 0,
+            afc: 0,
+            totalLeyesSociales: 0,
+
+            baseTributable: totalBruto,
+            impuestoUnico: retencionLegal, // Usamos este campo para la retención por simplicidad visual
+            descuentosVarios,
+
+            totalHaberes: totalBruto,
+            totalDescuentos: totalDescuentosGenerales,
+            liquidoAPagar: Math.max(0, liquido),
+
+            // Aportes patronales 0 para honorarios
+            aportesPatronales: {
+                afc: 0,
+                sis: 0,
+                mutual: 0,
+                total: 0,
+                costoFinalEmpresa: totalBruto
+            }
+        };
+    }
+
+    // --- CASO NORMAL: CONTRATO DEPENDIENTE ---
     const gratificacionLegal = calcularGratificacion(baseSalary, globalParams);
     const totalImponible = baseSalary + gratificacionLegal + bonosImponibles;
 
@@ -194,6 +235,7 @@ export const calcularLiquidacionReal = (workerData, ajustesPeriodo = {}, globalP
         baseTributable,
         impuestoUnico,
         descuentosVarios,
+        diasVacaciones,
 
         totalHaberes,
         totalDescuentos: totalDescuentosGenerales,

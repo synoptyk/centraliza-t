@@ -64,7 +64,7 @@ const getAllSubscriptions = asyncHandler(async (req, res) => {
 // @desc    Create a new plan (SuperAdmin Only)
 // @route   POST /api/subscriptions/plans
 const createPlan = asyncHandler(async (req, res) => {
-    const { name, description, priceUF, limits, features, isTrial, isPublic } = req.body;
+    const { name, description, priceUF, limits, features, isTrial, isPublic, targetAudience } = req.body;
 
     const planExists = await SubscriptionPlan.findOne({ name });
     if (planExists) {
@@ -79,7 +79,8 @@ const createPlan = asyncHandler(async (req, res) => {
         limits,
         features,
         isTrial,
-        isPublic
+        isPublic,
+        targetAudience
     });
 
     res.status(201).json(plan);
@@ -133,13 +134,13 @@ const updateSubscriptionStatus = asyncHandler(async (req, res) => {
         subscription.startDate = new Date();
         subscription.endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-        // Enforce Service Mode Update
+        // Enforce Service Mode Update based on Plan Target Audience
         const planDetails = await SubscriptionPlan.findById(subscription.planId);
         if (planDetails) {
             const company = await Company.findById(subscription.companyId);
             if (company) {
-                const isAgencyPlan = planDetails.name.toLowerCase().includes('recluta') || planDetails.name.toLowerCase().includes('recruitment');
-                company.serviceMode = isAgencyPlan ? 'RECRUITMENT_ONLY' : 'FULL_HR_360';
+                // Logic: agency -> RECRUITMENT_ONLY, others (full_hr, both, etc) -> FULL_HR_360
+                company.serviceMode = planDetails.targetAudience === 'agency' ? 'RECRUITMENT_ONLY' : 'FULL_HR_360';
                 await company.save();
             }
         }
@@ -378,13 +379,12 @@ const handleWebhook = asyncHandler(async (req, res) => {
                 await subscription.save();
                 console.log(`🚀 Suscripción ACTIVADA para la empresa ${companyId}`);
 
-                // 2. Automate Dual-Flow Switch depending on Plan Name
+                // 2. Automate Dual-Flow Switch depending on Plan Target Audience
                 const planDetails = await SubscriptionPlan.findById(planId);
                 if (planDetails) {
                     const company = await Company.findById(companyId);
                     if (company) {
-                        const isAgencyPlan = planDetails.name.toLowerCase().includes('recluta') || planDetails.name.toLowerCase().includes('recruitment');
-                        company.serviceMode = isAgencyPlan ? 'RECRUITMENT_ONLY' : 'FULL_HR_360';
+                        company.serviceMode = planDetails.targetAudience === 'agency' ? 'RECRUITMENT_ONLY' : 'FULL_HR_360';
                         await company.save();
                         console.log(`🔄 Service Mode actualizado a: ${company.serviceMode} (Empresa: ${company.name})`);
                     }

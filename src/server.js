@@ -8,6 +8,8 @@ const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { startNotificationWorker } = require('./utils/notificationWorker');
 const { startIndicatorSyncWorker, runManualSync } = require('./utils/indicatorSyncService');
+const { runVacationAccrualSync } = require('./utils/vacationWorker');
+const { globalLimiter, authLimiter } = require('./middleware/rateLimiter');
 
 dotenv.config();
 
@@ -97,6 +99,10 @@ app.use((req, res, next) => {
     next();
 });
 
+// Rate Limiting
+app.use('/api/', globalLimiter);
+app.use('/api/auth', authLimiter);
+
 // Routes
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.get('/api/ping', (req, res) => res.json({ message: 'pong', time: new Date() }));
@@ -113,6 +119,10 @@ app.use('/api/config', require('./routes/configRoutes'));
 app.use('/api/settings', require('./routes/settingsRoutes'));
 app.use('/api/contracts', require('./routes/contractRoutes'));
 app.use('/api/subscriptions', require('./routes/subscriptionRoutes'));
+app.use('/api/vacations', require('./routes/vacationRoutes'));
+app.use('/api/records', require('./routes/recordRoutes'));
+app.use('/api/exports', require('./routes/exportRoutes'));
+app.use('/api/finiquitos', require('./routes/finiquitoRoutes'));
 
 // Diagnostic Route for Email
 const sendEmail = require('./utils/sendEmail');
@@ -144,9 +154,9 @@ app.post('/api/test-email', async (req, res) => {
 const User = require('./models/User');
 const seedAdmin = async () => {
     try {
-        const email = 'ceo@synoptyk.cl'; // Dedicated SuperAdmin Email
-        const password = 'BarrientosJobsMosk';
-        const name = 'SuperAdmin CEO';
+        const email = process.env.SEED_ADMIN_EMAIL || 'ceo@synoptyk.cl';
+        const password = process.env.SEED_ADMIN_PASSWORD || 'ChangeMeInProduction!';
+        const name = process.env.SEED_ADMIN_NAME || 'SuperAdmin CEO';
 
         let admin = await User.findOne({ email });
 
@@ -214,6 +224,14 @@ connectDB().then(async () => {
     // Start workers
     startNotificationWorker();
     startIndicatorSyncWorker(); // 🔴🟡🟢 Living Indicators Ecosystem
+
+    // 🏖️ Vacation Accrual Sync — runs every 7 days
+    // NOTE: 30 days in ms (2,592,000,000) overflows Node's 32-bit setInterval limit.
+    // Running weekly is safe and still keeps balances accurate.
+    runVacationAccrualSync().catch(e => console.error('Initial vacation sync error:', e.message));
+    setInterval(() => {
+        runVacationAccrualSync().catch(e => console.error('Vacation sync error:', e.message));
+    }, 7 * 24 * 60 * 60 * 1000); // 7 days (604,800,000ms — within 32-bit limit)
 
     server.listen(PORT, () => {
         console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);

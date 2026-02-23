@@ -29,14 +29,15 @@ export const calcularTiempoTrabajado = (fechaInicio, fechaFin) => {
 /**
  * Calcula Días de Vacaciones Proporcionales (Matemática Pura - Omitiendo festivos para el MVP)
  */
-export const calcularVacacionesProporcionales = (fechaInicio, fechaFin, sueldoBase) => {
+export const calcularVacacionesProporcionales = (fechaInicio, fechaFin, sueldoBase, diasTomados = 0) => {
     const { meses, diasExtra } = calcularTiempoTrabajado(fechaInicio, fechaFin);
     const totalMesesDecimal = meses + (diasExtra / 30);
 
     const diasAcumulados = totalMesesDecimal * DIAS_VACACIONES_POR_MES;
+    const saldoDias = Math.max(0, diasAcumulados - diasTomados);
     const valorDia = sueldoBase / 30;
 
-    return Math.round(diasAcumulados * valorDia);
+    return Math.round(saldoDias * valorDia);
 };
 
 /**
@@ -68,7 +69,7 @@ export const calcularAvisoPrevio = (sueldoImponible, valorUF) => {
 };
 
 /**
- * Máster: Calcula Finiquito Dinámico basado en Causal Legal.
+ * Máster: Calcula Finiquito Dinámico basado en Causal Legal y Tipo de Contrato.
  */
 export const calcularFiniquitoReal = (workerData, config) => {
     const {
@@ -77,19 +78,37 @@ export const calcularFiniquitoReal = (workerData, config) => {
         causal,           // "159-1" (Mutuo), "159-2" (Renuncia), "160" (Culposo), "161" (Necesidades)
         daAvisoPrevio,    // boolean (True si se le avisó con 30 días, eximiendo el pago sustitutivo en el art 161)
         sueldoBase,
-        totalImponible
+        totalImponible,
+        contractType = 'Indefinido', // Default to Indefinido if missing
+        vacationsTaken = 0
     } = workerData;
 
     const { ufValue = 38500 } = config; // Inyectado desde BancoCentral API / GlobalSettings
 
-    // 1. Vacaciones (Base de todo finiquito sin importar la causal)
-    const montoVacaciones = calcularVacacionesProporcionales(fechaInicio, fechaFin, sueldoBase);
+    // 1. CASO ESPECIAL: Honorarios -> No tienen finiquito legal.
+    if (contractType?.toLowerCase() === 'honorarios') {
+        return {
+            causalLegal: 'N/A (Honorarios)',
+            desglose: {
+                vacacionesProporcionales: 0,
+                indemnizacionAñosServicio: 0,
+                indemnizacionAvisoPrevio: 0
+            },
+            totalAPagar: 0
+        };
+    }
+
+    // 2. Vacaciones (Base de todo finiquito dependiente sin importar la causal)
+    const montoVacaciones = calcularVacacionesProporcionales(fechaInicio, fechaFin, sueldoBase, vacationsTaken);
 
     let montoAvisoPrevio = 0;
     let montoAñosServicio = 0;
 
-    // 2. Indemnizaciones (Solo Art. 161 exige pago por años de servicio y aviso previo)
-    if (causal.startsWith('161')) {
+    // 3. Indemnizaciones (Solo Art. 161 exige pago por años de servicio y aviso previo)
+    // REGLA: Los contratos a Plazo Fijo o Por Obra/Faena NO tienen indemnización por años de servicio ni mes de aviso por el art 161 (el fin es por el 159).
+    const isIndefinido = contractType?.toLowerCase() === 'indefinido';
+
+    if (causal.startsWith('161') && isIndefinido) {
         montoAñosServicio = calcularAñosServicio(fechaInicio, fechaFin, totalImponible, ufValue);
 
         if (!daAvisoPrevio) {
@@ -97,7 +116,7 @@ export const calcularFiniquitoReal = (workerData, config) => {
         }
     }
 
-    // 3. Causales de mutuo acuerdo pueden pactar indemnizaciones, pero fuera del MVP nos regimos por el piso legal restrictivo.
+    // 4. Causales de mutuo acuerdo pueden pactar indemnizaciones, pero fuera del MVP nos regimos por el piso legal restrictivo.
 
     const totalFiniquito = montoVacaciones + montoAñosServicio + montoAvisoPrevio;
 

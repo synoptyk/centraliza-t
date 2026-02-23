@@ -10,10 +10,11 @@ const {
 
 const { protect } = require('../middleware/authMiddleware');
 const { checkSubscriptionStatus, checkResourceLimits } = require('../middleware/subscriptionMiddleware');
+const { validate, createProjectSchema } = require('../middleware/validators');
 
 router.route('/')
     .get(protect, getProjects)
-    .post(protect, checkSubscriptionStatus, checkResourceLimits('projects'), createProject);
+    .post(protect, checkSubscriptionStatus, checkResourceLimits('projects'), validate(createProjectSchema), createProject);
 
 router.route('/:id')
     .get(protect, getProjectById)

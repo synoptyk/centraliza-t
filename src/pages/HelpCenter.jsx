@@ -45,7 +45,7 @@ const HelpCenter = ({ auth, onLogout }) => {
             ]
         },
         {
-            category: "GESTIÓN Y CONTRATACIONES",
+            category: "GESTIÓN DE CAPITAL HUMANO",
             icon: FilePlus,
             items: [
                 { id: 14, name: "Contrataciones (Generación IA)", obj: "Formalización automatizada.", functions: "Generación de contratos con IA y editor inteligente.", icon: FilePlus },

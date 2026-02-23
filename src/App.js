@@ -39,6 +39,8 @@ import Finiquitos from './pages/Finiquitos';
 import BancoCentral from './pages/BancoCentral';
 import SIIMirror from './pages/SIIMirror';
 import PreviredMirror from './pages/PreviredMirror';
+import Vacaciones from './pages/Vacaciones';
+import RelacionesLaborales from './pages/RelacionesLaborales';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth, blockRecruitmentOnly }) => {
@@ -229,6 +231,18 @@ function AppContent() {
                         <Route path="/finiquitos" element={
                             <ProtectedRoute auth={auth} blockRecruitmentOnly={true}>
                                 <Finiquitos auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/vacaciones" element={
+                            <ProtectedRoute auth={auth} blockRecruitmentOnly={true}>
+                                <Vacaciones auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/relaciones-laborales" element={
+                            <ProtectedRoute auth={auth} blockRecruitmentOnly={true}>
+                                <RelacionesLaborales auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 

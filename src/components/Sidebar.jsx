@@ -27,9 +27,11 @@ import {
     Zap,
     Trophy,
     FilePlus,
+    Plane,
     LifeBuoy,
     CircleDollarSign,
     Scale,
+    ShieldAlert,
     ExternalLink
 } from 'lucide-react';
 
@@ -93,6 +95,8 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     const managementItems = [
         { id: 'contratos', name: 'Contrataciones (Generación IA)', icon: FilePlus, path: '/contratos' },
         { id: 'nomina', name: 'Nómina (Payroll)', icon: CircleDollarSign, path: '/nomina' },
+        { id: 'vacaciones', name: 'Gestión de Vacaciones', icon: Plane, path: '/vacaciones' },
+        { id: 'relaciones-laborales', name: 'Relaciones Laborales', icon: ShieldAlert, path: '/relaciones-laborales' },
         { id: 'finiquitos', name: 'Finiquitos y Desvinculación', icon: Scale, path: '/finiquitos' },
     ];
 
@@ -105,10 +109,12 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     ];
 
     const administrationItems = [
-        { id: 'dashboard', name: 'Dashboard Central', icon: LayoutDashboard, path: '/dashboard' },
+        { id: 'dashboard', name: isRecruitmentOnly ? 'Dashboard Agencia' : 'Dashboard Central', icon: LayoutDashboard, path: isRecruitmentOnly ? '/dashboard-empresa' : '/dashboard' },
         { id: 'proyectos', name: 'Gestión de Proyectos', icon: ClipboardList, path: '/proyectos' },
         { id: 'contratacion', name: 'Aprobaciones (Firma Final)', icon: FileCheck, path: '/contratacion', badge: counts.contratacion },
         ...(isRecruitmentOnly ? [] : [{ id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano' }]),
+        ...(isRecruitmentOnly ? [] : [{ id: 'contratados', name: 'Personal Contratado', icon: Users, path: '/contratados' }]),
+        { id: 'historial', name: 'Historial de Procesos', icon: History, path: '/historial' },
         { id: 'contenedor', name: 'Contenedor (Portal Cliente)', icon: FolderOpen, path: '/contenedor' },
     ];
 
@@ -326,7 +332,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                                 </div>
                             </div>
 
-                            {/* 3. GESTIÓN & APROBACIONES */}
+                            {/* 3. GESTIÓN DE CAPITAL HUMANO */}
                             {!isRecruitmentOnly && (
                                 <div className="space-y-1">
                                     <button
@@ -335,7 +341,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                                     >
                                         <div className="flex items-center gap-3">
                                             <FileCheck size={16} className="text-emerald-400" />
-                                            <span className="font-black text-[11px] uppercase tracking-[0.15em] text-slate-300 group-hover:text-white transition-colors">Gestión Y Contrataciones</span>
+                                            <span className="font-black text-[11px] uppercase tracking-[0.15em] text-slate-300 group-hover:text-white transition-colors">Gestión de Capital Humano</span>
                                         </div>
                                         <ChevronRight
                                             size={12}
@@ -351,64 +357,67 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                             {/* 4. AJUSTES Y PLANES */}
                             <div className="space-y-1 pt-4 border-t border-white/5 ml-2">
                                 {checkPermission(settingsItem) && <NavItem item={settingsItem} level={1} />}
+                                {!isRecruitmentOnly && checkPermission(legalSettingsItem) && <NavItem item={legalSettingsItem} level={1} />}
 
-                                {/* NUEVO MÓDULO CONEXIONES */}
-                                <div className="space-y-1">
-                                    <button
-                                        onClick={() => toggleSection('conexiones')}
-                                        className="w-full flex items-center justify-between pl-7 pr-5 py-4 rounded-2xl transition-all duration-500 group bg-white/[0.01] hover:bg-white/[0.03] border border-white/5"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center transition-all group-hover:from-indigo-500/20 group-hover:to-purple-500/20 border border-white/5 group-hover:border-indigo-400/30 group-hover:scale-110 group-hover:rotate-3">
-                                                <ExternalLink size={18} className="text-slate-400 group-hover:text-white transition-colors" />
+                                {/* MÓDULO CONEXIONES — Solo para Empresa Integral */}
+                                {!isRecruitmentOnly && (
+                                    <div className="space-y-1">
+                                        <button
+                                            onClick={() => toggleSection('conexiones')}
+                                            className="w-full flex items-center justify-between pl-7 pr-5 py-4 rounded-2xl transition-all duration-500 group bg-white/[0.01] hover:bg-white/[0.03] border border-white/5"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center transition-all group-hover:from-indigo-500/20 group-hover:to-purple-500/20 border border-white/5 group-hover:border-indigo-400/30 group-hover:scale-110 group-hover:rotate-3">
+                                                    <ExternalLink size={18} className="text-slate-400 group-hover:text-white transition-colors" />
+                                                </div>
+                                                <span className="font-black text-[12px] uppercase tracking-[0.12em] text-slate-400 group-hover:text-white group-hover:tracking-[0.15em] transition-all">Conexiones</span>
                                             </div>
-                                            <span className="font-black text-[12px] uppercase tracking-[0.12em] text-slate-400 group-hover:text-white group-hover:tracking-[0.15em] transition-all">Conexiones</span>
+                                            <ChevronRight
+                                                size={12}
+                                                className={`text-slate-600 transition-transform duration-300 ${sections.conexiones ? 'rotate-90' : ''}`}
+                                            />
+                                        </button>
+                                        <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-4 ${sections.conexiones ? 'max-h-[600px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
+                                            {conexionesItems.map(item => (
+                                                item.path.startsWith('/') ? (
+                                                    <NavLink
+                                                        key={item.id}
+                                                        to={item.path}
+                                                        onClick={() => setIsOpen(false)}
+                                                        className={({ isActive }) => `flex items-center gap-4 pl-10 pr-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-2 ${isActive
+                                                            ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-white border-l-2 border-indigo-500 shadow-lg shadow-indigo-500/10'
+                                                            : 'text-slate-400 hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-white/[0.04] hover:text-white'
+                                                            }`}
+                                                    >
+                                                        <div className="relative z-10 flex items-center gap-4">
+                                                            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center transition-all duration-500 group-hover:scale-110 border border-white/5 ${location.pathname === item.path ? 'from-indigo-500/30 to-purple-500/30 border-indigo-400/30' : 'group-hover:from-indigo-500/20 group-hover:to-purple-500/20'
+                                                                }`}>
+                                                                <item.icon size={16} />
+                                                            </div>
+                                                            <span className="font-black text-[11px] uppercase tracking-[0.12em] group-hover:tracking-[0.15em] transition-all">{item.name}</span>
+                                                        </div>
+                                                    </NavLink>
+                                                ) : (
+                                                    <a
+                                                        key={item.id}
+                                                        href={item.path}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-4 pl-10 pr-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-2 text-slate-400 hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-white/[0.04] hover:text-white hover:scale-[1.01]"
+                                                    >
+                                                        <div className="relative z-10 flex items-center gap-4">
+                                                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center group-hover:from-indigo-500/20 group-hover:to-purple-500/20 transition-all duration-500 group-hover:scale-110 border border-white/5 group-hover:border-indigo-400/30">
+                                                                <item.icon size={16} />
+                                                            </div>
+                                                            <span className="font-black text-[11px] uppercase tracking-[0.12em] group-hover:tracking-[0.15em] transition-all">{item.name}</span>
+                                                        </div>
+                                                        <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400 absolute right-4" />
+                                                    </a>
+                                                )
+                                            ))}
                                         </div>
-                                        <ChevronRight
-                                            size={12}
-                                            className={`text-slate-600 transition-transform duration-300 ${sections.conexiones ? 'rotate-90' : ''}`}
-                                        />
-                                    </button>
-                                    <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-4 ${sections.conexiones ? 'max-h-[600px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
-                                        {conexionesItems.map(item => (
-                                            item.path.startsWith('/') ? (
-                                                <NavLink
-                                                    key={item.id}
-                                                    to={item.path}
-                                                    onClick={() => setIsOpen(false)}
-                                                    className={({ isActive }) => `flex items-center gap-4 pl-10 pr-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-2 ${isActive
-                                                        ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-white border-l-2 border-indigo-500 shadow-lg shadow-indigo-500/10'
-                                                        : 'text-slate-400 hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-white/[0.04] hover:text-white'
-                                                        }`}
-                                                >
-                                                    <div className="relative z-10 flex items-center gap-4">
-                                                        <div className={`w-8 h-8 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center transition-all duration-500 group-hover:scale-110 border border-white/5 ${location.pathname === item.path ? 'from-indigo-500/30 to-purple-500/30 border-indigo-400/30' : 'group-hover:from-indigo-500/20 group-hover:to-purple-500/20'
-                                                            }`}>
-                                                            <item.icon size={16} />
-                                                        </div>
-                                                        <span className="font-black text-[11px] uppercase tracking-[0.12em] group-hover:tracking-[0.15em] transition-all">{item.name}</span>
-                                                    </div>
-                                                </NavLink>
-                                            ) : (
-                                                <a
-                                                    key={item.id}
-                                                    href={item.path}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center gap-4 pl-10 pr-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-2 text-slate-400 hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-white/[0.04] hover:text-white hover:scale-[1.01]"
-                                                >
-                                                    <div className="relative z-10 flex items-center gap-4">
-                                                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center group-hover:from-indigo-500/20 group-hover:to-purple-500/20 transition-all duration-500 group-hover:scale-110 border border-white/5 group-hover:border-indigo-400/30">
-                                                            <item.icon size={16} />
-                                                        </div>
-                                                        <span className="font-black text-[11px] uppercase tracking-[0.12em] group-hover:tracking-[0.15em] transition-all">{item.name}</span>
-                                                    </div>
-                                                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400 absolute right-4" />
-                                                </a>
-                                            )
-                                        ))}
                                     </div>
-                                </div>
+                                )}
 
                                 {checkPermission(subscriptionItem) && <NavItem item={subscriptionItem} level={1} />}
                                 <NavItem item={{ id: 'ayuda', name: 'Centro de Ayuda', icon: LifeBuoy, path: '/ayuda' }} level={1} />

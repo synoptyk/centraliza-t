@@ -14,6 +14,7 @@ const Contenedor = ({ auth, onLogout }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedWorker, setSelectedWorker] = useState(null);
     const [stats, setStats] = useState({ total: 0, active: 0, incomplete: 0 });
+    const isAgency = auth?.company?.serviceMode === 'RECRUITMENT_ONLY';
 
     useEffect(() => {
         fetchWorkers();
@@ -22,20 +23,31 @@ const Contenedor = ({ auth, onLogout }) => {
     const fetchWorkers = async () => {
         try {
             const res = await api.get('/applicants');
-            // Filter for recruited/contracted talent. 
-            // Adjustable based on strict "Client View" requirements.
-            const recruited = res.data.filter(a =>
-                ['Contratado', 'Aprobado para Contratación', 'Carga Documental', 'Acreditación'].includes(a.status)
-            );
+
+            let recruited;
+            if (isAgency) {
+                // Agencies see the full pipeline (candidates delivered or in process for B2B clients)
+                recruited = res.data.filter(a =>
+                    ['Postulando', 'En Entrevista', 'En Test', 'Carga Documental', 'Acreditación', 'Pendiente Aprobación Gerencia', 'Aprobado para Contratación', 'Contratado'].includes(a.status)
+                );
+                setStats({
+                    total: recruited.length,
+                    active: recruited.filter(w => ['Aprobado para Contratación', 'Contratado'].includes(w.status)).length,
+                    incomplete: recruited.filter(w => !['Aprobado para Contratación', 'Contratado'].includes(w.status)).length
+                });
+            } else {
+                // Enterprises see only contracted/near-contracted workers
+                recruited = res.data.filter(a =>
+                    ['Contratado', 'Aprobado para Contratación', 'Carga Documental', 'Acreditación'].includes(a.status)
+                );
+                setStats({
+                    total: recruited.length,
+                    active: recruited.filter(w => w.status === 'Contratado').length,
+                    incomplete: recruited.filter(w => w.status !== 'Contratado').length
+                });
+            }
 
             setWorkers(recruited);
-
-            // Calculate Stats
-            setStats({
-                total: recruited.length,
-                active: recruited.filter(w => w.status === 'Contratado').length,
-                incomplete: recruited.filter(w => w.status !== 'Contratado').length
-            });
         } catch (error) {
             console.error(error);
             toast.error('Error al cargar la dotación');
@@ -113,8 +125,8 @@ const Contenedor = ({ auth, onLogout }) => {
 
     return (
         <PageWrapper
-            title="CONTENEDOR CORPORATIVO"
-            subtitle="Bóveda Digital de Talento y Documentación"
+            title={isAgency ? 'PORTAL DE ENTREGA AL CLIENTE' : 'CONTENEDOR CORPORATIVO'}
+            subtitle={isAgency ? 'Pipeline de Talento para Empresas Mandantes' : 'Bóveda Digital de Talento y Documentación'}
             icon={FolderOpen}
             auth={auth}
             onLogout={onLogout}
@@ -123,7 +135,7 @@ const Contenedor = ({ auth, onLogout }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-lg transition-all cursor-default">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Dotación Total</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{isAgency ? 'Pipeline Total' : 'Dotación Total'}</p>
                         <h3 className="text-3xl font-black text-slate-900">{stats.total}</h3>
                     </div>
                     <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -132,7 +144,7 @@ const Contenedor = ({ auth, onLogout }) => {
                 </div>
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-lg transition-all cursor-default">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Activos / En Obra</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{isAgency ? 'Colocados / Aprobados' : 'Activos / En Obra'}</p>
                         <h3 className="text-3xl font-black text-emerald-600">{stats.active}</h3>
                     </div>
                     <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -141,7 +153,7 @@ const Contenedor = ({ auth, onLogout }) => {
                 </div>
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-lg transition-all cursor-default">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Pendiente Doc.</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{isAgency ? 'En Proceso' : 'Pendiente Doc.'}</p>
                         <h3 className="text-3xl font-black text-amber-500">{stats.incomplete}</h3>
                     </div>
                     <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">

@@ -49,7 +49,14 @@ exports.generatePDF = async (req, res) => {
         const contract = await Contract.findById(req.params.id);
         if (!contract) return res.status(404).json({ message: 'Contrato no encontrado' });
 
-        let options = { format: 'A4', margin: { top: '20mm', right: '20mm', bottom: '20mm', left: '20mm' } };
+        const { format = 'A4', margin = '20mm', fitToPage = 'false' } = req.query;
+
+        let options = {
+            format: format,
+            margin: { top: margin, right: margin, bottom: margin, left: margin },
+            printBackground: true,
+            scale: fitToPage === 'true' ? 0.9 : 1.0
+        };
         let file = { content: contract.content };
 
         html_pdf.generatePdf(file, options).then(pdfBuffer => {

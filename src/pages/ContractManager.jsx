@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     FileText, Sparkles, Download, Save, Users, History,
     FilePlus, ChevronRight, Loader2, CheckCircle, AlertCircle,
-    Building2, Calendar, DollarSign, UserCheck, Search, X
+    Building2, Calendar, DollarSign, UserCheck, Search, X, Printer
 } from 'lucide-react';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
@@ -12,6 +12,7 @@ import 'react-quill/dist/quill.snow.css';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import axios from 'axios';
+import PrintConfigModal from '../components/PrintConfigModal';
 
 const ContractManager = ({ auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
@@ -27,6 +28,10 @@ const ContractManager = ({ auth, onLogout }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingApplicant, setEditingApplicant] = useState(null);
     const [statusFilter, setStatusFilter] = useState('All');
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    const [printMode, setPrintMode] = useState('download');
+    const [printingContractId, setPrintingContractId] = useState(null);
+    const [printingTitle, setPrintingTitle] = useState('Contrato');
 
     useEffect(() => {
         fetchApprovedApplicants();
@@ -126,18 +131,46 @@ const ContractManager = ({ auth, onLogout }) => {
         }
     };
 
-    const downloadPDF = async (contractId) => {
+    const downloadPDF = async (config, mode = 'download') => {
+        if (!printingContractId) return;
+
+        const loadingToast = toast.loading(mode === 'print' ? 'Preparando impresión...' : 'Generando contrato...');
+
         try {
-            const response = await api.get(`/contracts/${contractId}/pdf`, { responseType: 'blob' });
+            // Convert config to query params
+            const queryParams = new URLSearchParams({
+                format: config.format,
+                margin: config.margin,
+                fitToPage: config.fitToPage ? 'true' : 'false'
+            }).toString();
+
+            const response = await api.get(`/contracts/${printingContractId}/pdf?${queryParams}`, { responseType: 'blob' });
             const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `${selectedContract?.title || 'Contrato'}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+
+            if (mode === 'print') {
+                const printWindow = window.open(url, '_blank');
+                if (printWindow) {
+                    printWindow.onload = () => {
+                        printWindow.print();
+                    };
+                    toast.success('Contrato listo para impresión', { id: loadingToast });
+                } else {
+                    toast.error('Por favor, permite las ventanas emergentes', { id: loadingToast });
+                }
+            } else {
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `${printingTitle}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                toast.success('Contrato descargado exitosamente', { id: loadingToast });
+            }
         } catch (error) {
-            toast.error('Error al generar PDF');
+            console.error('Error generating PDF:', error);
+            toast.error('Error al generar PDF', { id: loadingToast });
+        } finally {
+            setIsPrintModalOpen(false);
         }
     };
 
@@ -240,6 +273,8 @@ const ContractManager = ({ auth, onLogout }) => {
                                                 <div className="flex items-center gap-1.5 mt-1">
                                                     <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></div>
                                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Proyecto Centraliza-T</span>
+                                                    <span className="mx-1 text-slate-300">•</span>
+                                                    <span className="text-[9px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md uppercase tracking-widest">{app.workerData?.contract?.type || 'Indefinido'}</span>
                                                 </div>
                                             </td>
                                             <td className="px-10 py-8">
@@ -275,11 +310,43 @@ const ContractManager = ({ auth, onLogout }) => {
                                                             Formalizar IA
                                                         </button>
                                                     ) : (
-                                                        <button
-                                                            className="px-6 py-3 bg-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-default flex items-center gap-2"
-                                                        >
-                                                            <CheckCircle size={14} /> Finalizado
-                                                        </button>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => {
+                                                                    // Find contract for this applicant
+                                                                    const contract = contracts.find(c => c.applicantId?._id === app._id || c.applicantId === app._id);
+                                                                    if (contract) {
+                                                                        setPrintingContractId(contract._id);
+                                                                        setPrintingTitle(contract.title);
+                                                                        setPrintMode('print');
+                                                                        setIsPrintModalOpen(true);
+                                                                    } else {
+                                                                        toast.error('No se encontró el contrato archivado');
+                                                                    }
+                                                                }}
+                                                                className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                                                                title="Imprimir Contrato"
+                                                            >
+                                                                <Printer size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const contract = contracts.find(c => c.applicantId?._id === app._id || c.applicantId === app._id);
+                                                                    if (contract) {
+                                                                        setPrintingContractId(contract._id);
+                                                                        setPrintingTitle(contract.title);
+                                                                        setPrintMode('download');
+                                                                        setIsPrintModalOpen(true);
+                                                                    } else {
+                                                                        toast.error('No se encontró el contrato archivado');
+                                                                    }
+                                                                }}
+                                                                className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                                                                title="Descargar PDF"
+                                                            >
+                                                                <Download size={16} />
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </td>
@@ -365,6 +432,28 @@ const ContractManager = ({ auth, onLogout }) => {
                                                 })}
                                             />
                                         </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Tipo de Contrato</label>
+                                            <select
+                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+                                                value={editingApplicant.workerData?.contract?.type || 'Indefinido'}
+                                                onChange={(e) => setEditingApplicant({
+                                                    ...editingApplicant,
+                                                    workerData: {
+                                                        ...editingApplicant.workerData,
+                                                        contract: {
+                                                            ...editingApplicant.workerData.contract,
+                                                            type: e.target.value
+                                                        }
+                                                    }
+                                                })}
+                                            >
+                                                <option value="Indefinido">Indefinido</option>
+                                                <option value="Plazo Fijo">Plazo Fijo</option>
+                                                <option value="Por Obra o Faena">Por Obra o Faena</option>
+                                                <option value="Honorarios">Honorarios</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div className="flex gap-4 pt-4">
                                         <button
@@ -432,7 +521,15 @@ const ContractManager = ({ auth, onLogout }) => {
                     </div>
                 </div>
             )}
-        </PageWrapper>
+            {isPrintModalOpen && (
+                <PrintConfigModal
+                    isOpen={isPrintModalOpen}
+                    onClose={() => setIsPrintModalOpen(false)}
+                    onConfirm={downloadPDF}
+                    mode={printMode}
+                />
+            )}
+        </PageWrapper >
     );
 };
 

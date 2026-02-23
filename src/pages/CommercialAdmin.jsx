@@ -51,7 +51,8 @@ const CommercialAdmin = () => {
         limits: { adminUsers: 5, monthlyApplicants: 100, projects: 10, storageGB: 5 },
         features: [''],
         isTrial: false,
-        isPublic: true
+        isPublic: true,
+        targetAudience: 'both'
     });
 
     const [newPromo, setNewPromo] = useState({
@@ -118,7 +119,8 @@ const CommercialAdmin = () => {
             limits: { adminUsers: 5, monthlyApplicants: 100, projects: 10, storageGB: 5 },
             features: [''],
             isTrial: false,
-            isPublic: true
+            isPublic: true,
+            targetAudience: 'both'
         });
     };
 
@@ -132,7 +134,8 @@ const CommercialAdmin = () => {
             limits: plan.limits || { adminUsers: 5, monthlyApplicants: 100, projects: 10, storageGB: 5 },
             features: plan.features || [''],
             isTrial: plan.isTrial || false,
-            isPublic: plan.isPublic
+            isPublic: plan.isPublic,
+            targetAudience: plan.targetAudience || 'both'
         });
         setShowPlanModal(true);
     };
@@ -527,6 +530,9 @@ const CommercialAdmin = () => {
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2">
                                                 <h4 className="text-slate-900 font-black uppercase text-xs tracking-wider">{plan.name}</h4>
+                                                {plan.targetAudience === 'agency' && <span className="bg-purple-100 text-purple-600 text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Agencia</span>}
+                                                {plan.targetAudience === 'full_hr' && <span className="bg-emerald-100 text-emerald-600 text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Integral</span>}
+                                                {plan.targetAudience === 'both' && <span className="bg-blue-100 text-blue-600 text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Universal</span>}
                                                 {!plan.isActive && <span className="bg-red-100 text-red-600 text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Suspendido</span>}
                                                 {!plan.isPublic && <span className="bg-slate-100 text-slate-500 text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Privado</span>}
                                             </div>
@@ -637,6 +643,19 @@ const CommercialAdmin = () => {
                                     placeholder="Describa la propuesta de valor..."
                                     required
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Público Objetivo (Modo de Servicio)</label>
+                                <select
+                                    value={newPlan.targetAudience}
+                                    onChange={(e) => setNewPlan({ ...newPlan, targetAudience: e.target.value })}
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-slate-900 text-xs outline-none focus:border-indigo-600/30 focus:bg-white transition-all font-bold appearance-none cursor-pointer"
+                                >
+                                    <option value="both">Universal (Ambos Flujos)</option>
+                                    <option value="agency">Agencia (Solo Reclutamiento)</option>
+                                    <option value="full_hr">Empresa (HR 360 Integral)</option>
+                                </select>
                             </div>
 
                             <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-6">

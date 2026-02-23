@@ -9,7 +9,89 @@ import api from '../utils/api';
 import toast from 'react-hot-toast';
 import { calcularLiquidacionReal } from '../utils/payrollCalculator';
 
+import { exportToExcel, exportToPrevired } from '../utils/excelHelper';
+import axios from 'axios';
+import PrintConfigModal from '../components/PrintConfigModal';
+
 const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
+    // ... existing state ...
+    const handleExportPayroll = () => {
+        const headers = {
+            fullName: 'Nombre',
+            rut: 'RUT',
+            sueldoBase: 'Sueldo Base',
+            totalImponible: 'Total Imponible',
+            totalHaberes: 'Total Haberes',
+            liquidoAPagar: 'Líquido a Pagar',
+            status: 'Estado'
+        };
+
+        const exportData = employees.map(emp => ({
+            fullName: emp.fullName,
+            rut: emp.rut,
+            sueldoBase: emp.payrollData?.calculation?.sueldoBase || 0,
+            totalImponible: emp.payrollData?.calculation?.totalImponible || 0,
+            totalHaberes: emp.payrollData?.calculation?.totalHaberes || 0,
+            liquidoAPagar: emp.payrollData?.calculation?.liquidoAPagar || 0,
+            status: emp.payrollData?.status
+        }));
+
+        exportToExcel(exportData, `Nomina_\${currentPeriod}`, 'Nomina_Mensual', headers);
+    };
+
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    const [printingEmployee, setPrintingEmployee] = useState(null);
+    const [printMode, setPrintMode] = useState('download');
+
+    const handleGeneratePayslip = async (employee, config = { format: 'A4', margin: '10mm' }, mode = 'download') => {
+        setIsPrintModalOpen(false);
+        const loadingToast = toast.loading(`${mode === 'print' ? 'Preparando impresión' : 'Generando liquidación'} para \${employee.fullName}...`);
+        try {
+            const res = await api.post('/exports/payslip', {
+                employeeData: {
+                    fullName: employee.fullName,
+                    rut: employee.rut,
+                    position: employee.position,
+                    hiringDate: employee.hiring?.contractStartDate ? new Date(employee.hiring.contractStartDate).toLocaleDateString() : '-',
+                    afp: employee.workerData?.prevision?.afp || 'Habitat',
+                    health: employee.workerData?.prevision?.healthSystem?.provider || 'Fonasa'
+                },
+                calculation: employee.payrollData.calculation,
+                companyInfo: {
+                    name: auth?.user?.companyId?.name || 'CENTRALIZA-T MASTER',
+                    rut: auth?.user?.companyId?.rut || '77.777.777-7'
+                },
+                period: currentPeriod,
+                config: config
+            }, { responseType: 'blob' });
+
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+
+            if (mode === 'print') {
+                const printWindow = window.open(url, '_blank');
+                if (printWindow) {
+                    printWindow.onload = () => {
+                        printWindow.print();
+                    };
+                    toast.success('Liquidación lista para impresión', { id: loadingToast });
+                } else {
+                    toast.error('Por favor, permite las ventanas emergentes', { id: loadingToast });
+                }
+            } else {
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Liquidacion_\${employee.rut}_\${currentPeriod}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                toast.success('Documento generado exitosamente', { id: loadingToast });
+            }
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            toast.error('Error al procesar la liquidación', { id: loadingToast });
+        }
+    };
     const [employees, setEmployees] = useState([]);
     const [globalParams, setGlobalParams] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -41,6 +123,9 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
             }
 
             const res = await api.get('/applicants');
+            const vacationRes = await api.get(`/vacations?month=${currentPeriod}&status=Aprobado`);
+            const monthVacations = vacationRes.data;
+
             // Real Payroll Calculation Engine Integration
             const active = res.data
                 .filter(app => app.status === 'Contratado')
@@ -50,11 +135,16 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                     const healthSystem = app.workerData?.prevision?.healthSystem || { provider: 'Fonasa' };
                     const contractType = app.workerData?.contract?.type || 'Indefinido';
 
+                    // Auto-calculate vacation days for this period
+                    const empVacations = monthVacations.filter(v => v.applicantId._id === app._id);
+                    const diasVacaciones = empVacations.reduce((sum, v) => sum + v.daysRequested, 0);
+
                     // Inicializamos ajustes manuales del periodo en cero
                     const periodAdjustments = {
                         bonosImponibles: 0,
                         bonosNoImponibles: 0,
-                        descuentosVarios: 0
+                        descuentosVarios: 0,
+                        diasVacaciones
                     };
 
                     const calc = calcularLiquidacionReal({
@@ -133,13 +223,8 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const totalEmployerCost = employees.reduce((sum, emp) => sum + (emp.payrollData?.calculation?.aportesPatronales?.total || 0), 0);
     const paidCount = employees.filter(e => e.payrollData?.status === 'Pagado').length;
 
-    const handleGeneratePayslip = (employee) => {
-        toast.success(`Generando liquidación para ${employee.fullName}...`);
-        // Mock PDF generation delay
-        setTimeout(() => {
-            toast.success('Documento generado exitosamente');
-        }, 1500);
-    };
+    // handleGeneratePayslip is already defined above with API call
+
 
     return (
         <PageWrapper
@@ -233,8 +318,17 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                         />
                     </div>
                     <div className="flex gap-3">
-                        <button className="px-6 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-all flex items-center gap-2">
+                        <button
+                            onClick={() => exportToPrevired(employees, `Previred_\${currentPeriod}`)}
+                            className="px-6 py-4 bg-slate-100 text-indigo-600 border border-indigo-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-50 transition-all flex items-center gap-2"
+                        >
                             <Download size={16} /> Exportar PREVIRED
+                        </button>
+                        <button
+                            onClick={handleExportPayroll}
+                            className="px-6 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-all flex items-center gap-2"
+                        >
+                            <FileText size={16} /> Exportar Nómina Completa
                         </button>
                     </div>
                 </div>
@@ -252,6 +346,7 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                 <th className="px-5 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Dctos Varios</th>
                                 <th className="px-5 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Líquido</th>
                                 <th className="px-5 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Costo Emp.</th>
+                                <th className="px-5 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">En Vacas.</th>
                                 <th className="px-5 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">Estado</th>
                                 <th className="px-5 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Acciones</th>
                             </tr>
@@ -310,6 +405,15 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                             <p className="text-[8px] text-slate-400 uppercase font-bold mt-1">Líquido + SIS + Mut. + AFC</p>
                                         </td>
                                         <td className="px-5 py-4 text-center">
+                                            {emp.periodAdjustments.diasVacaciones > 0 ? (
+                                                <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-md text-[10px] font-black">
+                                                    {emp.periodAdjustments.diasVacaciones} Días
+                                                </span>
+                                            ) : (
+                                                <span className="text-slate-200">-</span>
+                                            )}
+                                        </td>
+                                        <td className="px-5 py-4 text-center">
                                             <span className={`px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest ${emp.payrollData?.status === 'Pagado' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                                                 {emp.payrollData?.status}
                                             </span>
@@ -324,7 +428,11 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                                     <Plus size={16} className="group-hover/btn:scale-110 transition-transform" />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleGeneratePayslip(emp)}
+                                                    onClick={() => {
+                                                        setPrintingEmployee(emp);
+                                                        setPrintMode('print');
+                                                        setIsPrintModalOpen(true);
+                                                    }}
                                                     className="px-6 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center gap-2 group/btn"
                                                 >
                                                     <FileText size={14} className="group-hover/btn:-rotate-12 transition-transform" />
@@ -403,6 +511,17 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                 )
             }
 
+            {isPrintModalOpen && (
+                <PrintConfigModal
+                    isOpen={isPrintModalOpen}
+                    onClose={() => {
+                        setIsPrintModalOpen(false);
+                        setPrintingEmployee(null);
+                    }}
+                    onConfirm={(config, m) => handleGeneratePayslip(printingEmployee, config, m)}
+                    mode={printMode}
+                />
+            )}
         </PageWrapper >
     );
 };
