@@ -4,7 +4,7 @@ import {
     ShieldCheck, Users, FileCheck, ClipboardList,
     UserPlus, Calendar, BrainCircuit, FileText,
     FolderOpen, LayoutDashboard, History, FilePlus,
-    Activity, Settings, CreditCard, Trophy, Lightbulb, Building2, CheckCircle
+    Activity, Settings, CreditCard, Trophy, Lightbulb, Building2, CheckCircle, ExternalLink
 } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 
