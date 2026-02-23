@@ -26,7 +26,8 @@ const {
     getRemoteApprovalDetails,
     processFiniquito,
     uploadFiniquitoDocument,
-    importLegacyWorkforce
+    importLegacyWorkforce,
+    addCollaboratorNote
 } = require('../controllers/applicantController');
 
 const {
@@ -63,6 +64,7 @@ router.route('/interviews/calendar').get(protect, getInterviewsCalendar);
 router.route('/:id/tests').put(protect, updateTests);
 router.route('/:id/tests/send-psycholabor').post(protect, sendPsycholaborTest);
 router.route('/:id/tests/results').get(protect, getTestResults);
+router.route('/:id/notes').post(protect, addCollaboratorNote);
 
 // Contract Documents (Module 5 - Universal)
 router.route('/:id/contract-docs').post(protect, upload.single('file'), uploadContractDocument);

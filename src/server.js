@@ -111,6 +111,7 @@ app.use('/api/projects', require('./routes/projectRoutes'));
 app.get('/api/ping', (req, res) => res.json({ message: 'pong', time: new Date() }));
 app.use('/api/applicants', require('./routes/applicantRoutes'));
 app.use('/api/curriculum', require('./routes/curriculumRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/companies', require('./routes/companyRoutes'));

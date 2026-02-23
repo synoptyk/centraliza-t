@@ -66,31 +66,86 @@ const ContractManager = ({ auth, onLogout }) => {
     const generateInitialContract = (applicant) => {
         setSelectedApplicant(applicant);
         const today = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: es });
+        const companyName = auth.user.company?.name || 'LA EMPRESA';
+        const companyTaxId = auth.user.company?.taxId || 'N/A';
+        const representative = auth.user.name;
+        const startDate = applicant.workerData?.contract?.startDate
+            ? format(new Date(applicant.workerData.contract.startDate), "dd 'de' MMMM 'de' yyyy", { locale: es })
+            : today;
 
         const template = `
-            <div style="font-family: 'Inter', sans-serif; line-height: 1.6; color: #1e293b; padding: 40px;">
-                <h1 style="text-align: center; color: #020617; text-transform: uppercase; font-weight: 900; margin-bottom: 40px;">Contrato Individual de Trabajo</h1>
-                
-                <p>En Santiago de Chile, a ${today}, entre <strong>${auth.company?.name || 'LA EMPRESA'}</strong>, RUT <strong>${auth.company?.taxId || 'N/A'}</strong>, representada por <strong>${auth.name}</strong>, en adelante "el empleador"; y don(ña) <strong>${applicant.fullName}</strong>, RUT <strong>${applicant.rut}</strong>, de nacionalidad <strong>${applicant.country === 'CL' ? 'Chilena' : applicant.country}</strong>, en adelante "el trabajador", se ha convenido el siguiente contrato de trabajo:</p>
-                
-                <h3 style="color: #4f46e5; text-transform: uppercase; font-size: 14px; margin-top: 30px;">PRIMERO: CARGO Y FUNCIONES</h3>
-                <p>El trabajador se obliga a desempeñar las funciones de <strong>${applicant.position}</strong>, realizando todas las labores inherentes a dicho cargo y aquellas que el empleador le encomiende para el buen servicio de la empresa.</p>
-                
-                <h3 style="color: #4f46e5; text-transform: uppercase; font-size: 14px; margin-top: 30px;">SEGUNDO: REMUNERACIÓN</h3>
-                <p>El empleador se compromete a pagar al trabajador una remuneración líquida mensual de <strong>$${parseInt(applicant.workerData?.financial?.liquidSalary || 0).toLocaleString()}</strong>, pagaderos en forma mensual por períodos vencidos el último día hábil de cada mes.</p>
-                
-                <h3 style="color: #4f46e5; text-transform: uppercase; font-size: 14px; margin-top: 30px;">TERCERO: JORNADA DE TRABAJO</h3>
-                <p>La jornada de trabajo será de 44 horas semanales, distribuidas de lunes a viernes, conforme al reglamento interno de la empresa.</p>
-                
-                <div style="margin-top: 100px; display: flex; justify-content: space-between;">
-                    <div style="text-align: center; width: 200px; border-top: 1px solid #94a3b8; padding-top: 10px;">
-                        <p style="font-size: 10px; font-weight: bold;">FIRMA EMPLEADOR</p>
-                        <p style="font-size: 10px;">${auth.company?.name || 'CENTRALIZA-T'}</p>
+            <div style="font-family: 'Helvetica', 'Arial', sans-serif; line-height: 1.5; color: #334155; padding: 50px; max-width: 800px; margin: auto; background: white;">
+                <!-- Header -->
+                <div style="text-align: center; margin-bottom: 40px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px;">
+                    <h1 style="color: #0f172a; font-size: 24px; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: -0.025em;">Contrato Individual de Trabajo</h1>
+                    <p style="color: #64748b; font-size: 12px; font-weight: 600; margin-top: 5px; text-transform: uppercase; tracking-widest: 0.1em;">Documento de Validez Legal - Centraliza-T</p>
+                </div>
+
+                <!-- Comparecientes -->
+                <p style="text-align: justify; margin-bottom: 25px;">
+                    En la ciudad de Santiago de Chile, a ${today}, entre la empresa <strong>${companyName}</strong>, 
+                    RUT número <strong>${companyTaxId}</strong>, representada legalmente por don(ña) <strong>${representative}</strong>, 
+                    en adelante "el Empleador"; y don(ña) <strong>${applicant.fullName}</strong>, cédula de identidad número <strong>${applicant.rut}</strong>, 
+                    nacionalidad <strong>${applicant.country === 'CL' ? 'Chilena' : (applicant.country || 'N/A')}</strong>, 
+                    con domicilio en <strong>${applicant.address || '________________________'}</strong>, 
+                    en adelante "el Trabajador", se ha convenido el siguiente contrato de trabajo:
+                </p>
+
+                <!-- Cláusulas -->
+                <div style="margin-top: 30px;">
+                    <section style="margin-bottom: 20px;">
+                        <h3 style="color: #4f46e5; font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; border-left: 4px solid #4f46e5; padding-left: 10px;">PRIMERO: Naturaleza de los Servicios</h3>
+                        <p style="text-align: justify; margin: 0;">
+                            El Trabajador se obliga a desempeñar el cargo de <strong>${applicant.position}</strong>. Sus funciones incluirán, pero no se limitarán a, todas aquellas tareas inherentes a su posición y las instrucciones impartidas por su supervisor directo para el correcto cumplimiento de los objetivos de la Empresa.
+                        </p>
+                    </section>
+
+                    <section style="margin-bottom: 20px;">
+                        <h3 style="color: #4f46e5; font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; border-left: 4px solid #4f46e5; padding-left: 10px;">SEGUNDO: Lugar de Trabajo y Jornada</h3>
+                        <p style="text-align: justify; margin: 0;">
+                            El Trabajador prestará sus servicios en las dependencias del Empleador o donde este designe por razones operativas. 
+                            La jornada ordinaria de trabajo será de 44 horas semanales, distribuidas de lunes a viernes en horario administrativo.
+                        </p>
+                    </section>
+
+                    <section style="margin-bottom: 20px;">
+                        <h3 style="color: #4f46e5; font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; border-left: 4px solid #4f46e5; padding-left: 10px;">TERCERO: Remuneración</h3>
+                        <p style="text-align: justify; margin: 0;">
+                            El Empleador pagará al Trabajador una remuneración mensual líquida de <strong>$${parseInt(applicant.workerData?.financial?.liquidSalary || 0).toLocaleString('es-CL')}</strong>. 
+                            Dicha suma será cancelada el último día hábil de cada mes mediante transferencia electrónica.
+                        </p>
+                    </section>
+
+                    <section style="margin-bottom: 20px;">
+                        <h3 style="color: #4f46e5; font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; border-left: 4px solid #4f46e5; padding-left: 10px;">CUARTO: Vigencia</h3>
+                        <p style="text-align: justify; margin: 0;">
+                            Este contrato tendrá una vigencia de carácter <strong>${applicant.workerData?.contract?.type || 'Indefinido'}</strong>, iniciando formalmente sus funciones con fecha <strong>${startDate}</strong>.
+                        </p>
+                    </section>
+
+                    <section style="margin-bottom: 20px;">
+                        <h3 style="color: #4f46e5; font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; border-left: 4px solid #4f46e5; padding-left: 10px;">QUINTO: Confidencialidad</h3>
+                        <p style="text-align: justify; margin: 0; font-style: italic; font-size: 12px;">
+                            El Trabajador se obliga a mantener absoluta reserva respecto de toda información, datos, procesos o secretos comerciales de la Empresa a los que tenga acceso en el ejercicio de sus funciones.
+                        </p>
+                    </section>
+                </div>
+
+                <!-- Firmas -->
+                <div style="margin-top: 80px; display: flex; justify-content: space-between; gap: 50px;">
+                    <div style="flex: 1; text-align: center; border-top: 1px solid #94a3b8; padding-top: 15px;">
+                        <p style="font-size: 10px; font-weight: 800; margin: 0; text-transform: uppercase;">Por el Empleador</p>
+                        <p style="font-size: 10px; color: #64748b; margin-top: 5px;">${companyName}</p>
                     </div>
-                    <div style="text-align: center; width: 200px; border-top: 1px solid #94a3b8; padding-top: 10px;">
-                        <p style="font-size: 10px; font-weight: bold;">FIRMA TRABAJADOR</p>
-                        <p style="font-size: 10px;">${applicant.fullName}</p>
+                    <div style="flex: 1; text-align: center; border-top: 1px solid #94a3b8; padding-top: 15px;">
+                        <p style="font-size: 10px; font-weight: 800; margin: 0; text-transform: uppercase;">El Trabajador</p>
+                        <p style="font-size: 10px; color: #64748b; margin-top: 5px;">${applicant.fullName}</p>
                     </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="margin-top: 60px; text-align: center; color: #cbd5e1; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">
+                    Generado automáticamente por el Ecosistema Smart Digital de Centraliza-T
                 </div>
             </div>
         `;

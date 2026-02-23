@@ -703,6 +703,32 @@ const updateApplicant = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Add a collaborator note to applicant history
+// @route   POST /api/applicants/:id/notes
+const addCollaboratorNote = asyncHandler(async (req, res) => {
+    const { note } = req.body;
+    const applicant = await findScopedApplicant(req.params.id, req.user);
+
+    if (!applicant) {
+        res.status(404);
+        throw new Error('Applicant not found');
+    }
+
+    if (!note) {
+        res.status(400);
+        throw new Error('La nota es requerida');
+    }
+
+    applicant.history.push({
+        status: applicant.status,
+        changedBy: req.user.name,
+        comments: note
+    });
+
+    const updatedApplicant = await applicant.save();
+    res.json(updatedApplicant);
+});
+
 // @desc    Process remote approval/rejection (Public Link)
 // @route   POST /api/applicants/:id/remote-approval
 const processRemoteApproval = asyncHandler(async (req, res) => {
@@ -1254,6 +1280,7 @@ module.exports = {
     getRemoteApprovalDetails,
     processFiniquito,
     uploadFiniquitoDocument,
-    importLegacyWorkforce
+    importLegacyWorkforce,
+    addCollaboratorNote
 };
 

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
     FileCheck, User, Mail, Send, CheckCircle2, XCircle,
     Clock, Search, ExternalLink, ShieldCheck, DollarSign,
-    ShoppingCart, CreditCard, Building2, UserCheck, Loader2
+    ShoppingCart, CreditCard, Building2, UserCheck, Loader2, Plus, MessageSquare, AlertCircle, CheckCircle
 } from 'lucide-react';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 import usePermissions from '../hooks/usePermissions';
 import PageWrapper from '../components/PageWrapper';
+import HistoryTimeline from '../components/HistoryTimeline';
 
 const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
@@ -17,6 +18,8 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [saving, setSaving] = useState(false);
     const [config, setConfig] = useState({ managers: [] });
     const [selectedManager, setSelectedManager] = useState('');
+    const [newNote, setNewNote] = useState('');
+    const [isAddingNote, setIsAddingNote] = useState(false);
 
     useEffect(() => {
         fetchAwaitingApproval();
@@ -86,6 +89,23 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
             toast.error('Error al procesar la decisión');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleAddNote = async () => {
+        if (!newNote.trim() || !selectedApplicant) return;
+
+        setIsAddingNote(true);
+        try {
+            const { data } = await api.post(`/applicants/${selectedApplicant._id}/notes`, { note: newNote });
+            setSelectedApplicant({ ...selectedApplicant, history: data.history });
+            setApplicants(applicants.map(app => app._id === selectedApplicant._id ? { ...app, history: data.history } : app));
+            setNewNote('');
+            toast.success('Nota añadida');
+        } catch (error) {
+            toast.error('Error al añadir nota');
+        } finally {
+            setIsAddingNote(false);
         }
     };
 
@@ -413,6 +433,45 @@ const HiringApproval = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                         </div>
                                     </div>
                                 </Section>
+                            </div>
+
+                            {/* History and Notes Column */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {/* Audit Timeline */}
+                                <div className="lg:col-span-2">
+                                    <Section title="Historial y Auditoría de Contratación" icon={Clock}>
+                                        <HistoryTimeline history={selectedApplicant.history} />
+                                    </Section>
+                                </div>
+
+                                {/* Collaborative Notes Panel */}
+                                <div className="lg:col-span-1">
+                                    <div className="bg-slate-900 p-8 rounded-3xl text-white space-y-4 shadow-xl shadow-slate-200">
+                                        <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                                            <MessageSquare size={18} className="text-indigo-400" />
+                                            <h4 className="font-black text-[10px] uppercase tracking-widest text-white/50">Notas de Colaboración</h4>
+                                        </div>
+
+                                        <p className="text-[10px] font-medium text-white/40 italic leading-relaxed">
+                                            Añada feedback para que otros gerentes o reclutadores puedan verlo en la línea de vida del candidato.
+                                        </p>
+
+                                        <textarea
+                                            value={newNote}
+                                            onChange={(e) => setNewNote(e.target.value)}
+                                            placeholder="Escriba un comentario interno..."
+                                            className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-white focus:bg-white/10 focus:ring-4 focus:ring-indigo-500/20 outline-none resize-none h-32 placeholder:text-white/20"
+                                        />
+
+                                        <button
+                                            onClick={handleAddNote}
+                                            disabled={isAddingNote || !newNote.trim()}
+                                            className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                                        >
+                                            {isAddingNote ? 'Guardando...' : <><Plus size={14} /> Registrar Nota</>}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ) : (

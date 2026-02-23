@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import {
     History, Search, Filter, ArrowUpRight, CheckCircle2, XCircle,
     Clock, User, Users, FileText, Activity, ShieldCheck, Mail, Phone,
-    X, ClipboardCheck, BookOpen, Eye, Calendar, UserCheck, Loader2
+    X, ClipboardCheck, BookOpen, Eye, Calendar, UserCheck, Loader2, Plus, MessageSquare
 } from 'lucide-react';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 import PageWrapper from '../components/PageWrapper';
+import HistoryTimeline from '../components/HistoryTimeline';
 
 const HistoryPage = ({ auth, onLogout }) => {
     const [applicants, setApplicants] = useState([]);
@@ -14,6 +15,8 @@ const HistoryPage = ({ auth, onLogout }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('Todos');
     const [selectedApplicant, setSelectedApplicant] = useState(null);
+    const [newNote, setNewNote] = useState('');
+    const [isAddingNote, setIsAddingNote] = useState(false);
 
     useEffect(() => {
         fetchApplicants();
@@ -89,46 +92,92 @@ const HistoryPage = ({ auth, onLogout }) => {
 
                     {/* Scrollable Content */}
                     <div className="flex-1 overflow-y-auto p-10">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                            {/* Personal & Interview */}
-                            <div className="space-y-8">
-                                <Section title="Información de Contacto" icon={Mail}>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div><p className="text-[10px] font-black text-slate-400 uppercase">Email</p><p className="font-bold text-slate-800">{applicant.email}</p></div>
-                                        <div><p className="text-[10px] font-black text-slate-400 uppercase">Teléfono</p><p className="font-bold text-slate-800">{applicant.phone}</p></div>
-                                    </div>
-                                </Section>
+                            {/* Column 1: Personal & Documents */}
+                            <div className="lg:col-span-1 space-y-8">
 
-                                <Section title="Hito 1: Entrevista" icon={Calendar}>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-100">
-                                            <span className="text-xs font-bold text-slate-500">Resultado</span>
-                                            <span className={`text-xs font-black uppercase px-3 py-1 rounded-full ${applicant.interview?.result === 'OK' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
-                                                {applicant.interview?.result || 'Pendiente'}
-                                            </span>
+                                {/* Personal & Interview */}
+                                <div className="space-y-8">
+                                    <Section title="Información de Contacto" icon={Mail}>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div><p className="text-[10px] font-black text-slate-400 uppercase">Email</p><p className="font-bold text-slate-800">{applicant.email}</p></div>
+                                            <div><p className="text-[10px] font-black text-slate-400 uppercase">Teléfono</p><p className="font-bold text-slate-800">{applicant.phone}</p></div>
                                         </div>
-                                        <p className="text-xs text-slate-600 leading-relaxed italic">"{applicant.interview?.notes || 'Sin observaciones'}"</p>
-                                    </div>
-                                </Section>
+                                    </Section>
 
-                                <Section title="Hito 2: Evaluaciones" icon={Activity}>
+                                    <Section title="Documentación Validada" icon={FileText}>
+                                        <div className="space-y-2">
+                                            {(applicant.documents || []).map((doc, idx) => (
+                                                <div key={idx} className="flex items-center justify-between p-2.5 bg-white border border-slate-100 rounded-xl">
+                                                    <span className="text-[11px] font-bold text-slate-700 truncate w-2/3">{doc.docType}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        {doc.url && <a href={doc.url} target="_blank" rel="noreferrer" className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><Eye size={14} /></a>}
+                                                        <span className={`p-1.5 rounded-lg ${doc.status === 'OK' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                                                            {doc.status === 'OK' ? <CheckCircle2 size={14} /> : <Clock size={14} />}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Section>
+
+                                    <Section title="Acreditación y Prevención" icon={ShieldCheck}>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                                <p className="text-[10px] font-black text-emerald-600 uppercase mb-2 flex items-center gap-2"><ClipboardCheck size={12} /> Exámenes Médicos</p>
+                                                <div className="space-y-1">
+                                                    {(applicant.accreditation?.physicalExams || []).filter(e => e.status === 'Aprobado').map((e, i) => (
+                                                        <div key={i} className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                                                            <span>{e.name}</span>
+                                                            <CheckCircle2 size={12} className="text-emerald-500" />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Section>
+                                </div>
+                            </div>
+
+                            {/* Column 2: Audit Timeline */}
+                            <div className="lg:col-span-1 space-y-8">
+                                <Section title="Historial Maestro de Operaciones" icon={History}>
+                                    <HistoryTimeline history={applicant.history} />
+                                </Section>
+                            </div>
+
+                            {/* Column 3: Collaboration & Context */}
+                            <div className="lg:col-span-1 space-y-8">
+                                <Section title="Añadir Nota de Auditoría" icon={MessageSquare}>
                                     <div className="space-y-4">
-                                        <div className="p-4 bg-white rounded-2xl border border-slate-100">
-                                            <p className="text-[10px] font-black text-indigo-500 uppercase mb-2">Psicolaboral</p>
-                                            <div className="flex justify-between text-xs font-bold mb-1">
-                                                <span className="text-slate-500">Puntaje:</span>
-                                                <span className="text-slate-800">{applicant.tests?.psychological?.score || 0}%</span>
-                                            </div>
-                                            <p className="text-[10px] text-slate-400 italic">{applicant.tests?.psychological?.comments || 'Sin comentarios'}</p>
-                                        </div>
-                                        <div className="p-4 bg-white rounded-2xl border border-slate-100">
-                                            <p className="text-[10px] font-black text-purple-500 uppercase mb-2">Técnica Profesional</p>
-                                            <div className="flex justify-between text-xs font-bold">
-                                                <span className="text-slate-500">Nivel:</span>
-                                                <span className="text-slate-800">{applicant.tests?.professional?.knowledgeLevel || 'N/A'}</span>
-                                            </div>
-                                        </div>
+                                        <textarea
+                                            value={newNote}
+                                            onChange={(e) => setNewNote(e.target.value)}
+                                            placeholder="Registrar observación adicional..."
+                                            className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 outline-none resize-none h-32 placeholder:text-slate-300"
+                                        />
+                                        <button
+                                            onClick={async () => {
+                                                if (!newNote.trim()) return;
+                                                setIsAddingNote(true);
+                                                try {
+                                                    const { data } = await api.post(`/applicants/${applicant._id}/notes`, { note: newNote });
+                                                    setApplicants(applicants.map(a => a._id === applicant._id ? data : a));
+                                                    setSelectedApplicant(data);
+                                                    setNewNote('');
+                                                    toast.success('Nota registrada');
+                                                } catch (err) {
+                                                    toast.error('Error');
+                                                } finally {
+                                                    setIsAddingNote(false);
+                                                }
+                                            }}
+                                            disabled={isAddingNote || !newNote.trim()}
+                                            className="w-full py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all disabled:opacity-30"
+                                        >
+                                            {isAddingNote ? 'Sincronizando...' : 'Publicar Nota'}
+                                        </button>
                                     </div>
                                 </Section>
                             </div>
@@ -170,15 +219,15 @@ const HistoryPage = ({ auth, onLogout }) => {
                                 <Section title="Decisión Final Gerencia" icon={UserCheck}>
                                     <div className="bg-slate-900 p-5 rounded-2xl text-white">
                                         <div className="flex justify-between items-center mb-3">
-                                            <span className="text-[10px] font-black text-slate-500 uppercase">Estado</span>
+                                            <span className="text-[10px] font-black text-slate-500 uppercase">Estado Veredicto</span>
                                             <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-md ${applicant.hiring?.managerApproval === 'Aprobado' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
                                                 {applicant.hiring?.managerApproval || 'Pendiente'}
                                             </span>
                                         </div>
                                         {applicant.hiring?.approvedBy && (
-                                            <p className="text-[11px] font-bold mb-1">Aprobado por: <span className="text-emerald-400">{applicant.hiring.approvedBy}</span></p>
+                                            <p className="text-[11px] font-bold mb-1">Resolución por: <span className="text-emerald-400">{applicant.hiring.approvedBy}</span></p>
                                         )}
-                                        <p className="text-xs text-slate-400 italic">"{applicant.hiring?.managerNote || 'Sin notas del reclutador'}"</p>
+                                        <p className="text-xs text-slate-400 italic">"{applicant.hiring?.managerNote || 'Sin notas ejecutivas'}"</p>
                                     </div>
                                 </Section>
                             </div>
