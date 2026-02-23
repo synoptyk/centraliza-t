@@ -12,6 +12,12 @@ import {
 import api from '../utils/api';
 import UserProfileModal from './UserProfileModal';
 
+const CheckSquare = ({ size, className }) => (
+    <div className={`border-2 border-current rounded-sm flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
+        <div className="w-1.5 h-1.5 bg-current rounded-ss-sm"></div>
+    </div>
+);
+
 const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen }) => {
     const navigate = useNavigate();
     const location = useLocation();
