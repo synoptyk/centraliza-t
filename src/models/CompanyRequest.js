@@ -1,68 +1,58 @@
 const mongoose = require('mongoose');
 
-const professionalSchema = new mongoose.Schema({
-    rut: {
+const companyRequestSchema = new mongoose.Schema({
+    companyRut: {
         type: String,
         required: true,
         index: true
     },
-    fullName: {
+    companyName: {
         type: String,
         required: true
     },
-    birthDate: {
+    companyRegion: {
+        type: String,
+        required: true
+    },
+    projectOrArea: {
+        type: String,
+        required: true
+    },
+    requiredPosition: {
+        type: String,
+        required: true
+    },
+    workRegion: {
+        type: String,
+        required: true
+    },
+    workCommune: {
+        type: String,
+        required: true
+    },
+    hrContact: {
+        type: String,
+        required: true
+    },
+    hrEmail: {
+        type: String,
+        required: true
+    },
+    projectedHiringDate: {
         type: Date,
         required: true
-    },
-    studies: {
-        type: String,
-        required: true
-    },
-    specialty: {
-        type: String,
-        required: true
-    },
-    nationality: {
-        type: String,
-        required: true
-    },
-    gender: {
-        type: String,
-        required: true
-    },
-    region: {
-        type: String,
-        required: true
-    },
-    commune: {
-        type: String,
-        required: true
-    },
-    workingStatus: {
-        type: String,
-        enum: ['Trabajando', 'Disponibilidad Inmediata'],
-        required: true
-    },
-    email: {
-        type: String,
-        required: true
-    },
-    phone: {
-        type: String,
-        required: true
-    },
-    cvUrl: {
-        type: String
     },
     companyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',
         required: true,
         index: true
+    },
+    status: {
+        type: String,
+        enum: ['Nuevo', 'Contactado', 'Cerrado'],
+        default: 'Nuevo'
     }
 }, { timestamps: true });
 
-// Ensure uniqueness of RUT per Company (Agency)
-professionalSchema.index({ rut: 1, companyId: 1 }, { unique: true });
-
-module.exports = mongoose.model('Professional', professionalSchema);
+module.exports = mongoose.model('CompanyRequest', companyRequestSchema);

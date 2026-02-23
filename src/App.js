@@ -43,6 +43,8 @@ import Vacaciones from './pages/Vacaciones';
 import RelacionesLaborales from './pages/RelacionesLaborales';
 import PortfolioPortal from './pages/PortfolioPortal';
 import ProfessionalPortfolio from './pages/ProfessionalPortfolio';
+import SelectionPortal from './pages/SelectionPortal';
+import CorporatePortal from './pages/CorporatePortal';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth, blockRecruitmentOnly }) => {
@@ -100,7 +102,7 @@ function AppContent() {
     if (loading) return null;
 
     // Sidebar should only show in dashboard routes
-    const isAppRoute = location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/forgot-password' && !location.pathname.startsWith('/resetpassword') && location.pathname !== '/remote-approval' && !location.pathname.startsWith('/test-psicolaboral') && !location.pathname.startsWith('/portal-profesional');
+    const isAppRoute = location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/forgot-password' && !location.pathname.startsWith('/resetpassword') && location.pathname !== '/remote-approval' && !location.pathname.startsWith('/test-psicolaboral') && !location.pathname.startsWith('/portal-profesional') && !location.pathname.startsWith('/portal-captacion') && !location.pathname.startsWith('/portal-empresarial');
 
     return (
         <div className={`flex min-h-screen ${isAppRoute ? 'bg-slate-50' : 'bg-white'}`}>
@@ -126,7 +128,9 @@ function AppContent() {
                         <Route path="/resetpassword/:resettoken" element={<ResetPasswordPage />} />
                         <Route path="/remote-approval" element={<RemoteApproval />} />
                         <Route path="/test-psicolaboral/:token" element={<PublicTestPortal />} />
+                        <Route path="/portal-captacion/:companyId" element={<SelectionPortal />} />
                         <Route path="/portal-profesional/:companyId" element={<PortfolioPortal />} />
+                        <Route path="/portal-empresarial/:companyId" element={<CorporatePortal />} />
 
                         {/* Protected App Routes */}
                         <Route path="/dashboard" element={

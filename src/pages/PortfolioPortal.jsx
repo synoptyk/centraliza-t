@@ -15,10 +15,12 @@ import {
     Shield,
     Globe,
     Zap,
-    HeartPulse
+    HeartPulse,
+    ChevronDown
 } from 'lucide-react';
 import API_URL from '../config/api';
-import { cleanRut, formatRut, validateRut } from '../utils/rutUtils';
+import { formatRut, validateRut } from '../utils/rutUtils';
+import { chileanRegions } from '../utils/locationData';
 
 const PortfolioPortal = () => {
     const { companyId } = useParams();
@@ -26,6 +28,7 @@ const PortfolioPortal = () => {
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(null);
     const [companyName, setCompanyName] = useState('Nuestra Agencia');
+    const [communes, setCommunes] = useState([]);
 
     const [formData, setFormData] = useState({
         rut: '',
@@ -36,6 +39,8 @@ const PortfolioPortal = () => {
         nationality: 'Chilena',
         gender: '',
         region: '',
+        commune: '',
+        workingStatus: '',
         email: '',
         phone: '',
         cvUrl: '',
@@ -54,11 +59,17 @@ const PortfolioPortal = () => {
         if (companyId) fetchCompany();
     }, [companyId]);
 
+    const handleRegionChange = (e) => {
+        const value = e.target.value;
+        const region = chileanRegions.find(r => r.name === value);
+        setCommunes(region ? region.communes : []);
+        setFormData({ ...formData, region: value, commune: '' });
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'rut') {
-            const formatted = formatRut(value);
-            setFormData({ ...formData, [name]: formatted });
+            setFormData({ ...formData, [name]: formatRut(value) });
         } else {
             setFormData({ ...formData, [name]: value });
         }
@@ -71,11 +82,11 @@ const PortfolioPortal = () => {
         setLoading(true);
         const data = new FormData();
         data.append('file', file);
-        data.append('upload_preset', 'centralizat_presets'); // Adjust if needed
+        data.append('upload_preset', 'centralizat_presets');
 
         try {
             const res = await axios.post(
-                'https://api.cloudinary.com/v1_1/dou9m6iky/image/upload', // Generic Cloudinary endpoint or use project's
+                'https://api.cloudinary.com/v1_1/dou9m6iky/image/upload',
                 data
             );
             setFormData({ ...formData, cvUrl: res.data.secure_url });
@@ -110,7 +121,7 @@ const PortfolioPortal = () => {
 
     if (success) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-[#0f172a]">
                 <div className="max-w-md w-full bg-white rounded-[40px] p-12 text-center shadow-2xl border-4 border-emerald-500/20">
                     <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
                         <CheckCircle2 size={48} className="text-emerald-600" />
@@ -143,7 +154,7 @@ const PortfolioPortal = () => {
                         Únete a <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">{companyName}</span>
                     </h1>
                     <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
-                        Estamos construyendo la comunidad de talentos más grande. Registra tu perfil y posicionate ante las mejores oportunidades laborales.
+                        Regístrate y posiciónate ante las mejores oportunidades laborales.
                     </p>
                 </div>
             </div>
@@ -170,83 +181,79 @@ const PortfolioPortal = () => {
                         </div>
 
                         <div className="space-y-4">
-                            <div className="relative">
+                            <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Nombre Completo</label>
-                                <input
-                                    required name="fullName" value={formData.fullName} onChange={handleChange}
-                                    placeholder="Ej: Juan Pérez"
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-indigo-500/50 transition-all font-bold placeholder:text-slate-700"
-                                />
+                                <input required name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Ej: Juan Pérez" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-indigo-500/50" />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="relative">
+                                <div>
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">RUT</label>
-                                    <input
-                                        required name="rut" value={formData.rut} onChange={handleChange}
-                                        placeholder="12.345.678-9"
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-indigo-500/50 transition-all font-bold placeholder:text-slate-700"
-                                    />
+                                    <input required name="rut" value={formData.rut} onChange={handleChange} placeholder="12.345.678-9" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none" />
                                 </div>
-                                <div className="relative">
+                                <div>
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">F. Nacimiento</label>
-                                    <input
-                                        required type="date" name="birthDate" value={formData.birthDate} onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-indigo-500/50 transition-all font-bold [color-scheme:dark]"
-                                    />
+                                    <input required type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none [color-scheme:dark]" />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="relative">
+                                <div>
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Sexo</label>
-                                    <select
-                                        required name="gender" value={formData.gender} onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-indigo-500/50 transition-all font-bold appearance-none bg-transparent"
-                                    >
+                                    <select required name="gender" value={formData.gender} onChange={handleChange} className="w-full bg-[#0f172a] border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none appearance-none">
                                         <option value="">Seleccionar</option>
                                         <option value="Masculino">Masculino</option>
                                         <option value="Femenino">Femenino</option>
                                         <option value="Otro">Otro</option>
                                     </select>
                                 </div>
-                                <div className="relative">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Nacionalidad</label>
-                                    <input
-                                        required name="nationality" value={formData.nationality} onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-indigo-500/50 transition-all font-bold"
-                                    />
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">¿Estado Actual?</label>
+                                    <select required name="workingStatus" value={formData.workingStatus} onChange={handleChange} className="w-full bg-[#0f172a] border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none appearance-none font-black text-indigo-400">
+                                        <option value="">¿Estás Trabajando?</option>
+                                        <option value="Trabajando">Trabajando</option>
+                                        <option value="Disponibilidad Inmediata">Disponibilidad Inmediata</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Professional & Contact */}
+                    {/* Profile & Location */}
                     <div className="space-y-6">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400">
-                                <Briefcase size={20} />
+                                <MapPin size={20} />
                             </div>
-                            <h3 className="font-black text-sm uppercase tracking-widest text-slate-200">Perfil & Contacto</h3>
+                            <h3 className="font-black text-sm uppercase tracking-widest text-slate-200">Ubicación & Perfil</h3>
                         </div>
 
                         <div className="space-y-4">
-                            <div className="relative">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Especialidad / Cargo</label>
-                                <input
-                                    required name="specialty" value={formData.specialty} onChange={handleChange}
-                                    placeholder="Ej: Desarrollador, Electricista, etc."
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-purple-500/50 transition-all font-bold"
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Región</label>
+                                    <select required name="region" value={formData.region} onChange={handleRegionChange} className="w-full bg-[#0f172a] border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none appearance-none">
+                                        <option value="">Seleccionar</option>
+                                        {chileanRegions.map(r => <option key={r.name} value={r.name}>{r.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Comuna</label>
+                                    <select required name="commune" value={formData.commune} onChange={handleChange} disabled={!formData.region} className="w-full bg-[#0f172a] border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none appearance-none disabled:opacity-30">
+                                        <option value="">Seleccionar</option>
+                                        {communes.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="relative">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Nivel Estudios</label>
-                                    <select
-                                        required name="studies" value={formData.studies} onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-purple-500/50 transition-all font-bold appearance-none bg-transparent"
-                                    >
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Especialidad</label>
+                                    <input required name="specialty" value={formData.specialty} onChange={handleChange} placeholder="Ej: Soldador, Dev" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none" />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Estudios</label>
+                                    <select required name="studies" value={formData.studies} onChange={handleChange} className="w-full bg-[#0f172a] border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none appearance-none">
                                         <option value="">Seleccionar</option>
                                         <option value="Técnico">Técnico</option>
                                         <option value="Universitario">Universitario</option>
@@ -254,103 +261,39 @@ const PortfolioPortal = () => {
                                         <option value="Otros">Otros</option>
                                     </select>
                                 </div>
-                                <div className="relative">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Región</label>
-                                    <input
-                                        required name="region" value={formData.region} onChange={handleChange}
-                                        placeholder="Ej: Metropolitana"
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-purple-500/50 transition-all font-bold"
-                                    />
-                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="relative">
+                                <div>
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Correo</label>
-                                    <input
-                                        required type="email" name="email" value={formData.email} onChange={handleChange}
-                                        placeholder="usuario@ejemplo.com"
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-purple-500/50 transition-all font-bold"
-                                    />
+                                    <input required type="email" name="email" value={formData.email} onChange={handleChange} placeholder="usuario@ejemplo.com" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none" />
                                 </div>
-                                <div className="relative">
+                                <div>
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Celular</label>
-                                    <input
-                                        required name="phone" value={formData.phone} onChange={handleChange}
-                                        placeholder="+56 9 ..."
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none focus:border-purple-500/50 transition-all font-bold"
-                                    />
+                                    <input required name="phone" value={formData.phone} onChange={handleChange} placeholder="+56 9 ..." className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none" />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* CV Upload - Full Width */}
+                    {/* CV Upload */}
                     <div className="md:col-span-2 mt-4">
                         <div className="relative group/upload">
-                            <input
-                                type="file"
-                                onChange={handleFileUpload}
-                                className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                                accept=".pdf,.doc,.docx"
-                            />
-                            <div className={`border-2 border-dashed ${formData.cvUrl ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/10 bg-white/[0.02]'} rounded-[32px] p-10 text-center transition-all group-hover/upload:border-indigo-500/30 group-hover/upload:bg-indigo-500/5`}>
-                                {formData.cvUrl ? (
-                                    <div className="flex flex-col items-center gap-2">
-                                        <CheckCircle2 className="text-emerald-500 mb-2" size={40} />
-                                        <span className="font-black text-xs uppercase tracking-[0.2em] text-emerald-400">CV Cargado Correctamente</span>
-                                        <span className="text-[10px] text-slate-500 font-bold">Haz click para reemplazar el archivo</span>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center gap-4">
-                                        <div className="w-16 h-16 rounded-[24px] bg-slate-800 flex items-center justify-center text-slate-400 group-hover/upload:scale-110 group-hover/upload:text-indigo-400 transition-all duration-500">
-                                            <Upload size={32} />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="font-black text-xs uppercase tracking-[0.2em] text-slate-200">Sube tu Curriculum Vitae</p>
-                                            <p className="text-[10px] text-slate-500 font-bold">PDF, DOC o DOCX (Máx. 5MB)</p>
-                                        </div>
-                                    </div>
-                                )}
+                            <input type="file" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer z-20" accept=".pdf,.doc,.docx" />
+                            <div className={`border-2 border-dashed ${formData.cvUrl ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/10 bg-white/[0.02]'} rounded-[32px] p-10 text-center transition-all group-hover/upload:border-indigo-500/30`}>
+                                {formData.cvUrl ? (<div className="flex flex-col items-center gap-2"><CheckCircle2 className="text-emerald-500 mb-2" size={40} /> <span className="font-black text-xs uppercase tracking-[0.2em] text-emerald-400">CV Cargado Correctamente</span> </div>) : (<div className="flex flex-col items-center gap-4"> <div className="w-16 h-16 rounded-[24px] bg-slate-800 flex items-center justify-center text-slate-400 group-hover/upload:scale-110 group-hover/upload:text-indigo-400 transition-all duration-500"> <Upload size={32} /> </div> <p className="font-black text-xs uppercase tracking-[0.2em] text-slate-200">Sube tu Curriculum Vitae</p> </div>)}
                             </div>
                         </div>
                     </div>
 
-                    {error && (
-                        <div className="md:col-span-2 bg-rose-500/10 border border-rose-500/20 text-rose-400 p-6 rounded-3xl text-xs font-bold uppercase tracking-widest text-center animate-pulse">
-                            {error}
-                        </div>
-                    )}
+                    {error && <div className="md:col-span-2 bg-rose-500/10 border border-rose-500/20 text-rose-400 p-6 rounded-3xl text-xs font-bold uppercase tracking-widest text-center">{error}</div>}
 
-                    <div className="md:col-span-2 mt-6">
-                        <button
-                            type="submit"
-                            disabled={loading || !formData.cvUrl}
-                            className={`w-full py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-sm transition-all shadow-2xl ${!formData.cvUrl
-                                ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
-                                : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02] hover:shadow-indigo-500/25'
-                                }`}
-                        >
+                    <div className="md:col-span-2">
+                        <button type="submit" disabled={loading || !formData.cvUrl} className={`w-full py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-sm transition-all shadow-2xl ${!formData.cvUrl ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50' : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02]'}`}>
                             Finalizar Registro y Unirse
                         </button>
                     </div>
                 </form>
-
-                {/* Footer / Trust */}
-                <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-12 text-center opacity-50">
-                    <div className="space-y-3">
-                        <Shield className="mx-auto text-indigo-400" size={32} />
-                        <p className="text-[10px] font-black uppercase tracking-widest">Privacidad <span className="text-white">Garantizada</span></p>
-                    </div>
-                    <div className="space-y-3">
-                        <Globe className="mx-auto text-purple-400" size={32} />
-                        <p className="text-[10px] font-black uppercase tracking-widest">Red <span className="text-white">Global</span> de Talentos</p>
-                    </div>
-                    <div className="space-y-3">
-                        <HeartPulse className="mx-auto text-rose-400" size={32} />
-                        <p className="text-[10px] font-black uppercase tracking-widest">Soporte <span className="text-white">Empresarial</span></p>
-                    </div>
-                </div>
             </div>
         </div>
     );

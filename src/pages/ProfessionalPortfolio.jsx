@@ -8,16 +8,18 @@ import {
     Copy,
     Check,
     User,
-    Mail,
-    Phone,
     MapPin,
     GraduationCap,
     Briefcase,
     Loader2,
-    Building2,
     Users,
+    Building2,
     Activity,
-    FileText
+    FileText,
+    Calendar,
+    Mail,
+    ChevronDown,
+    Zap
 } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 import api from '../utils/api';
@@ -25,43 +27,44 @@ import { format } from 'date-fns';
 
 const ProfessionalPortfolio = ({ auth, onLogout }) => {
     const [professionals, setProfessionals] = useState([]);
+    const [corporateRequests, setCorporateRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('professionals');
     const [searchTerm, setSearchTerm] = useState('');
     const [copied, setCopied] = useState(false);
-    const [filters, setFilters] = useState({
-        specialty: '',
-        region: ''
-    });
+    const [filters, setFilters] = useState({ specialty: '', region: '' });
 
-    const portalUrl = `${window.location.origin}/portal-profesional/${auth?.company?._id}`;
+    const portalUrl = `${window.location.origin}/portal-captacion/${auth?.company?._id}`;
 
     useEffect(() => {
-        fetchProfessionals();
-    }, [filters]);
+        fetchData();
+    }, [activeTab, filters]);
 
-    const fetchProfessionals = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const query = new URLSearchParams({
-                ...filters,
-                search: searchTerm
-            }).toString();
-            const response = await api.get(`/api/professionals?${query}`);
-            setProfessionals(response.data);
-            setLoading(false);
+            if (activeTab === 'professionals') {
+                const query = new URLSearchParams({ ...filters, search: searchTerm }).toString();
+                const response = await api.get(`/api/professionals?${query}`);
+                setProfessionals(response.data);
+            } else {
+                const response = await api.get(`/api/professionals/corporate`);
+                setCorporateRequests(response.data);
+            }
         } catch (error) {
-            console.error('Error fetching professionals:', error);
+            console.error('Error fetching data:', error);
+        } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('¿Estás seguro de eliminar a este profesional de la cartera?')) return;
+        if (!window.confirm('¿Estás seguro de eliminar este registro?')) return;
         try {
             await api.delete(`/api/professionals/${id}`);
             setProfessionals(professionals.filter(p => p._id !== id));
         } catch (error) {
-            console.error('Error deleting professional:', error);
+            console.error('Error deleting:', error);
         }
     };
 
@@ -73,199 +76,130 @@ const ProfessionalPortfolio = ({ auth, onLogout }) => {
 
     return (
         <PageWrapper
-            title="CARTERA PROFESIONAL"
-            subtitle="Gestión y captación masiva de talentos para tu agencia"
-            icon={Users}
+            title="CENTRO DE CAPTACIÓN"
+            subtitle="Gestión estratégica de talentos y requerimientos empresariales"
+            icon={Zap}
             auth={auth}
             onLogout={onLogout}
         >
-            {/* Invitation Section */}
-            <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-[32px] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden mb-12">
-                <div className="absolute top-0 right-0 p-12 opacity-10">
-                    <Users size={200} />
-                </div>
-                <div className="relative z-10 max-w-2xl space-y-6">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-xs font-black uppercase tracking-widest">
-                        <Activity size={14} /> Canal de Captación Activo
+            {/* Invitation Bar */}
+            <div className="bg-slate-900 rounded-[32px] p-8 text-white mb-10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-10 opacity-10"><Zap size={140} /></div>
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-black uppercase italic tracking-tight">Tu Portal Público de Captación</h2>
+                        <p className="text-slate-400 text-sm font-medium">Comparte este link para recibir postulantes y empresas.</p>
                     </div>
-                    <h2 className="text-4xl font-black tracking-tight leading-tight uppercase italic">
-                        Expande tu <span className="text-indigo-200">Red de Talentos</span>
-                    </h2>
-                    <p className="text-indigo-100 font-medium opacity-80 leading-relaxed">
-                        Comparte este enlace único en tus comunidades, redes sociales y grupos de reclutamiento. Todos los que se registren aparecerán automáticamente en tu cartera.
-                    </p>
+                    <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 w-full md:w-auto">
+                        <span className="text-[10px] font-bold opacity-40 truncate max-w-[200px]">{portalUrl}</span>
+                        <button onClick={copyToClipboard} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 hover:bg-indigo-500 transition-all">
+                            {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copiado' : 'Copiar'}
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-                    <div className="flex flex-col md:flex-row gap-4 pt-4">
-                        <div className="flex-1 bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 px-6 py-4 flex items-center justify-between group overflow-hidden">
-                            <span className="text-xs font-bold opacity-60 truncate mr-4">
-                                {portalUrl}
-                            </span>
-                            <button
-                                onClick={copyToClipboard}
-                                className="flex items-center gap-2 bg-white text-indigo-900 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg active:scale-95"
-                            >
-                                {copied ? <Check size={14} /> : <Copy size={14} />}
-                                {copied ? 'Copiado' : 'Copiar Link'}
-                            </button>
+            {/* Tabs */}
+            <div className="flex gap-4 mb-8">
+                <button
+                    onClick={() => setActiveTab('professionals')}
+                    className={`flex-1 py-6 rounded-[24px] font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-3 border-2 ${activeTab === 'professionals' ? 'bg-indigo-100 border-indigo-200 text-indigo-700 shadow-lg shadow-indigo-100' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-50'}`}
+                >
+                    <Users size={18} /> Cartera Profesional
+                </button>
+                <button
+                    onClick={() => setActiveTab('corporate')}
+                    className={`flex-1 py-6 rounded-[24px] font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-3 border-2 ${activeTab === 'corporate' ? 'bg-purple-100 border-purple-200 text-purple-700 shadow-lg shadow-purple-100' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-50'}`}
+                >
+                    <Building2 size={18} /> Cartera Empresarial
+                </button>
+            </div>
+
+            {/* Main Content */}
+            {activeTab === 'professionals' ? (
+                <div className="space-y-8">
+                    {/* Search & Filters (Existing logic improved) */}
+                    <div className="bg-white p-6 rounded-[32px] border-2 border-slate-100 flex flex-wrap gap-4 shadow-sm">
+                        <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Nombre o RUT..." className="flex-1 bg-slate-50 border-none rounded-2xl px-6 py-4 outline-none font-bold text-sm" />
+                        <button onClick={fetchData} className="bg-slate-900 text-white px-8 rounded-2xl font-black uppercase text-[11px] tracking-widest hover:bg-indigo-600 transition-all">Filtrar</button>
+                    </div>
+
+                    {loading ? <div className="text-center py-20"><Loader2 className="animate-spin mx-auto text-indigo-500" size={48} /></div> : (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {professionals.map(p => (
+                                <div key={p._id} className="bg-white rounded-[32px] border-2 border-slate-50 p-6 flex flex-col md:flex-row gap-6 hover:shadow-2xl transition-all group">
+                                    <div className="flex-1 space-y-4">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className="text-xl font-black text-slate-900 uppercase italic leading-none">{p.fullName}</h4>
+                                                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-2 px-3 py-1 bg-indigo-50 rounded-lg inline-block">{p.workingStatus}</p>
+                                            </div>
+                                            <button onClick={() => handleDelete(p._id)} className="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={16} /></button>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3 text-[11px] font-bold text-slate-500">
+                                            <div className="flex items-center gap-2"><Briefcase size={14} className="opacity-50" /> {p.specialty}</div>
+                                            <div className="flex items-center gap-2"><MapPin size={14} className="opacity-50" /> {p.commune}, {p.region}</div>
+                                            <div className="flex items-center gap-2"><GraduationCap size={14} className="opacity-50" /> {p.studies}</div>
+                                            <div className="flex items-center gap-2"><Phone size={14} className="opacity-50" /> {p.phone}</div>
+                                        </div>
+                                    </div>
+                                    <div className="md:w-40 flex flex-col gap-2">
+                                        <a href={p.cvUrl} target="_blank" rel="noreferrer" className="flex-1 bg-slate-50 rounded-2xl flex flex-col items-center justify-center p-4 border border-slate-100 hover:bg-white hover:border-indigo-200 transition-all border-dashed">
+                                            <FileText className="text-slate-300 group-hover:text-indigo-500 transition-colors" size={32} />
+                                            <span className="text-[8px] font-black uppercase tracking-tighter mt-2">Ver Curriculum</span>
+                                        </a>
+                                        <a href={p.cvUrl} download className="bg-slate-900 text-white py-3 rounded-xl text-[9px] font-black uppercase text-center flex items-center justify-center gap-2"><Download size={12} /> Descargar</a>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                        <a
-                            href={portalUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-indigo-500 hover:bg-indigo-400 text-white px-8 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all font-black uppercase tracking-widest text-[11px] shadow-xl hover:shadow-indigo-500/30"
-                        >
-                            <ExternalLink size={16} /> Previsualizar Portal
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            {/* Filter Bar */}
-            <div className="bg-white p-8 rounded-[32px] border-2 border-slate-100 shadow-xl mb-10">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div className="relative md:col-span-2">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Buscar por nombre o RUT..."
-                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold outline-none focus:border-indigo-500/30 transition-all placeholder:text-slate-400"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && fetchProfessionals()}
-                        />
-                    </div>
-                    <div className="relative">
-                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Especialidad..."
-                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold outline-none focus:border-indigo-500/30 transition-all"
-                            value={filters.specialty}
-                            onChange={(e) => setFilters({ ...filters, specialty: e.target.value })}
-                        />
-                    </div>
-                    <div className="relative">
-                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Región..."
-                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold outline-none focus:border-indigo-500/30 transition-all"
-                            value={filters.region}
-                            onChange={(e) => setFilters({ ...filters, region: e.target.value })}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Content List */}
-            {loading ? (
-                <div className="flex flex-col items-center justify-center py-24 gap-4">
-                    <Loader2 size={48} className="text-indigo-600 animate-spin" />
-                    <p className="font-black text-xs uppercase tracking-widest text-slate-400">Escaneando Cartera...</p>
-                </div>
-            ) : professionals.length === 0 ? (
-                <div className="text-center py-20 bg-slate-50 rounded-[40px] border-2 border-dashed border-slate-200">
-                    <Users size={64} className="mx-auto text-slate-200 mb-6" />
-                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Cartera Vacía</h3>
-                    <p className="text-slate-400 font-medium mt-2">No se encontraron profesionales con los filtros aplicados.</p>
+                    )}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {professionals.map(prof => (
-                        <div key={prof._id} className="bg-white rounded-[40px] border-2 border-slate-100 p-8 shadow-lg hover:shadow-2xl transition-all group relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
-                                <Briefcase size={120} />
-                            </div>
-
-                            <div className="relative z-10 flex flex-col md:flex-row gap-8">
-                                <div className="flex-1 space-y-6">
-                                    <div className="flex items-start justify-between">
-                                        <div className="space-y-1">
-                                            <h4 className="text-2xl font-black text-slate-900 tracking-tight leading-tight uppercase italic">{prof.fullName}</h4>
-                                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">{prof.specialty}</p>
+                <div className="space-y-6">
+                    {loading ? <div className="text-center py-20"><Loader2 className="animate-spin mx-auto text-purple-500" size={48} /></div> : (
+                        <div className="grid grid-cols-1 gap-6">
+                            {corporateRequests.map(r => (
+                                <div key={r._id} className="bg-white rounded-[32px] border-2 border-slate-50 p-8 shadow-sm hover:shadow-xl transition-all flex flex-col md:flex-row gap-10">
+                                    <div className="flex-1 space-y-6">
+                                        <div className="flex justify-between items-start">
+                                            <div className="space-y-1">
+                                                <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">{r.companyName}</h3>
+                                                <p className="text-[10px] font-black text-purple-600 uppercase tracking-[0.2em]">{r.companyRut}</p>
+                                            </div>
+                                            <span className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-widest">{r.status}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => handleDelete(prof._id)}
-                                                className="p-3 bg-rose-50 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-sm"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-y-4 gap-x-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                                <User size={18} />
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                            <div className="space-y-1">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase">Requerimiento</p>
+                                                <p className="text-sm font-bold border-l-2 border-purple-500 pl-3">{r.requiredPosition}</p>
+                                                <p className="text-[10px] text-slate-400 font-medium pl-3">{r.projectOrArea}</p>
                                             </div>
-                                            <div>
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">RUT</p>
-                                                <p className="text-xs font-bold text-slate-700">{prof.rut}</p>
+                                            <div className="space-y-1">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase">Ubicación Obra</p>
+                                                <p className="text-sm font-bold border-l-2 border-indigo-500 pl-3">{r.workCommune}</p>
+                                                <p className="text-[10px] text-slate-400 font-medium pl-3">{r.workRegion}</p>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                                <MapPin size={18} />
-                                            </div>
-                                            <div>
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Residencia</p>
-                                                <p className="text-xs font-bold text-slate-700">{prof.region}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                                <Phone size={18} />
-                                            </div>
-                                            <div>
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contacto</p>
-                                                <p className="text-xs font-bold text-slate-700">{prof.phone}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                                <GraduationCap size={18} />
-                                            </div>
-                                            <div>
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Estudios</p>
-                                                <p className="text-xs font-bold text-slate-700">{prof.studies}</p>
+                                            <div className="space-y-1">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase">Contacto RRHH</p>
+                                                <p className="text-sm font-bold border-l-2 border-emerald-500 pl-3">{r.hrContact}</p>
+                                                <a href={`mailto:${r.hrEmail}`} className="text-[10px] text-indigo-500 font-black hover:underline pl-3">{r.hrEmail}</a>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Mail size={14} className="text-slate-300" />
-                                            <span className="text-[11px] font-bold text-slate-500">{prof.email}</span>
+                                    <div className="md:w-64 bg-slate-50 rounded-[28px] p-6 flex flex-col justify-center items-center text-center space-y-4 border border-slate-100">
+                                        <Calendar className="text-purple-400" size={32} />
+                                        <div>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Fecha Proyectada</p>
+                                            <p className="text-lg font-black text-slate-900 tracking-tight">{format(new Date(r.projectedHiringDate), 'dd/MM/yyyy')}</p>
                                         </div>
-                                        <span className="text-[10px] bg-slate-50 text-slate-400 px-3 py-1 rounded-full font-black uppercase tracking-widest">
-                                            Registrado: {format(new Date(prof.createdAt), 'dd/MM/yy')}
-                                        </span>
+                                        <button className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-purple-600 transition-all">Gestionar</button>
                                     </div>
                                 </div>
-
-                                <div className="md:w-48 flex flex-col gap-3">
-                                    <div className="flex-1 bg-slate-50 rounded-3xl border-2 border-slate-100 flex flex-col items-center justify-center p-6 space-y-4 group/cv transition-all hover:bg-white hover:border-indigo-500/20 shadow-inner">
-                                        <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg group-hover/cv:scale-110 group-hover/cv:bg-indigo-600 group-hover/cv:text-white transition-all duration-500">
-                                            <FileText size={32} />
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Currículum Vitae</p>
-                                            <p className="text-[9px] text-slate-400 font-bold uppercase">{prof.fullName.split(' ')[0]}.pdf</p>
-                                        </div>
-                                    </div>
-                                    <a
-                                        href={prof.cvUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full bg-slate-900 text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-black uppercase tracking-widest text-[10px] hover:bg-indigo-600 transition-all shadow-xl active:scale-95"
-                                    >
-                                        <Download size={14} /> Descargar CV
-                                    </a>
-                                </div>
-                            </div>
+                            ))}
+                            {corporateRequests.length === 0 && <div className="text-center py-20 bg-slate-50 rounded-[40px] border-2 border-dashed border-slate-100 text-slate-300 font-black uppercase tracking-widest">Sin solicitudes nuevas</div>}
                         </div>
-                    ))}
+                    )}
                 </div>
             )}
         </PageWrapper>
