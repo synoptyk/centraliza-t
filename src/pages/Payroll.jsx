@@ -385,7 +385,7 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Monto ($)</label>
-                                        <input type="number" placeholder="50000" className="w-full p-4 bg-slate-50 rounded-2xl border-none text-xl font-black text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                        <input type="number" placeholder="539000" className="w-full p-4 bg-slate-50 rounded-2xl border-none text-xl font-black text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" />
                                     </div>
                                 </div>
 

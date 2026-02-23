@@ -4,9 +4,9 @@
  */
 
 // Estas son solo constantes DEFAULT por seguridad en caso de que fallen las inyecciones de DB/API
-const DEFAULT_IMM = 539000; // Ingreso Mínimo Mensual (Proyectado a 2026)
-const DEFAULT_TOPE_AFP = 84.3; // UF
-const DEFAULT_TOPE_AFC = 126.6; // UF
+const DEFAULT_IMM = 539000; // Ingreso Mínimo Mensual (Actual Vigente 2025)
+const DEFAULT_TOPE_AFP = 87.8; // UF (Actualizado 2025)
+const DEFAULT_TOPE_AFC = 131.8; // UF (Actualizado 2025)
 const DEFAULT_VALOR_UF = 38500;
 const DEFAULT_VALOR_UTM = 65000;
 const DEFAULT_SIS_RATE = 1.49; // %
@@ -119,7 +119,7 @@ export const calcularMutual = (baseImponible, params) => {
 
 export const calcularImpuestoUnico = (baseTributable, params) => {
     if (baseTributable <= 0) return 0;
-    const utm = params?.utm || DEFAULT_VALOR_UTM;
+    const utm = params?.utmValue || params?.manualUtmValue || DEFAULT_VALOR_UTM;
 
     const tramosCalculados = TRAMOS_IMPUESTO_UNICO.map(t => ({
         desde: t.desde * utm,

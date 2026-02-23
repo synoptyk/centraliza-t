@@ -80,7 +80,7 @@ export const calcularFiniquitoReal = (workerData, config) => {
         totalImponible
     } = workerData;
 
-    const { ufValue = 38500 } = config; // Idealmente inyectado desde MIndicadorAPI/GlobalSettings
+    const { ufValue = 38500 } = config; // Inyectado desde BancoCentral API / GlobalSettings
 
     // 1. Vacaciones (Base de todo finiquito sin importar la causal)
     const montoVacaciones = calcularVacacionesProporcionales(fechaInicio, fechaFin, sueldoBase);

@@ -91,19 +91,19 @@ const PreviredMirror = ({ auth, onLogout }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <IndicatorCard
                     title="Tope Imponible AFP/Salud"
-                    value={settings?.topeImponibleAFP || 84.3}
+                    value={settings?.topeImponibleAFP || 87.8}
                     unit="UF"
                     icon={TrendingUp}
                     colorClass="text-indigo-600"
-                    footer="Válido para 2024/2025"
+                    footer="Actualizado 2025"
                 />
                 <IndicatorCard
                     title="Tope Imponible AFC"
-                    value={settings?.topeImponibleAFC || 126.6}
+                    value={settings?.topeImponibleAFC || 131.8}
                     unit="UF"
                     icon={Scale}
                     colorClass="text-emerald-600"
-                    footer="Seguro de Cesantía"
+                    footer="Seguro de Cesantía 2025"
                 />
                 <IndicatorCard
                     title="Seguro Invalidez (SIS)"
@@ -200,7 +200,7 @@ const PreviredMirror = ({ auth, onLogout }) => {
                             Los indicadores mostrados en este espejo son los mismos que Centraliza-T V5.0 utiliza para la generación de archivos PREVIRED (formato 105 campos) y el Libro de Remuneraciones Electrónico (LRE).
                         </span>
                         <span className="block p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-indigo-600">
-                            <strong>Tope 2025:</strong> Se ha detectado un ajuste proyectado a 87.8 UF para el tope de AFP. Asegúrese de que sus parámetros globales estén actualizados en la sección de Parámetros Legales.
+                            <strong>Actualización 2025:</strong> El Tope Imponible se ha ajustado de 84.3 a **87.8 UF** y el Seguro de Cesantía a **131.8 UF**. Centraliza-T ya tiene estos valores precargados.
                         </span>
                     </p>
                     <div className="mt-8 flex items-center gap-4 p-4 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-100">
