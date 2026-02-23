@@ -40,8 +40,16 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, light = true, auth = null }) => {
     ];
 
     return (
-        <nav className={`fixed top-0 w-full z-50 transition-all ${light ? 'bg-white/80 backdrop-blur-xl border-b border-slate-100' : 'bg-indigo-600/95 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-indigo-500/20'}`}>
-            <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <nav className={`fixed top-0 w-full z-50 flex flex-col transition-all ${light ? 'bg-white/80 backdrop-blur-xl border-b border-slate-100' : 'bg-indigo-600/95 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-indigo-500/20'}`}>
+            {/* Mini Promo Banner */}
+            <div className="w-full bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] py-1.5 px-2 text-center flex justify-center items-center gap-1.5 sm:gap-2 border-b border-white/10 shadow-md">
+                <span className="text-sm">🥵</span>
+                <span className="opacity-80 truncate">Deja de acumular diplomas de software y</span>
+                <span className="text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded border border-emerald-400/20 shrink-0">CENTRALIZA-T</span>
+                <span className="text-sm">🚀</span>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-6 h-20 w-full flex items-center justify-between">
                 <div className="flex items-center gap-2 cursor-pointer"
                     onClick={() => {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
