@@ -97,9 +97,9 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     ];
 
     const conexionesItems = [
-        { id: 'banco-central', name: 'Banco Central', icon: ExternalLink, path: 'https://www.bcentral.cl/' },
+        { id: 'banco-central', name: 'Banco Central', icon: ExternalLink, path: '/ajustes/conexiones/banco-central' },
         { id: 'previred', name: 'PreviRed', icon: ExternalLink, path: 'https://www.previred.com/' },
-        { id: 'sii', name: 'SII', icon: ExternalLink, path: 'https://homer.sii.cl/' },
+        { id: 'sii', name: 'SII', icon: ExternalLink, path: '/ajustes/conexiones/sii' },
         { id: 'dt', name: 'DT', icon: ExternalLink, path: 'https://www.dt.gob.cl/' },
         { id: 'banco', name: 'Banco', icon: ExternalLink, path: 'https://www.bancoestado.cl/' }
     ];
@@ -369,23 +369,43 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                                             className={`text-slate-600 transition-transform duration-300 ${sections.conexiones ? 'rotate-90' : ''}`}
                                         />
                                     </button>
-                                    <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-4 ${sections.conexiones ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
+                                    <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-4 ${sections.conexiones ? 'max-h-[600px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
                                         {conexionesItems.map(item => (
-                                            <a
-                                                key={item.id}
-                                                href={item.path}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-4 pl-10 pr-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-2 text-slate-400 hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-white/[0.04] hover:text-white hover:scale-[1.01]"
-                                            >
-                                                <div className="relative z-10 flex items-center gap-4">
-                                                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center group-hover:from-indigo-500/20 group-hover:to-purple-500/20 transition-all duration-500 group-hover:scale-110 border border-white/5 group-hover:border-indigo-400/30">
-                                                        <item.icon size={16} />
+                                            item.path.startsWith('/') ? (
+                                                <NavLink
+                                                    key={item.id}
+                                                    to={item.path}
+                                                    onClick={() => setIsOpen(false)}
+                                                    className={({ isActive }) => `flex items-center gap-4 pl-10 pr-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-2 ${isActive
+                                                        ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-white border-l-2 border-indigo-500 shadow-lg shadow-indigo-500/10'
+                                                        : 'text-slate-400 hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-white/[0.04] hover:text-white'
+                                                        }`}
+                                                >
+                                                    <div className="relative z-10 flex items-center gap-4">
+                                                        <div className={`w-8 h-8 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center transition-all duration-500 group-hover:scale-110 border border-white/5 ${location.pathname === item.path ? 'from-indigo-500/30 to-purple-500/30 border-indigo-400/30' : 'group-hover:from-indigo-500/20 group-hover:to-purple-500/20'
+                                                            }`}>
+                                                            <item.icon size={16} />
+                                                        </div>
+                                                        <span className="font-black text-[11px] uppercase tracking-[0.12em] group-hover:tracking-[0.15em] transition-all">{item.name}</span>
                                                     </div>
-                                                    <span className="font-black text-[11px] uppercase tracking-[0.12em] group-hover:tracking-[0.15em] transition-all">{item.name}</span>
-                                                </div>
-                                                <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400 absolute right-4" />
-                                            </a>
+                                                </NavLink>
+                                            ) : (
+                                                <a
+                                                    key={item.id}
+                                                    href={item.path}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-4 pl-10 pr-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-2 text-slate-400 hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-white/[0.04] hover:text-white hover:scale-[1.01]"
+                                                >
+                                                    <div className="relative z-10 flex items-center gap-4">
+                                                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center group-hover:from-indigo-500/20 group-hover:to-purple-500/20 transition-all duration-500 group-hover:scale-110 border border-white/5 group-hover:border-indigo-400/30">
+                                                            <item.icon size={16} />
+                                                        </div>
+                                                        <span className="font-black text-[11px] uppercase tracking-[0.12em] group-hover:tracking-[0.15em] transition-all">{item.name}</span>
+                                                    </div>
+                                                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400 absolute right-4" />
+                                                </a>
+                                            )
                                         ))}
                                     </div>
                                 </div>

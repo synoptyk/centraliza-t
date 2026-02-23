@@ -36,6 +36,8 @@ import HelpCenter from './pages/HelpCenter';
 import Payroll from './pages/Payroll';
 import GlobalSettings from './pages/GlobalSettings';
 import Finiquitos from './pages/Finiquitos';
+import BancoCentral from './pages/BancoCentral';
+import SIIMirror from './pages/SIIMirror';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth, blockRecruitmentOnly }) => {
@@ -235,6 +237,18 @@ function AppContent() {
                         <Route path="/finiquitos" element={
                             <ProtectedRoute auth={auth} blockRecruitmentOnly={true}>
                                 <Finiquitos auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/ajustes/conexiones/banco-central" element={
+                            <ProtectedRoute auth={auth}>
+                                <BancoCentral auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/ajustes/conexiones/sii" element={
+                            <ProtectedRoute auth={auth}>
+                                <SIIMirror auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
