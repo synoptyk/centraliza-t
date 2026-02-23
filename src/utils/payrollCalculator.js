@@ -4,14 +4,15 @@
  */
 
 // Estas son solo constantes DEFAULT por seguridad en caso de que fallen las inyecciones de DB/API
-const DEFAULT_IMM = 539000; // Ingreso Mínimo Mensual (Actual Vigente 2025)
-const DEFAULT_TOPE_AFP = 87.8; // UF (Actualizado 2025)
-const DEFAULT_TOPE_AFC = 131.8; // UF (Actualizado 2025)
-const DEFAULT_VALOR_UF = 38500;
-const DEFAULT_VALOR_UTM = 65000;
-const DEFAULT_SIS_RATE = 1.49; // %
+const DEFAULT_IMM = 539000; // IMM vigente Ley N°21.751 (2026)
+const DEFAULT_TOPE_AFP = 89.9; // UF - Tope imponible AFP/Salud 2026 (Sup. de Pensiones)
+const DEFAULT_TOPE_AFC = 135.1; // UF - Tope imponible Seguro Cesantía 2026 (AFC Chile)
+const DEFAULT_VALOR_UF = 39731; // UF referencia enero 2026
+const DEFAULT_VALOR_UTM = 68000; // UTM referencia 2026
+const DEFAULT_SIS_RATE = 1.54; // % SIS vigente enero 2026 (licitación AFP)
 const DEFAULT_MUTUAL_BASE = 0.90; // %
 
+// Tasas AFP 2026 (10% legal + comisión administradora) según Sup. de Pensiones
 const DEFAULT_TASAS_AFP = {
     'Capital': 11.44,
     'Cuprum': 11.44,
@@ -19,7 +20,7 @@ const DEFAULT_TASAS_AFP = {
     'PlanVital': 11.16,
     'Provida': 11.45,
     'Modelo': 10.58,
-    'UNO': 10.69
+    'UNO': 10.46  // Actualizado oct 2025 -> 0.46% comisión = 10.46% total
 };
 
 const TRAMOS_IMPUESTO_UNICO = [

@@ -47,15 +47,17 @@ const PreviredMirror = ({ auth, onLogout }) => {
         }
     };
 
-    const afpRates = settings?.afpRates ? (settings.afpRates instanceof Map ? Object.fromEntries(settings.afpRates) : settings.afpRates) : {
-        'Capital': 11.44,
-        'Cuprum': 11.44,
-        'Habitat': 11.27,
-        'PlanVital': 11.16,
-        'Provida': 11.45,
-        'Modelo': 10.58,
-        'UNO': 10.69
-    };
+    const afpRates = settings?.afpRates
+        ? (settings.afpRates instanceof Map ? Object.fromEntries(settings.afpRates) : settings.afpRates)
+        : {
+            'Capital': 11.44,
+            'Cuprum': 11.44,
+            'Habitat': 11.27,
+            'PlanVital': 11.16,
+            'Provida': 11.45,
+            'Modelo': 10.58,
+            'UNO': 10.46  // 2026: 0.46% comisión + 10% legal
+        };
 
     if (loading) {
         return (
@@ -91,35 +93,35 @@ const PreviredMirror = ({ auth, onLogout }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <IndicatorCard
                     title="Tope Imponible AFP/Salud"
-                    value={settings?.topeImponibleAFP || 87.8}
+                    value={settings?.topeImponibleAFP || 89.9}
                     unit="UF"
                     icon={TrendingUp}
                     colorClass="text-indigo-600"
-                    footer="Actualizado 2025"
+                    footer="Vigente enero 2026 (Sup. Pensiones)"
                 />
                 <IndicatorCard
                     title="Tope Imponible AFC"
-                    value={settings?.topeImponibleAFC || 131.8}
+                    value={settings?.topeImponibleAFC || 135.1}
                     unit="UF"
                     icon={Scale}
                     colorClass="text-emerald-600"
-                    footer="Seguro de Cesantía 2025"
+                    footer="Seguro Cesantía 2026 (AFC Chile)"
                 />
                 <IndicatorCard
                     title="Seguro Invalidez (SIS)"
-                    value={settings?.sisRate || 1.49}
+                    value={settings?.sisRate || 1.54}
                     unit="%"
                     icon={HeartPulse}
                     colorClass="text-rose-600"
-                    footer="Cargo Empleador"
+                    footer="Vigente enero 2026 - Cargo Empleador"
                 />
                 <IndicatorCard
-                    title="Sueldo Mínimo"
+                    title="Ingreso Mínimo (IMM)"
                     value={`$${(settings?.sueldoMinimo || 539000).toLocaleString('es-CL')}`}
                     unit=""
                     icon={DollarSign}
                     colorClass="text-amber-600"
-                    footer="Base de Gratificación"
+                    footer="Ley N°21.751 vigente 2026"
                 />
             </div>
 
@@ -137,7 +139,7 @@ const PreviredMirror = ({ auth, onLogout }) => {
                     </div>
                     <div className="bg-white px-6 py-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
                         <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Valores Vigentes</p>
+                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Vigentes Febrero 2026</p>
                     </div>
                 </div>
 
@@ -199,8 +201,8 @@ const PreviredMirror = ({ auth, onLogout }) => {
                         <span className="block mb-4">
                             Los indicadores mostrados en este espejo son los mismos que Centraliza-T V5.0 utiliza para la generación de archivos PREVIRED (formato 105 campos) y el Libro de Remuneraciones Electrónico (LRE).
                         </span>
-                        <span className="block p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-indigo-600">
-                            <strong>Actualización 2025:</strong> El Tope Imponible se ha ajustado de 84.3 a **87.8 UF** y el Seguro de Cesantía a **131.8 UF**. Centraliza-T ya tiene estos valores precargados.
+                        <span className="block p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs text-indigo-700">
+                            <strong>Actualizado Enero 2026:</strong> Tope AFP/Salud sube a <strong>89.9 UF</strong>, Cesantía a <strong>135.1 UF</strong>, y el SIS a <strong>1.54%</strong>. AFP UNO baja comisión a <strong>0.46%</strong>. Todos los motores de cálculo de Centraliza-T ya reflejan estos valores.
                         </span>
                     </p>
                     <div className="mt-8 flex items-center gap-4 p-4 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-100">
