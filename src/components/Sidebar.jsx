@@ -98,7 +98,6 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         { id: 'ayuda', name: 'Centro de Ayuda', icon: LifeBuoy, path: '/ayuda', color: 'text-blue-400' }
     ];
 
-    const CheckSquare = ({ size, className }) => <div className={`border-2 border-current rounded-sm ${className}`} style={{ width: size, height: size }} />;
 
     const checkPermission = (item) => {
         if (auth?.role === 'Ceo_Centralizat' || auth?.role === 'Admin_Centralizat') return true;
