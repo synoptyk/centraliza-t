@@ -18,6 +18,7 @@ import {
     HeartPulse
 } from 'lucide-react';
 import API_URL from '../config/api';
+import { cleanRut, formatRut, validateRut } from '../utils/rutUtils';
 
 const PortfolioPortal = () => {
     const { companyId } = useParams();
@@ -54,7 +55,13 @@ const PortfolioPortal = () => {
     }, [companyId]);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'rut') {
+            const formatted = formatRut(value);
+            setFormData({ ...formData, [name]: formatted });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
     const handleFileUpload = async (e) => {
@@ -82,6 +89,12 @@ const PortfolioPortal = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateRut(formData.rut)) {
+            setError('El RUT ingresado no es válido');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -314,8 +327,8 @@ const PortfolioPortal = () => {
                             type="submit"
                             disabled={loading || !formData.cvUrl}
                             className={`w-full py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-sm transition-all shadow-2xl ${!formData.cvUrl
-                                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
-                                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02] hover:shadow-indigo-500/25'
+                                ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
+                                : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02] hover:shadow-indigo-500/25'
                                 }`}
                         >
                             Finalizar Registro y Unirse
