@@ -98,43 +98,64 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         { id: 'ayuda', name: 'Centro de Ayuda', icon: LifeBuoy, path: '/ayuda', color: 'text-blue-400' }
     ];
 
-
     const checkPermission = (item) => {
         if (auth?.role === 'Ceo_Centralizat' || auth?.role === 'Admin_Centralizat') return true;
         const userPerm = auth?.permissions?.find(p => p.module === item.id);
         return userPerm?.actions?.read === true;
     };
 
-    const NavItem = ({ item, level = 0 }) => (
-        <NavLink
-            to={item.path}
-            className={({ isActive }) =>
-                `flex items-center justify-between mx-2 ${level === 1 ? 'pl-10 pr-4 py-3' : 'px-5 py-3.5'} rounded-xl transition-all duration-300 group relative mb-1 ${isActive
-                    ? 'bg-indigo-600/10 text-white shadow-[inset_0_0_20px_rgba(79,70,229,0.1)] border border-indigo-500/20'
-                    : 'text-slate-400 hover:bg-white/[0.03] hover:text-slate-200'
-                }`
-            }
-        >
-            <div className="flex items-center gap-3.5 relative z-10">
-                <div className={`p-2 rounded-lg transition-all duration-500 ${location.pathname === item.path ? 'bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.4)] text-white' : 'bg-slate-800/50 text-slate-500 group-hover:text-indigo-400 border border-white/5'}`}>
-                    <item.icon size={18} />
+    const NavItem = ({ item, level = 0 }) => {
+        const isActive = location.pathname === item.path;
+
+        // Dynamic semantic colors for icons
+        const getIconColors = () => {
+            if (isActive) return 'bg-indigo-600 shadow-[0_0_20px_rgba(79,70,229,0.5)] text-white ring-2 ring-indigo-400/50';
+
+            const colorMap = {
+                'text-indigo-400': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 group-hover:bg-indigo-500/20 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]',
+                'text-amber-400': 'bg-amber-500/10 text-amber-400 border-amber-500/20 group-hover:bg-amber-500/20 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]',
+                'text-emerald-400': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]',
+                'text-blue-400': 'bg-blue-500/10 text-blue-400 border-blue-500/20 group-hover:bg-blue-500/20 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]',
+                'text-purple-400': 'bg-purple-500/10 text-purple-400 border-purple-500/20 group-hover:bg-purple-500/20 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]',
+                'text-rose-400': 'bg-rose-500/10 text-rose-400 border-rose-500/20 group-hover:bg-rose-500/20 group-hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]',
+                'text-cyan-400': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20 group-hover:bg-cyan-500/20 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)]',
+                'text-slate-400': 'bg-slate-500/10 text-slate-400 border-slate-500/20 group-hover:bg-slate-500/20 group-hover:shadow-[0_0_15px_rgba(100,116,139,0.3)]'
+            };
+            return colorMap[item.color] || 'bg-slate-800/50 text-slate-500 border-white/5';
+        };
+
+        return (
+            <NavLink
+                to={item.path}
+                className={({ isActive }) =>
+                    `flex items-center justify-between mx-3 ${level === 1 ? 'pl-9 pr-4 py-3' : 'px-5 py-3.5'} rounded-2xl transition-all duration-500 group relative mb-1.5 ${isActive
+                        ? 'bg-indigo-600/10 text-white shadow-[inset_0_0_25px_rgba(79,70,229,0.15)] border border-indigo-500/30 ring-1 ring-white/5'
+                        : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-100'
+                    }`
+                }
+            >
+                <div className="flex items-center gap-4 relative z-10">
+                    <div className={`p-2.5 rounded-xl transition-all duration-500 border ${getIconColors()} group-hover:scale-110 group-hover:rotate-[5deg]`}>
+                        <item.icon size={19} strokeWidth={2.5} />
+                    </div>
+                    <span className={`text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-500 ${isActive ? 'text-white' : 'group-hover:translate-x-1 group-hover:text-white'}`}>
+                        {item.name}
+                    </span>
                 </div>
-                <span className={`text-[11px] font-bold uppercase tracking-wider transition-all ${location.pathname === item.path ? 'text-white' : 'group-hover:translate-x-1'}`}>
-                    {item.name}
-                </span>
-            </div>
 
-            {item.badge > 0 && (
-                <span className="bg-indigo-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md min-w-[18px] text-center shadow-lg shadow-indigo-600/20">
-                    {item.badge}
-                </span>
-            )}
+                {item.badge > 0 && (
+                    <span className="bg-indigo-600 text-white text-[9px] font-black px-2 py-0.5 rounded-lg min-w-[20px] text-center shadow-[0_0_15px_rgba(79,70,229,0.4)] ring-1 ring-white/20">
+                        {item.badge}
+                    </span>
+                )}
 
-            {location.pathname === item.path && (
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-indigo-500 rounded-l-full shadow-[0_0_10px_#6366f1]"></div>
-            )}
-        </NavLink>
-    );
+                {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-7 bg-indigo-500 rounded-r-full shadow-[0_0_15px_#6366f1] animate-pulse"></div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none"></div>
+            </NavLink>
+        );
+    };
 
     const SectionHeader = ({ id, label, icon: Icon, color }) => (
         <button
@@ -143,7 +164,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         >
             <div className="flex items-center gap-3">
                 <div className={`w-1 shadow-[0_0_8px_currentColor] h-3 rounded-full ${color}`}></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-slate-300 transition-colors">
+                <span className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 group-hover:text-slate-300 transition-colors">
                     {label}
                 </span>
             </div>
@@ -160,28 +181,29 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
             <div className={`w-80 h-screen bg-[#020617] text-white flex flex-col fixed left-0 top-0 z-50 shadow-[0_0_50px_rgba(0,0,0,0.5)] border-r border-white/5 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
 
                 {/* --- HEADER: SPECTACULAR BRANDING --- */}
-                <div className="relative p-8 pt-10 group cursor-pointer overflow-hidden" onClick={() => navigate('/dashboard')}>
-                    <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-indigo-600/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-                    <div className="absolute -top-10 -left-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/30 transition-all duration-1000"></div>
+                <div className="relative p-8 pt-12 pb-10 group cursor-pointer overflow-hidden mb-4" onClick={() => navigate('/dashboard')}>
+                    <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-indigo-600/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                    <div className="absolute -top-16 -left-16 w-48 h-48 bg-indigo-500/10 rounded-full blur-[80px] group-hover:bg-indigo-500/20 transition-all duration-1000"></div>
 
-                    <div className="relative z-10 flex items-center gap-5">
+                    <div className="relative z-10 flex items-center gap-6">
                         <div className="relative">
-                            <div className="w-14 h-14 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-700 overflow-hidden ring-1 ring-white/20">
-                                <img src="/logo_centralizat.png" alt="Logo" className="w-9 h-9 object-contain filter brightness-125 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
-                                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-transparent"></div>
+                            <div className="w-16 h-16 rounded-[24px] bg-white/[0.03] backdrop-blur-3xl border border-white/10 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] group-hover:scale-105 group-hover:rotate-[8deg] transition-all duration-700 overflow-hidden ring-1 ring-white/20">
+                                <img src="/logo_centralizat.png" alt="Logo" className="w-[42px] h-[42px] object-contain filter brightness-125 contrast-125 drop-shadow-[0_0_12px_rgba(99,102,241,0.8)] animate-pulse" />
+                                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/30 to-transparent mix-blend-overlay"></div>
+                                <div className="absolute -inset-full bg-gradient-to-r from-transparent via-white/10 to-transparent rotate-45 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                             </div>
-                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-indigo-600 rounded-lg flex items-center justify-center border-2 border-[#020617] group-hover:scale-110 transition-transform">
-                                <Zap size={10} className="text-white fill-white" />
+                            <div className="absolute -bottom-2 -right-1 w-7 h-7 bg-indigo-600 rounded-xl flex items-center justify-center border-[3px] border-[#020617] shadow-xl group-hover:scale-125 transition-transform group-hover:bg-indigo-500">
+                                <Zap size={12} className="text-white fill-white drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" />
                             </div>
                         </div>
 
                         <div className="flex flex-col">
-                            <h1 className="text-2xl font-black text-white tracking-[-0.02em] leading-none mb-1">
-                                CENTRALIZA<span className="text-indigo-500">-</span><span className="italic font-light">T</span>
+                            <h1 className="text-2xl font-black text-white tracking-[-0.03em] leading-none mb-1.5 drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+                                CENTRALIZA<span className="text-indigo-500 font-black">-</span><span className="italic font-medium text-indigo-100">T</span>
                             </h1>
-                            <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>
-                                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 group-hover:text-indigo-400 transition-colors">Digital Governance</span>
+                            <div className="flex items-center gap-2.5 px-0.5">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_#10b981] ring-1 ring-emerald-400/50"></div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 group-hover:text-indigo-400 group-hover:tracking-[0.45em] transition-all duration-700">Digital Governance</span>
                             </div>
                         </div>
                     </div>
@@ -241,8 +263,8 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                                 return (
                                     <button key={item.id} onClick={() => toggleSection('conexiones_nested')} className="w-full flex items-center justify-between px-5 py-3 rounded-xl text-slate-400 hover:bg-white/[0.03] group transition-all">
                                         <div className="flex items-center gap-3.5">
-                                            <div className="p-2 rounded-lg bg-slate-800/50 text-slate-500 group-hover:text-indigo-400 border border-white/5"><item.icon size={18} /></div>
-                                            <span className="text-[11px] font-bold uppercase tracking-wider">{item.name}</span>
+                                            <div className="p-2.5 rounded-xl bg-slate-800/50 text-slate-500 group-hover:text-indigo-400 border border-white/5"><item.icon size={19} /></div>
+                                            <span className="text-[11px] font-black uppercase tracking-wider">{item.name}</span>
                                         </div>
                                         <ChevronRight size={12} className="transition-all" />
                                     </button>
