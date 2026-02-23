@@ -29,7 +29,8 @@ import {
     FilePlus,
     LifeBuoy,
     CircleDollarSign,
-    Scale
+    Scale,
+    ExternalLink
 } from 'lucide-react';
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -55,7 +56,8 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         centralizat: false,
         recruitment: false,
         management: false,
-        administration: false
+        administration: false,
+        conexiones: false
     });
 
     const toggleSection = (section) => {
@@ -92,6 +94,14 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         { id: 'contratos', name: 'CONTRATACIONES', icon: FilePlus, path: '/contratos' },
         { id: 'nomina', name: 'NÓMINA (PAYROLL)', icon: CircleDollarSign, path: '/nomina' },
         { id: 'finiquitos', name: 'FINIQUITOS', icon: Scale, path: '/finiquitos' },
+    ];
+
+    const conexionesItems = [
+        { id: 'banco-central', name: 'Banco Central', icon: ExternalLink, path: 'https://www.bcentral.cl/' },
+        { id: 'previred', name: 'PreviRed', icon: ExternalLink, path: 'https://www.previred.com/' },
+        { id: 'sii', name: 'SII', icon: ExternalLink, path: 'https://homer.sii.cl/' },
+        { id: 'dt', name: 'DT', icon: ExternalLink, path: 'https://www.dt.gob.cl/' },
+        { id: 'banco', name: 'Banco', icon: ExternalLink, path: 'https://www.bancoestado.cl/' }
     ];
 
     const administrationItems = [
@@ -341,6 +351,45 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                             {/* 4. AJUSTES Y PLANES */}
                             <div className="space-y-1 pt-4 border-t border-white/5 ml-2">
                                 {checkPermission(settingsItem) && <NavItem item={settingsItem} level={1} />}
+
+                                {/* NUEVO MÓDULO CONEXIONES */}
+                                <div className="space-y-1">
+                                    <button
+                                        onClick={() => toggleSection('conexiones')}
+                                        className="w-full flex items-center justify-between pl-7 pr-5 py-4 rounded-2xl transition-all duration-500 group bg-white/[0.01] hover:bg-white/[0.03] border border-white/5"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center transition-all group-hover:from-indigo-500/20 group-hover:to-purple-500/20 border border-white/5 group-hover:border-indigo-400/30 group-hover:scale-110 group-hover:rotate-3">
+                                                <ExternalLink size={18} className="text-slate-400 group-hover:text-white transition-colors" />
+                                            </div>
+                                            <span className="font-black text-[12px] uppercase tracking-[0.12em] text-slate-400 group-hover:text-white group-hover:tracking-[0.15em] transition-all">Conexiones</span>
+                                        </div>
+                                        <ChevronRight
+                                            size={12}
+                                            className={`text-slate-600 transition-transform duration-300 ${sections.conexiones ? 'rotate-90' : ''}`}
+                                        />
+                                    </button>
+                                    <div className={`space-y-1 overflow-hidden transition-all duration-500 border-l border-white/5 ml-4 ${sections.conexiones ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
+                                        {conexionesItems.map(item => (
+                                            <a
+                                                key={item.id}
+                                                href={item.path}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-4 pl-10 pr-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden mb-2 text-slate-400 hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-white/[0.04] hover:text-white hover:scale-[1.01]"
+                                            >
+                                                <div className="relative z-10 flex items-center gap-4">
+                                                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center group-hover:from-indigo-500/20 group-hover:to-purple-500/20 transition-all duration-500 group-hover:scale-110 border border-white/5 group-hover:border-indigo-400/30">
+                                                        <item.icon size={16} />
+                                                    </div>
+                                                    <span className="font-black text-[11px] uppercase tracking-[0.12em] group-hover:tracking-[0.15em] transition-all">{item.name}</span>
+                                                </div>
+                                                <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400 absolute right-4" />
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 {checkPermission(subscriptionItem) && <NavItem item={subscriptionItem} level={1} />}
                                 <NavItem item={{ id: 'ayuda', name: 'Centro de Ayuda', icon: LifeBuoy, path: '/ayuda' }} level={1} />
                             </div>
