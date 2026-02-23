@@ -66,9 +66,9 @@ const ContractManager = ({ auth, onLogout }) => {
     const generateInitialContract = (applicant) => {
         setSelectedApplicant(applicant);
         const today = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: es });
-        const companyName = auth.user.company?.name || 'LA EMPRESA';
-        const companyTaxId = auth.user.company?.taxId || 'N/A';
-        const representative = auth.user.name;
+        const companyName = auth?.company?.name || 'LA EMPRESA';
+        const companyTaxId = auth?.company?.taxId || 'N/A';
+        const representative = auth?.name;
         const startDate = applicant.workerData?.contract?.startDate
             ? format(new Date(applicant.workerData.contract.startDate), "dd 'de' MMMM 'de' yyyy", { locale: es })
             : today;

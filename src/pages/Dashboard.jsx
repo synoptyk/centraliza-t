@@ -34,7 +34,7 @@ const Dashboard = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [statsData, setStatsData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const serviceMode = auth.user.company?.serviceMode || 'FULL_HR_360';
+    const serviceMode = auth?.company?.serviceMode || 'FULL_HR_360';
 
     useEffect(() => {
         const fetchDashboardStats = async () => {
