@@ -86,6 +86,13 @@ function AppContent() {
         setAuth(null);
     };
 
+    // Listen for custom event from Topbar to open mobile menu
+    useEffect(() => {
+        const handleOpenMenu = () => setIsMenuOpen(true);
+        window.addEventListener('open-mobile-menu', handleOpenMenu);
+        return () => window.removeEventListener('open-mobile-menu', handleOpenMenu);
+    }, []);
+
     if (loading) return null;
 
     // Sidebar should only show in dashboard routes
@@ -105,22 +112,6 @@ function AppContent() {
             )}
 
             <main className={`flex-1 transition-all duration-300 print:ml-0 print:p-0 overflow-hidden ${auth && isAppRoute ? 'md:ml-80' : ''}`}>
-                {auth && isAppRoute && (
-                    <div className="md:hidden bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                                <Rocket className="text-white" size={18} />
-                            </div>
-                            <span className="text-sm font-black tracking-tighter text-slate-900">CENTRALIZA-T</span>
-                        </div>
-                        <button
-                            onClick={() => setIsMenuOpen(true)}
-                            className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-600"
-                        >
-                            <Menu size={24} />
-                        </button>
-                    </div>
-                )}
                 <AnimatePresence mode="wait">
                     <Routes location={location} key={location.pathname}>
                         {/* Public Routes */}

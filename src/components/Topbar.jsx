@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LogOut } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import NotificationCenter from './NotificationCenter';
 
 const Topbar = ({ title, subtitle, icon: Icon, actions, auth, onLogout }) => {
@@ -15,7 +15,13 @@ const Topbar = ({ title, subtitle, icon: Icon, actions, auth, onLogout }) => {
             <div className="absolute inset-x-0 bottom-0 h-px bg-white/10"></div>
 
             <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3 sm:gap-6">
+                    <button
+                        onClick={() => window.dispatchEvent(new Event('open-mobile-menu'))}
+                        className="md:hidden p-2 -ml-2 text-white/80 hover:text-white transition-colors"
+                    >
+                        <Menu size={24} />
+                    </button>
                     {Icon && (
                         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/10 shadow-inner shrink-0">
                             <Icon className="text-white" size={16} />
