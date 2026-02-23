@@ -13,14 +13,12 @@ const protect = asyncHandler(async (req, res, next) => {
             const user = await User.findById(decoded.id).select('-password');
 
             if (!user) {
-                console.error(`--- AUTH FAIL: User not found for ID ${decoded.id} ---`);
                 res.status(401);
                 throw new Error('Usuario no encontrado');
             }
 
             // VALIDACIÓN DE SESIÓN ÚNICA: Comparar versión del token con la de la DB
             if (decoded.version !== user.tokenVersion) {
-                console.error(`--- AUTH FAIL: Token Version Mismatch for ${user.email}. Token: ${decoded.version}, DB: ${user.tokenVersion} ---`);
                 res.status(401);
                 throw new Error('Sesión expirada: Se ha detectado un nuevo inicio de sesión en otro dispositivo.');
             }
@@ -28,7 +26,6 @@ const protect = asyncHandler(async (req, res, next) => {
             req.user = user;
             next();
         } catch (error) {
-            console.error('--- AUTH ERROR:', error.message);
             res.status(401);
             throw new Error('Not authorized, token failed');
         }

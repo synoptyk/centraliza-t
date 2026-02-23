@@ -30,9 +30,9 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             console.error('Sesión expirada o no autorizada. Redirigiendo a login...');
-            // Opcional: Limpiar almacenamiento y redirigir
-            // localStorage.removeItem('centralizat_user');
-            // window.location.href = '/login';
+            localStorage.removeItem('centralizat_user');
+            sessionStorage.removeItem('centralizat_user');
+            window.location.href = '/login';
         }
         return Promise.reject(error);
     }
