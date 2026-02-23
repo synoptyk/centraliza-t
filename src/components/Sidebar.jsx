@@ -172,17 +172,29 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     const SectionHeader = ({ id, label, icon: Icon, color }) => (
         <button
             onClick={() => toggleSection(id)}
-            className="w-full flex items-center justify-between px-6 py-4 mt-4 group transition-all"
+            className={`w-[calc(100%-1.5rem)] flex items-center justify-between mx-3 px-5 py-4 mt-6 group transition-all duration-500 rounded-[20px] border relative overflow-hidden ${sections[id]
+                ? 'bg-white/[0.05] border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.4)] ring-1 ring-white/5'
+                : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'}`}
         >
-            <div className="flex items-center gap-4">
-                <div className={`p-2 rounded-xl border transition-all duration-500 ${getIconColors(color)} ${sections[id] ? 'scale-110 group-hover:rotate-0' : 'group-hover:scale-110 group-hover:rotate-[8deg]'}`}>
+            {/* Subtle glow effect when open */}
+            {sections[id] && (
+                <div className="absolute -top-10 -left-10 w-24 h-24 bg-indigo-500/10 rounded-full blur-[40px] pointer-events-none"></div>
+            )}
+
+            <div className="flex items-center gap-4 relative z-10">
+                <div className={`p-2.5 rounded-xl border transition-all duration-500 ${getIconColors(color)} ${sections[id] ? 'scale-110 rotate-0 shadow-[0_0_20px_rgba(99,102,241,0.3)]' : 'group-hover:scale-110 group-hover:rotate-[8deg]'}`}>
                     <Icon size={18} strokeWidth={2.5} />
                 </div>
-                <span className={`text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${sections[id] ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`}>
+                <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${sections[id] ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`}>
                     {label}
                 </span>
             </div>
-            <ChevronRight size={14} className={`text-slate-600 transition-all duration-300 ${sections[id] ? 'rotate-90 text-indigo-400' : ''}`} />
+            <div className={`relative z-10 transition-all duration-500 transform ${sections[id] ? 'rotate-90 scale-125' : ''}`}>
+                <ChevronRight size={14} className={sections[id] ? 'text-indigo-400' : 'text-slate-600'} />
+            </div>
+
+            {/* Glossy overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
         </button>
     );
 
