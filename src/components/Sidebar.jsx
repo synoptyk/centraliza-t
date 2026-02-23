@@ -46,9 +46,9 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
 
     const isRecruitmentOnly = auth?.company?.serviceMode === 'RECRUITMENT_ONLY';
 
-    // --- COGNITIVE ARCHITECTURE: PHASE-BASED GROUPING ---
+    // --- COGNITIVE ARCHITECTURE: REBRANDED SECTIONS v6.2 ---
 
-    // 1. INTELIGENCIA Y MANDO (Neural Core)
+    // 1. CONTROL CEO (Neural Core)
     const intelligenceItems = [
         { id: 'dashboard', name: isRecruitmentOnly ? 'Dashboard Agencia' : 'Dashboard Central', icon: LayoutDashboard, path: isRecruitmentOnly ? '/dashboard-empresa' : '/dashboard', color: 'text-indigo-400' },
         ...(auth?.role === 'Ceo_Centralizat' ? [
@@ -57,14 +57,14 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         ] : [])
     ];
 
-    // 2. GOBERNANZA ESTRATÉGICA (Planning & Control)
+    // 2. ADMINISTRACIÓN (Planning & Control)
     const strategyItems = [
         { id: 'proyectos', name: 'Gestión de Proyectos', icon: Briefcase, path: '/proyectos', color: 'text-blue-400' },
         { id: 'contratacion', name: 'Aprobaciones (Firma)', icon: FileCheck, path: '/contratacion', badge: counts.contratacion, color: 'text-purple-400' },
         { id: 'historial', name: 'Historial Operativo', icon: History, path: '/historial', color: 'text-slate-400' }
     ];
 
-    // 3. EMBUDO DE TALENTO (Acquisition Funnel)
+    // 3. RECLUTAMIENTO Y SELECCIÓN (Acquisition Funnel)
     const talentItems = [
         { id: 'ingreso', name: 'Captura de Talento', icon: UserPlus, path: '/ingreso', color: 'text-indigo-400' },
         { id: 'entrevista', name: 'Entrevistas Filtro', icon: Calendar, path: '/entrevista', badge: counts.entrevista, color: 'text-blue-400' },
@@ -75,7 +75,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         { id: 'cartera-profesional', name: 'Centro de Captación', icon: Zap, path: '/cartera-profesional', color: 'text-cyan-400' },
     ];
 
-    // 4. CAPITAL HUMANO (Employee Lifecycle)
+    // 4. RELACIONES LABORALES (Employee Lifecycle)
     const capitalItems = [
         ...(!isRecruitmentOnly ? [
             { id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano', color: 'text-indigo-400' },
@@ -104,25 +104,29 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         return userPerm?.actions?.read === true;
     };
 
+    const getIconColors = (colorClass, isActive = false) => {
+        if (isActive) return 'bg-indigo-600 shadow-[0_0_20px_rgba(79,70,229,0.5)] text-white ring-2 ring-indigo-400/50';
+
+        const colorMap = {
+            'text-indigo-400': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 group-hover:bg-indigo-500/20 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]',
+            'text-amber-400': 'bg-amber-500/10 text-amber-400 border-amber-500/20 group-hover:bg-amber-500/20 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]',
+            'text-emerald-400': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]',
+            'text-blue-400': 'bg-blue-500/10 text-blue-400 border-blue-500/20 group-hover:bg-blue-500/20 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]',
+            'text-purple-400': 'bg-purple-500/10 text-purple-400 border-purple-500/20 group-hover:bg-purple-500/20 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]',
+            'text-rose-400': 'bg-rose-500/10 text-rose-400 border-rose-500/20 group-hover:bg-rose-500/20 group-hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]',
+            'text-cyan-400': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20 group-hover:bg-cyan-500/20 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)]',
+            'text-slate-400': 'bg-slate-500/10 text-slate-400 border-slate-500/20 group-hover:bg-slate-500/20 group-hover:shadow-[0_0_15px_rgba(100,116,139,0.3)]',
+            'text-indigo-500': 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20 group-hover:bg-indigo-500/20',
+            'text-blue-500': 'bg-blue-500/10 text-blue-500 border-blue-500/20 group-hover:bg-blue-500/20',
+            'text-cyan-500': 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20 group-hover:bg-cyan-500/20',
+            'text-emerald-500': 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 group-hover:bg-emerald-500/20',
+            'text-slate-500': 'bg-slate-500/10 text-slate-500 border-slate-500/20 group-hover:bg-slate-500/20'
+        };
+        return colorMap[colorClass] || 'bg-slate-800/50 text-slate-500 border-white/5';
+    };
+
     const NavItem = ({ item, level = 0 }) => {
         const isActive = location.pathname === item.path;
-
-        // Dynamic semantic colors for icons
-        const getIconColors = () => {
-            if (isActive) return 'bg-indigo-600 shadow-[0_0_20px_rgba(79,70,229,0.5)] text-white ring-2 ring-indigo-400/50';
-
-            const colorMap = {
-                'text-indigo-400': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 group-hover:bg-indigo-500/20 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]',
-                'text-amber-400': 'bg-amber-500/10 text-amber-400 border-amber-500/20 group-hover:bg-amber-500/20 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]',
-                'text-emerald-400': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]',
-                'text-blue-400': 'bg-blue-500/10 text-blue-400 border-blue-500/20 group-hover:bg-blue-500/20 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]',
-                'text-purple-400': 'bg-purple-500/10 text-purple-400 border-purple-500/20 group-hover:bg-purple-500/20 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]',
-                'text-rose-400': 'bg-rose-500/10 text-rose-400 border-rose-500/20 group-hover:bg-rose-500/20 group-hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]',
-                'text-cyan-400': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20 group-hover:bg-cyan-500/20 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)]',
-                'text-slate-400': 'bg-slate-500/10 text-slate-400 border-slate-500/20 group-hover:bg-slate-500/20 group-hover:shadow-[0_0_15px_rgba(100,116,139,0.3)]'
-            };
-            return colorMap[item.color] || 'bg-slate-800/50 text-slate-500 border-white/5';
-        };
 
         return (
             <NavLink
@@ -135,7 +139,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                 }
             >
                 <div className="flex items-center gap-4 relative z-10">
-                    <div className={`p-2.5 rounded-xl transition-all duration-500 border ${getIconColors()} group-hover:scale-110 group-hover:rotate-[5deg]`}>
+                    <div className={`p-2.5 rounded-xl transition-all duration-500 border ${getIconColors(item.color, isActive)} group-hover:scale-110 group-hover:rotate-[5deg]`}>
                         <item.icon size={19} strokeWidth={2.5} />
                     </div>
                     <span className={`text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-500 ${isActive ? 'text-white' : 'group-hover:translate-x-1 group-hover:text-white'}`}>
@@ -160,11 +164,13 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     const SectionHeader = ({ id, label, icon: Icon, color }) => (
         <button
             onClick={() => toggleSection(id)}
-            className="w-full flex items-center justify-between px-6 py-4 mt-2 group transition-all"
+            className="w-full flex items-center justify-between px-6 py-4 mt-4 group transition-all"
         >
-            <div className="flex items-center gap-3">
-                <div className={`w-1 shadow-[0_0_8px_currentColor] h-3 rounded-full ${color}`}></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 group-hover:text-slate-300 transition-colors">
+            <div className="flex items-center gap-4">
+                <div className={`p-2 rounded-xl border transition-all duration-500 ${getIconColors(color)} ${sections[id] ? 'scale-110 group-hover:rotate-0' : 'group-hover:scale-110 group-hover:rotate-[8deg]'}`}>
+                    <Icon size={18} strokeWidth={2.5} />
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-[0.25em] transition-colors ${sections[id] ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`}>
                     {label}
                 </span>
             </div>
@@ -223,48 +229,47 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                     </div>
                 </div>
 
-                {/* --- NAVIGATION: PHASE-BASED FLOW --- */}
-                <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pt-2">
+                {/* --- NAVIGATION: PHASE-BASED FLOW v6.2 --- */}
+                <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pt-2 pb-10">
 
-                    {/* PHASE 1: INTELLIGENCE */}
-                    <SectionHeader id="intelligence" label="Inteligencia y Mando" icon={PieChart} color="text-indigo-500" />
+                    {/* PHASE 1: CONTROL CEO */}
+                    <SectionHeader id="intelligence" label="CONTROL CEO" icon={ShieldCheck} color="text-indigo-500" />
                     <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.intelligence ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         {intelligenceItems.filter(checkPermission).map(item => <NavItem key={item.id} item={item} />)}
                     </div>
 
-                    {/* PHASE 2: STRATEGY */}
-                    <SectionHeader id="strategy" label="Gobernanza Estratégica" icon={Briefcase} color="text-blue-500" />
+                    {/* PHASE 2: ADMINISTRACIÓN */}
+                    <SectionHeader id="strategy" label="ADMINISTRACIÓN" icon={Building2} color="text-blue-500" />
                     <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.strategy ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         {strategyItems.filter(checkPermission).map(item => <NavItem key={item.id} item={item} />)}
                     </div>
 
-                    {/* PHASE 3: TALENT */}
-                    <SectionHeader id="talent" label="Embudo de Talento" icon={Zap} color="text-cyan-500" />
+                    {/* PHASE 3: RECLUTAMIENTO Y SELECCIÓN */}
+                    <SectionHeader id="talent" label="RECLUTAMIENTO Y SELECCIÓN" icon={Zap} color="text-cyan-500" />
                     <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.talent ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         {talentItems.filter(checkPermission).map(item => <NavItem key={item.id} item={item} />)}
                     </div>
 
-                    {/* PHASE 4: HUMAN CAPITAL */}
+                    {/* PHASE 4: RELACIONES LABORALES */}
                     {!isRecruitmentOnly && (
                         <>
-                            <SectionHeader id="capital" label="Gestión Humana 360" icon={Users} color="text-emerald-500" />
+                            <SectionHeader id="capital" label="RELACIONES LABORALES" icon={Users} color="text-emerald-500" />
                             <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.capital ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                                 {capitalItems.filter(checkPermission).map(item => <NavItem key={item.id} item={item} />)}
                             </div>
                         </>
                     )}
 
-                    {/* PHASE 5: INFRASTRUCTURE */}
+                    {/* PHASE 5: INFRAESTRUCTURA */}
                     <SectionHeader id="infrastructure" label="Infraestructura" icon={Settings} color="text-slate-500" />
                     <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.infrastructure ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         {infrastructureItems.filter(checkPermission).map(item => {
                             if (item.isFolder) {
-                                // Nested Connections logic simplified
                                 return (
                                     <button key={item.id} onClick={() => toggleSection('conexiones_nested')} className="w-full flex items-center justify-between px-5 py-3 rounded-xl text-slate-400 hover:bg-white/[0.03] group transition-all">
-                                        <div className="flex items-center gap-3.5">
-                                            <div className="p-2.5 rounded-xl bg-slate-800/50 text-slate-500 group-hover:text-indigo-400 border border-white/5"><item.icon size={19} /></div>
-                                            <span className="text-[11px] font-black uppercase tracking-wider">{item.name}</span>
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-2.5 rounded-xl bg-slate-800/50 text-slate-500 group-hover:text-indigo-400 border border-white/5"><item.icon size={19} strokeWidth={2.5} /></div>
+                                            <span className="text-[11px] font-black uppercase tracking-[0.15em]">{item.name}</span>
                                         </div>
                                         <ChevronRight size={12} className="transition-all" />
                                     </button>
@@ -276,7 +281,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                 </nav>
 
                 {/* --- FOOTER: USER PROFILE PREMIUM --- */}
-                <div className="p-4 bg-white/5 mt-auto border-t border-white/5">
+                <div className="p-4 bg-white/5 mt-auto border-t border-white/5 backdrop-blur-md">
                     <div
                         onClick={() => setShowProfileModal(true)}
                         className="p-4 rounded-2xl bg-slate-900/50 border border-white/5 cursor-pointer hover:bg-indigo-600/10 hover:border-indigo-500/30 transition-all group/profile flex items-center gap-4"
