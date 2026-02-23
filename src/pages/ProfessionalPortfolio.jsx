@@ -192,7 +192,16 @@ const ProfessionalPortfolio = ({ auth, onLogout }) => {
                                         <Calendar className="text-purple-400" size={32} />
                                         <div>
                                             <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Fecha Proyectada</p>
-                                            <p className="text-lg font-black text-slate-900 tracking-tight">{format(new Date(r.projectedHiringDate), 'dd/MM/yyyy')}</p>
+                                            <p className="text-lg font-black text-slate-900 tracking-tight">
+                                                {r.projectedHiringDate ? (() => {
+                                                    try {
+                                                        const date = new Date(r.projectedHiringDate);
+                                                        return isNaN(date.getTime()) ? 'Pendiente' : format(date, 'dd/MM/yyyy');
+                                                    } catch (e) {
+                                                        return 'Pendiente';
+                                                    }
+                                                })() : 'Pendiente'}
+                                            </p>
                                         </div>
                                         <button className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-purple-600 transition-all">Gestionar</button>
                                     </div>
