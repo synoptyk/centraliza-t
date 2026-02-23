@@ -76,7 +76,16 @@ const registerCorporateRequest = asyncHandler(async (req, res) => {
 // @route   GET /api/professionals/corporate
 // @access  Private (Agency only)
 const getCorporateRequests = asyncHandler(async (req, res) => {
-    const requests = await CompanyRequest.find({ companyId: req.user.companyId }).sort({ createdAt: -1 });
+    let query = {};
+
+    if (req.user.role !== 'Ceo_Centralizat' && req.user.role !== 'Admin_Centralizat') {
+        if (!req.user.companyId) {
+            return res.json([]);
+        }
+        query.companyId = req.user.companyId;
+    }
+
+    const requests = await CompanyRequest.find(query).sort({ createdAt: -1 });
     res.json(requests);
 });
 

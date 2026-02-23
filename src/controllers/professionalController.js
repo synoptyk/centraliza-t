@@ -100,7 +100,15 @@ const registerProfessional = asyncHandler(async (req, res) => {
 const getProfessionals = asyncHandler(async (req, res) => {
     const { specialty, region, search } = req.query;
 
-    let query = { companyId: req.user.companyId };
+    let query = {};
+
+    // Si no es CEO, filtrar por su propia empresa
+    if (req.user.role !== 'Ceo_Centralizat' && req.user.role !== 'Admin_Centralizat') {
+        if (!req.user.companyId) {
+            return res.json([]); // O devolver error 403
+        }
+        query.companyId = req.user.companyId;
+    }
 
     if (specialty) query.specialty = { $regex: specialty, $options: 'i' };
     if (region) query.region = region;
@@ -119,10 +127,13 @@ const getProfessionals = asyncHandler(async (req, res) => {
 // @route   DELETE /api/professionals/:id
 // @access  Private (Agency only)
 const deleteProfessional = asyncHandler(async (req, res) => {
-    const professional = await Professional.findOne({
-        _id: req.params.id,
-        companyId: req.user.companyId
-    });
+    const query = { _id: req.params.id };
+
+    if (req.user.role !== 'Ceo_Centralizat' && req.user.role !== 'Admin_Centralizat') {
+        query.companyId = req.user.companyId;
+    }
+
+    const professional = await Professional.findOne(query);
 
     if (professional) {
         await professional.deleteOne();
