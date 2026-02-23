@@ -67,6 +67,7 @@ const Topbar = ({ title, subtitle, icon: Icon, actions, auth, onLogout }) => {
                         </div>
                     </div>
                 </div>
+            </div>
         </motion.div>
     );
 };
