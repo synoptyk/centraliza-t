@@ -87,8 +87,8 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         { id: 'tests', name: 'Evaluación Técnica', icon: BrainCircuit, path: '/tests', badge: counts.tests },
         { id: 'acreditacion-prevencion', name: 'Seguridad & Prevención', icon: ShieldCheck, path: '/acreditacion-prevencion', badge: counts.acreditacion },
         { id: 'documentos', name: 'Gestión Documental', icon: FileText, path: '/documentos', badge: counts.documentos },
-        { id: 'cartera-profesional', name: 'Centro de Captación', icon: Zap, path: '/cartera-profesional' },
         { id: 'ficha-colaborador', name: 'Ficha y Validación', icon: UserPlus, path: '/ficha-colaborador', badge: counts.ficha },
+        { id: 'cartera-profesional', name: 'Centro de Captación', icon: Zap, path: '/cartera-profesional' },
     ];
 
     const isRecruitmentOnly = auth?.company?.serviceMode === 'RECRUITMENT_ONLY';

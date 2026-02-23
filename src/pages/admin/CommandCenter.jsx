@@ -22,6 +22,7 @@ const MODULES_LIST = [
     { id: 'acreditacion-prevencion', name: 'Seguridad & Prevención' },
     { id: 'documentos', name: 'Gestión Documental' },
     { id: 'ficha-colaborador', name: 'Ficha y Validación' },
+    { id: 'cartera-profesional', name: 'Centro de Captación' },
     { id: 'contratos', name: 'Contrataciones (Generación IA)' },
     { id: 'contratacion', name: 'Aprobaciones (Firma Final)' },
     { id: 'nomina', name: 'Nómina (Payroll)' },
