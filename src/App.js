@@ -38,13 +38,21 @@ import GlobalSettings from './pages/GlobalSettings';
 import Finiquitos from './pages/Finiquitos';
 
 // Protected Route Component
-const ProtectedRoute = ({ children, allowedRoles, auth }) => {
+const ProtectedRoute = ({ children, allowedRoles, auth, blockRecruitmentOnly }) => {
     if (!auth) {
         return <Navigate to="/login" replace />;
     }
+
+    // Check role access
     if (allowedRoles && !allowedRoles.includes(auth.role)) {
         return <Navigate to="/dashboard" replace />;
     }
+
+    // Check dual-flow access (Block Agencies from HR 360 features)
+    if (blockRecruitmentOnly && auth?.company?.serviceMode === 'RECRUITMENT_ONLY') {
+        return <Navigate to="/dashboard" replace />;
+    }
+
     return children;
 };
 
@@ -207,7 +215,7 @@ function AppContent() {
                         } />
 
                         <Route path="/contratos" element={
-                            <ProtectedRoute auth={auth}>
+                            <ProtectedRoute auth={auth} blockRecruitmentOnly={true}>
                                 <ContractManager auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
@@ -219,13 +227,13 @@ function AppContent() {
                         } />
 
                         <Route path="/nomina" element={
-                            <ProtectedRoute auth={auth}>
+                            <ProtectedRoute auth={auth} blockRecruitmentOnly={true}>
                                 <Payroll auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 
                         <Route path="/finiquitos" element={
-                            <ProtectedRoute auth={auth}>
+                            <ProtectedRoute auth={auth} blockRecruitmentOnly={true}>
                                 <Finiquitos auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
@@ -237,7 +245,7 @@ function AppContent() {
                         } />
 
                         <Route path="/gestion-capital-humano" element={
-                            <ProtectedRoute auth={auth}>
+                            <ProtectedRoute auth={auth} blockRecruitmentOnly={true}>
                                 <HumanCapitalMaster onOpenCENTRALIZAT={setSelectedCENTRALIZATApplicant} auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />

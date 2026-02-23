@@ -14,9 +14,11 @@ const {
     getAllSubscriptions,
     updateSubscriptionStatus,
     notifyClientPayment,
-    handleWebhook
+    handleWebhook,
+    processManualPayment
 } = require('../controllers/subscriptionController');
 const { protect, authorize } = require('../middleware/authMiddleware');
+const { upload } = require('../config/cloudinary');
 
 console.log('--- SUBSCRIPTION ROUTES LOADED ---');
 
@@ -26,6 +28,7 @@ router.get('/test', (req, res) => res.json({ message: 'Rutas de suscripción act
 router.get('/plans', getActivePlans);
 router.get('/my-subscription', protect, getMySubscription);
 router.post('/checkout', protect, createCheckoutSession);
+router.post('/manual-payment', protect, upload.single('file'), processManualPayment);
 router.post('/webhook', handleWebhook); // Public for MP
 
 // Admin Routes (CEO Centralizat Only)

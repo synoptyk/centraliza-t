@@ -35,9 +35,10 @@ const subscriptionSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['MercadoPago', 'Transbank', 'Transferencia', 'None'],
+        enum: ['MercadoPago', 'Transbank', 'Transferencia', 'OC', 'None'],
         default: 'None'
     },
+    paymentProofUrl: String,
     lastPaymentAmount: Number,
     lastPaymentDate: Date,
     transactionHistory: [{

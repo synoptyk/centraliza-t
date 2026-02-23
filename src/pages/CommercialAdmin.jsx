@@ -18,7 +18,8 @@ import {
     Building2,
     Mail,
     ShieldCheck,
-    AlertTriangle
+    AlertTriangle,
+    FileText
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

@@ -199,7 +199,7 @@ const Finiquitos = ({ auth, onLogout }) => {
                                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{emp.workerData?.contract?.type || 'Indefinido'}</p>
                                         </td>
                                         <td className="px-5 py-4">
-                                            <span className="font-bold text-slate-700">${parseInt(emp.workerData?.financial?.liquidSalary || globalParams?.sueldoMinimo || 500000).toLocaleString()}</span>
+                                            <span className="font-bold text-slate-700">${parseInt(emp.workerData?.financial?.liquidSalary || globalParams?.sueldoMinimo || 539000).toLocaleString()}</span>
                                         </td>
                                         <td className="px-5 py-4 text-center">
                                             <span className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest ${emp.status === 'Contratado' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
@@ -327,7 +327,7 @@ const Finiquitos = ({ auth, onLogout }) => {
                                                     </div>
                                                     <div>
                                                         <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-1">Base Imponible Proyectada</p>
-                                                        <p className="text-sm font-bold">${(finiquitoPreview.desglose?.indemnizacionAvisoPrevio > 0 ? finiquitoPreview.desglose?.indemnizacionAvisoPrevio : 500000).toLocaleString()}</p>
+                                                        <p className="text-sm font-bold">${(finiquitoPreview.desglose?.indemnizacionAvisoPrevio > 0 ? finiquitoPreview.desglose?.indemnizacionAvisoPrevio : 539000).toLocaleString()}</p>
                                                     </div>
                                                 </div>
                                             </div>

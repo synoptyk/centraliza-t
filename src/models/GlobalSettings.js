@@ -4,7 +4,7 @@ const globalSettingsSchema = new mongoose.Schema({
     id: { type: String, default: 'UNIQUE_CONFIG_DOCUMENT', unique: true }, // Simple singleton approach
 
     // Legal & Financial Constraints (Chile)
-    sueldoMinimo: { type: Number, default: 500000 },
+    sueldoMinimo: { type: Number, default: 539000 },
     topeImponibleAFP: { type: Number, default: 84.3 }, // in UF
     topeImponibleAFC: { type: Number, default: 126.6 }, // in UF
 

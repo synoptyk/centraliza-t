@@ -102,7 +102,7 @@ const Payroll = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                 }
 
                 // Recalcular liquidación con nuevos ajustes
-                const baseSalary = parseInt(emp.workerData?.financial?.liquidSalary || 500000);
+                const baseSalary = parseInt(emp.workerData?.financial?.liquidSalary || globalParams?.sueldoMinimo || 539000);
                 const afp = emp.workerData?.prevision?.afp || 'Habitat';
                 const healthSystem = emp.workerData?.prevision?.healthSystem || { provider: 'Fonasa' };
                 const contractType = emp.workerData?.contract?.type || 'Indefinido';

@@ -11,7 +11,10 @@ import {
     CreditCard,
     ArrowUpCircle,
     Building,
-    ExternalLink
+    ExternalLink,
+    X,
+    FileText,
+    UploadCloud
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -19,6 +22,12 @@ const BillingAndSubscription = () => {
     const [subscription, setSubscription] = useState(null);
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Modal de Pago B2B
+    const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState(null);
+    const [paymentMethod, setPaymentMethod] = useState('mercadopago'); // mercadopago, transferencia, oc
+    const [fileProof, setFileProof] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -53,17 +62,43 @@ const BillingAndSubscription = () => {
         }
     };
 
-    const handleCheckout = async (planId) => {
-        const loadingToast = toast.loading('Generando sesión de pago segura...');
-        try {
-            const { data } = await api.post('/subscriptions/checkout', { planId });
-            toast.dismiss(loadingToast);
+    const openPaymentModal = (plan) => {
+        setSelectedPlan(plan);
+        setPaymentMethod('mercadopago');
+        setFileProof(null);
+        setPaymentModalOpen(true);
+    };
 
-            if (data.checkoutUrl) {
-                // Redirigir a Mercado Pago
-                window.location.href = data.checkoutUrl;
+    const handleCheckout = async () => {
+        if (!selectedPlan) return;
+
+        const loadingToast = toast.loading('Procesando solicitud de pago segura...');
+        try {
+            if (paymentMethod === 'mercadopago') {
+                const { data } = await api.post('/subscriptions/checkout', { planId: selectedPlan._id });
+                toast.dismiss(loadingToast);
+
+                if (data.checkoutUrl) {
+                    window.location.href = data.checkoutUrl;
+                } else {
+                    toast.error('No se pudo obtener la URL de pago');
+                }
             } else {
-                toast.error('No se pudo obtener la URL de pago');
+                // Transferencia u OC (Manual Payment Flow)
+                const formData = new FormData();
+                formData.append('planId', selectedPlan._id);
+                formData.append('method', paymentMethod);
+                if (fileProof) {
+                    formData.append('file', fileProof);
+                }
+
+                await api.post('/subscriptions/manual-payment', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                toast.dismiss(loadingToast);
+                toast.success('Comprobante enviado exitosamente a revisión financiera. Te notificaremos cuando se active tu plan.', { duration: 6000 });
+                setPaymentModalOpen(false);
             }
         } catch (error) {
             toast.dismiss(loadingToast);
@@ -179,7 +214,7 @@ const BillingAndSubscription = () => {
                             </div>
 
                             <button
-                                onClick={() => handleCheckout(plan._id)}
+                                onClick={() => openPaymentModal(plan)}
                                 disabled={plan._id === subscription?.planId?._id}
                                 className={`w-full py-6 rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 ${plan._id === subscription?.planId?._id
                                     ? 'bg-slate-100 text-slate-400 cursor-default shadow-inner'
@@ -208,6 +243,118 @@ const BillingAndSubscription = () => {
                     Configurar Conexión <ExternalLink size={16} />
                 </button>
             </div>
+
+            {/* Modal de Pagos B2B */}
+            {paymentModalOpen && selectedPlan && (
+                <div className="fixed inset-0 bg-[#020617]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                        {/* Header */}
+                        <div className="bg-slate-900 p-8 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+                                    <ShieldCheck className="text-indigo-500" /> Pasarela Corporativa
+                                </h3>
+                                <p className="text-slate-400 text-sm mt-1">Upgrade a {selectedPlan.name} ({selectedPlan.priceUF} UF/mes)</p>
+                            </div>
+                            <button
+                                onClick={() => setPaymentModalOpen(false)}
+                                className="text-slate-500 hover:text-white p-2 transition-colors"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="p-8 space-y-8">
+                            <div>
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Medio de Pago</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <button
+                                        onClick={() => setPaymentMethod('mercadopago')}
+                                        className={`p-4 rounded-2xl border-2 transition-all ${paymentMethod === 'mercadopago' ? 'border-indigo-600 bg-indigo-50 text-indigo-900' : 'border-slate-100 hover:border-slate-200 text-slate-600'}`}
+                                    >
+                                        <CreditCard className={`mx-auto mb-2 ${paymentMethod === 'mercadopago' ? 'text-indigo-600' : 'text-slate-400'}`} />
+                                        <p className="font-bold text-xs uppercase tracking-widest">Mercado Pago</p>
+                                        <p className="text-[9px] mt-1 opacity-70">Tarjetas / Efectivo</p>
+                                    </button>
+                                    <button
+                                        onClick={() => setPaymentMethod('transferencia')}
+                                        className={`p-4 rounded-2xl border-2 transition-all ${paymentMethod === 'transferencia' ? 'border-emerald-600 bg-emerald-50 text-emerald-900' : 'border-slate-100 hover:border-slate-200 text-slate-600'}`}
+                                    >
+                                        <Building className={`mx-auto mb-2 ${paymentMethod === 'transferencia' ? 'text-emerald-600' : 'text-slate-400'}`} />
+                                        <p className="font-bold text-xs uppercase tracking-widest">Transferencia</p>
+                                        <p className="text-[9px] mt-1 opacity-70">Aprobación Manual</p>
+                                    </button>
+                                    <button
+                                        onClick={() => setPaymentMethod('oc')}
+                                        className={`p-4 rounded-2xl border-2 transition-all ${paymentMethod === 'oc' ? 'border-purple-600 bg-purple-50 text-purple-900' : 'border-slate-100 hover:border-slate-200 text-slate-600'}`}
+                                    >
+                                        <FileText className={`mx-auto mb-2 ${paymentMethod === 'oc' ? 'text-purple-600' : 'text-slate-400'}`} />
+                                        <p className="font-bold text-xs uppercase tracking-widest">Orden de Compra</p>
+                                        <p className="text-[9px] mt-1 opacity-70">Pago Institucional</p>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {paymentMethod !== 'mercadopago' && (
+                                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 animate-in slide-in-from-top-4">
+                                    {paymentMethod === 'transferencia' ? (
+                                        <div className="mb-4 text-xs text-slate-600 leading-relaxed font-bold">
+                                            <p className="text-slate-900 uppercase tracking-widest mb-2 font-black">Datos Bancarios Centraliza-T SPA:</p>
+                                            <p>Banco: Banco Santander</p>
+                                            <p>Cuenta Corriente: 123456789</p>
+                                            <p>RUT: 76.543.210-K</p>
+                                            <p>Email: finanzas@centralizat.cl</p>
+                                            <p>Monto a transferir: {Math.round(selectedPlan.priceUF * 38000).toLocaleString()} CLP (Aprox)</p>
+                                        </div>
+                                    ) : (
+                                        <div className="mb-4 text-xs text-slate-600 leading-relaxed font-bold">
+                                            <p className="text-slate-900 uppercase tracking-widest mb-2 font-black">Instrucciones OC:</p>
+                                            <p>Asegúrese de que la Orden de Compra esté a nombre de Centraliza-T SPA y cubra el monto del plan (Renovación automática o plazo fijo).</p>
+                                        </div>
+                                    )}
+
+                                    <label className="block mt-6">
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Subir Documento (Comprobante u OC)</span>
+                                        <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl overflow-hidden relative">
+                                            <div className="space-y-1 text-center">
+                                                <UploadCloud className="mx-auto h-8 w-8 text-slate-400" />
+                                                <div className="flex text-xs text-slate-600 justify-center">
+                                                    <label className="relative cursor-pointer bg-white rounded-md font-black text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-0">
+                                                        <span>{fileProof ? fileProof.name : 'Seleccionar Archivo'}</span>
+                                                        <input type="file" className="sr-only" onChange={(e) => setFileProof(e.target.files[0])} accept=".pdf,.png,.jpg,.jpeg" />
+                                                    </label>
+                                                </div>
+                                                <p className="text-[9px] text-slate-400 font-bold">PDF, PNG, JPG (Max 5MB)</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="bg-slate-50 p-6 border-t border-slate-100 flex justify-end gap-3">
+                            <button
+                                onClick={() => setPaymentModalOpen(false)}
+                                className="px-6 py-3 text-sm font-black text-slate-500 uppercase tracking-widest hover:text-slate-800 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleCheckout}
+                                disabled={paymentMethod !== 'mercadopago' && !fileProof}
+                                className={`px-8 py-3 text-white text-sm font-black uppercase tracking-widest shadow-xl rounded-xl transition-all flex items-center gap-2 ${paymentMethod !== 'mercadopago' && !fileProof
+                                    ? 'bg-slate-300 cursor-not-allowed shadow-none'
+                                    : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20'
+                                    }`}
+                            >
+                                <Check size={16} /> Procesar Transacción
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

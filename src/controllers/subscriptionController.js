@@ -128,6 +128,23 @@ const updateSubscriptionStatus = asyncHandler(async (req, res) => {
     }
 
     subscription.status = status;
+
+    if (status === 'Active') {
+        subscription.startDate = new Date();
+        subscription.endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+        // Enforce Service Mode Update
+        const planDetails = await SubscriptionPlan.findById(subscription.planId);
+        if (planDetails) {
+            const company = await Company.findById(subscription.companyId);
+            if (company) {
+                const isAgencyPlan = planDetails.name.toLowerCase().includes('recluta') || planDetails.name.toLowerCase().includes('recruitment');
+                company.serviceMode = isAgencyPlan ? 'RECRUITMENT_ONLY' : 'FULL_HR_360';
+                await company.save();
+            }
+        }
+    }
+
     await subscription.save();
 
     res.json(subscription);
@@ -270,6 +287,51 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Process Manual B2B Payment (Transfer/OC)
+// @route   POST /api/subscriptions/manual-payment
+const processManualPayment = asyncHandler(async (req, res) => {
+    const { planId, method } = req.body;
+
+    if (!req.file) {
+        res.status(400);
+        throw new Error('Debe adjuntar un comprobante o documento (OC/Transferencia) válido');
+    }
+
+    const plan = await SubscriptionPlan.findById(planId);
+    if (!plan) {
+        res.status(404);
+        throw new Error('Plan no encontrado');
+    }
+
+    let subscription = await Subscription.findOne({ companyId: req.user.companyId });
+
+    const methodEnum = method === 'oc' ? 'OC' : 'Transferencia';
+
+    if (!subscription) {
+        subscription = new Subscription({
+            companyId: req.user.companyId,
+            planId,
+            status: 'Pending',
+            paymentMethod: methodEnum,
+            paymentProofUrl: req.file.path,
+            endDate: new Date(Date.now() + 24 * 60 * 60 * 1000) // 1 day grace
+        });
+    } else {
+        subscription.planId = planId;
+        subscription.status = 'Pending';
+        subscription.paymentMethod = methodEnum;
+        subscription.paymentProofUrl = req.file.path;
+    }
+
+    await subscription.save();
+
+    res.status(200).json({
+        success: true,
+        message: 'Comprobante recibido exitosamente. Esperando validación financiera.',
+        subscription
+    });
+});
+
 // @desc    Handle Mercado Pago Webhook Notifications
 // @route   POST /api/subscriptions/webhook
 const handleWebhook = asyncHandler(async (req, res) => {
@@ -316,7 +378,19 @@ const handleWebhook = asyncHandler(async (req, res) => {
                 await subscription.save();
                 console.log(`🚀 Suscripción ACTIVADA para la empresa ${companyId}`);
 
-                // 2. Notificar al cliente (Opcional)
+                // 2. Automate Dual-Flow Switch depending on Plan Name
+                const planDetails = await SubscriptionPlan.findById(planId);
+                if (planDetails) {
+                    const company = await Company.findById(companyId);
+                    if (company) {
+                        const isAgencyPlan = planDetails.name.toLowerCase().includes('recluta') || planDetails.name.toLowerCase().includes('recruitment');
+                        company.serviceMode = isAgencyPlan ? 'RECRUITMENT_ONLY' : 'FULL_HR_360';
+                        await company.save();
+                        console.log(`🔄 Service Mode actualizado a: ${company.serviceMode} (Empresa: ${company.name})`);
+                    }
+                }
+
+                // 3. Notificar al cliente (Opcional)
                 // await notifyActivation(companyId, planId);
             }
         } catch (error) {
@@ -371,5 +445,6 @@ module.exports = {
     createCheckoutSession,
     handleWebhook,
     getPromoCodes,
-    createPromoCode
+    createPromoCode,
+    processManualPayment
 };
