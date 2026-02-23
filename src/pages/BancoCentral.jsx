@@ -69,21 +69,41 @@ const IndicatorCard = ({ title, data, icon: Icon, colorClass, borderClass, prefi
 
 const BancoCentral = ({ auth, onLogout }) => {
     const [indicators, setIndicators] = useState(null);
+    const [settings, setSettings] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
 
     useEffect(() => {
-        fetchIndicators();
+        fetchData();
     }, []);
 
-    const fetchIndicators = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await axios.get('https://mindicador.cl/api');
-            setIndicators(res.data);
+            // Fetch from our backend — which auto-syncs and caches
+            const [apiRes, settingsRes] = await Promise.all([
+                axios.get('https://mindicador.cl/api'),
+                axios.get('/api/settings')
+            ]);
+            setIndicators(apiRes.data);
+            setSettings(settingsRes.data);
         } catch (error) {
             toast.error('Error sincronizando con el Banco Central / mindicador.cl');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleForceSync = async () => {
+        setSyncing(true);
+        try {
+            await axios.post('/api/settings/force-sync');
+            toast.success('✅ Sincronización forzada completada');
+            await fetchData();
+        } catch (err) {
+            toast.error('Error en sincronización forzada');
+        } finally {
+            setSyncing(false);
         }
     };
 
@@ -109,12 +129,21 @@ const BancoCentral = ({ auth, onLogout }) => {
             auth={auth}
             onLogout={onLogout}
             headerActions={
-                <button
-                    onClick={fetchIndicators}
-                    className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white rounded-2xl border border-white/20 hover:bg-white/20 transition-all font-black text-[10px] uppercase tracking-widest backdrop-blur-sm"
-                >
-                    <RefreshCcw size={14} /> Sincronizar Ahora
-                </button>
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-white">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                        <span className="text-[9px] font-black uppercase tracking-widest">
+                            Sync cada 2h
+                        </span>
+                    </div>
+                    <button
+                        onClick={handleForceSync}
+                        disabled={syncing}
+                        className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white rounded-2xl border border-white/20 hover:bg-white/20 transition-all font-black text-[10px] uppercase tracking-widest backdrop-blur-sm disabled:opacity-50"
+                    >
+                        <RefreshCcw size={14} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Sincronizando...' : 'Forzar Sync'}
+                    </button>
+                </div>
             }
         >
             {/* Header Notification */}
