@@ -38,6 +38,7 @@ import GlobalSettings from './pages/GlobalSettings';
 import Finiquitos from './pages/Finiquitos';
 import BancoCentral from './pages/BancoCentral';
 import SIIMirror from './pages/SIIMirror';
+import PreviredMirror from './pages/PreviredMirror';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth, blockRecruitmentOnly }) => {
@@ -249,6 +250,12 @@ function AppContent() {
                         <Route path="/ajustes/conexiones/sii" element={
                             <ProtectedRoute auth={auth}>
                                 <SIIMirror auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/ajustes/conexiones/previred" element={
+                            <ProtectedRoute auth={auth}>
+                                <PreviredMirror auth={auth} onLogout={handleLogout} />
                             </ProtectedRoute>
                         } />
 

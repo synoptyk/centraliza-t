@@ -98,7 +98,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
 
     const conexionesItems = [
         { id: 'banco-central', name: 'Banco Central', icon: ExternalLink, path: '/ajustes/conexiones/banco-central' },
-        { id: 'previred', name: 'PreviRed', icon: ExternalLink, path: 'https://www.previred.com/' },
+        { id: 'previred', name: 'PreviRed', icon: ExternalLink, path: '/ajustes/conexiones/previred' },
         { id: 'sii', name: 'SII', icon: ExternalLink, path: '/ajustes/conexiones/sii' },
         { id: 'dt', name: 'DT', icon: ExternalLink, path: 'https://www.dt.gob.cl/' },
         { id: 'banco', name: 'Banco', icon: ExternalLink, path: 'https://www.bancoestado.cl/' }
