@@ -1,4 +1,5 @@
 const Applicant = require('../models/Applicant');
+const Project = require('../models/Project');
 const Config = require('../models/Config');
 const asyncHandler = require('express-async-handler');
 const crypto = require('crypto');
@@ -1063,6 +1064,122 @@ const processFiniquito = asyncHandler(async (req, res) => {
     res.json(updatedApplicant);
 });
 
+// @desc    Import legacy workforce bypassing recruitment
+// @route   POST /api/applicants/bulk-legacy
+const importLegacyWorkforce = asyncHandler(async (req, res) => {
+    const applicantsData = req.body;
+
+    if (!Array.isArray(applicantsData) || applicantsData.length === 0) {
+        res.status(400);
+        throw new Error('No data provided');
+    }
+
+    const companyId = req.user.companyId;
+
+    let createdCount = 0;
+    let skippedCount = 0;
+    let errors = [];
+
+    // Map projects to minimize DB calls
+    const projectCache = {};
+
+    // Get or create default project for empty ones
+    let defaultProject = await Project.findOne({ companyId, name: 'Nómina General' });
+    if (!defaultProject) {
+        defaultProject = await Project.create({
+            name: 'Nómina General',
+            clientB2BName: 'Interno',
+            clientB2BRut: '1-9',
+            mainMandante: 'Interno',
+            durationMonths: 120, // 10 years by default
+            startDate: new Date(),
+            regions: ['N/A'],
+            companyId,
+            createdBy: req.user._id,
+            status: 'Abierto'
+        });
+    }
+
+    for (let i = 0; i < applicantsData.length; i++) {
+        const row = applicantsData[i];
+
+        try {
+            // Check if user already exists
+            const exists = await Applicant.findOne({ rut: row.rut });
+            if (exists) {
+                skippedCount++;
+                errors.push({ row: i + 1, rut: row.rut, message: 'RUT ya existe' });
+                continue;
+            }
+
+            // Determine Project ID
+            let projectId = defaultProject._id;
+
+            if (row.project) {
+                const projName = row.project.trim();
+                if (projectCache[projName]) {
+                    projectId = projectCache[projName];
+                } else {
+                    let proj = await Project.findOne({ companyId, name: new RegExp(`^${projName}$`, 'i') });
+                    if (!proj) {
+                        // Create project on the fly if it doesn't exist
+                        proj = await Project.create({
+                            name: projName,
+                            clientB2BName: 'Pendiente',
+                            clientB2BRut: '1-9',
+                            mainMandante: 'Pendiente',
+                            durationMonths: 12,
+                            startDate: new Date(),
+                            regions: ['N/A'],
+                            companyId,
+                            createdBy: req.user._id,
+                            status: 'Abierto'
+                        });
+                    }
+                    projectCache[projName] = proj._id;
+                    projectId = proj._id;
+                }
+            }
+
+            // Construct Applicant
+            const newApp = await Applicant.create({
+                fullName: row.fullName || 'Sin Nombre',
+                email: row.email || 'sin@email.com',
+                phone: row.phone || '0000',
+                rut: row.rut,
+                position: row.position || 'Colaborador',
+                projectId: projectId,
+                companyId: companyId,
+                status: 'Contratado', // Bypasses the funnel
+                history: [{
+                    status: 'Contratado',
+                    changedBy: req.user.name,
+                    comments: 'Carga masiva (Dotación Existente)'
+                }],
+                workerData: {
+                    validationStatus: 'Aprobado',
+                    contract: {
+                        startDate: row.startDate ? new Date(row.startDate) : new Date(),
+                        type: 'Indefinido'
+                    }
+                }
+            });
+
+            createdCount++;
+
+        } catch (err) {
+            skippedCount++;
+            errors.push({ row: i + 1, rut: row.rut, message: err.message });
+        }
+    }
+
+    res.json({
+        created: createdCount,
+        skipped: skippedCount,
+        errors
+    });
+});
+
 module.exports = {
     registerApplicant,
     getApplicants,
@@ -1086,6 +1203,7 @@ module.exports = {
     getTestResults,
     processRemoteApproval,
     getRemoteApprovalDetails,
-    processFiniquito
+    processFiniquito,
+    importLegacyWorkforce
 };
 

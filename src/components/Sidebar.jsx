@@ -91,9 +91,9 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     const isRecruitmentOnly = auth?.company?.serviceMode === 'RECRUITMENT_ONLY';
 
     const managementItems = [
-        { id: 'contratos', name: 'CONTRATACIONES', icon: FilePlus, path: '/contratos' },
-        { id: 'nomina', name: 'NÓMINA (PAYROLL)', icon: CircleDollarSign, path: '/nomina' },
-        { id: 'finiquitos', name: 'FINIQUITOS', icon: Scale, path: '/finiquitos' },
+        { id: 'contratos', name: 'Contrataciones (Generación IA)', icon: FilePlus, path: '/contratos' },
+        { id: 'nomina', name: 'Nómina (Payroll)', icon: CircleDollarSign, path: '/nomina' },
+        { id: 'finiquitos', name: 'Finiquitos y Desvinculación', icon: Scale, path: '/finiquitos' },
     ];
 
     const conexionesItems = [
@@ -105,9 +105,9 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     ];
 
     const administrationItems = [
-        { id: 'dashboard', name: 'Módulo de Cliente', icon: LayoutDashboard, path: '/dashboard' },
+        { id: 'dashboard', name: 'Dashboard Central', icon: LayoutDashboard, path: '/dashboard' },
         { id: 'proyectos', name: 'Gestión de Proyectos', icon: ClipboardList, path: '/proyectos' },
-        { id: 'contratacion', name: 'APROBACIONES', icon: FileCheck, path: '/contratacion', badge: counts.contratacion },
+        { id: 'contratacion', name: 'Aprobaciones (Firma Final)', icon: FileCheck, path: '/contratacion', badge: counts.contratacion },
         ...(isRecruitmentOnly ? [] : [{ id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano' }]),
         { id: 'contenedor', name: 'Contenedor (Portal Cliente)', icon: FolderOpen, path: '/contenedor' },
     ];
@@ -335,7 +335,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                                     >
                                         <div className="flex items-center gap-3">
                                             <FileCheck size={16} className="text-emerald-400" />
-                                            <span className="font-black text-[11px] uppercase tracking-[0.15em] text-slate-300 group-hover:text-white transition-colors">CONTRATACIONES</span>
+                                            <span className="font-black text-[11px] uppercase tracking-[0.15em] text-slate-300 group-hover:text-white transition-colors">Gestión Y Contrataciones</span>
                                         </div>
                                         <ChevronRight
                                             size={12}

@@ -24,7 +24,8 @@ const {
     getTestResults,
     processRemoteApproval,
     getRemoteApprovalDetails,
-    processFiniquito
+    processFiniquito,
+    importLegacyWorkforce
 } = require('../controllers/applicantController');
 
 const {
@@ -40,6 +41,8 @@ const { checkSubscriptionStatus, checkResourceLimits } = require('../middleware/
 router.route('/')
     .get(protect, getApplicants)
     .post(protect, checkSubscriptionStatus, checkResourceLimits('applicants'), registerApplicant);
+
+router.route('/bulk-legacy').post(protect, importLegacyWorkforce);
 
 router.route('/:id')
     .put(protect, updateApplicant);

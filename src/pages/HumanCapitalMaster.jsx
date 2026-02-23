@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import {
     Users, AlertCircle, FileText, Calendar, Bell, ArrowRight, MoreVertical,
     Search, Filter, CheckCircle2, XCircle, Clock, ShieldCheck, Activity,
     Eye, Info, ExternalLink, User, History as HistoryIcon, TrendingUp,
-    FileCheck, Briefcase
+    FileCheck, Briefcase, Plus
 } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 import api from '../utils/api';
@@ -16,6 +17,8 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [viewMode, setViewMode] = useState('list'); // 'list' or 'detail'
     const [detailTab, setDetailTab] = useState('summary'); // 'summary', 'dossier', 'history'
+    const [bulkLoading, setBulkLoading] = useState(false);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         fetchData();
@@ -46,6 +49,51 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleBulkUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setBulkLoading(true);
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const bstr = evt.target.result;
+                const wb = XLSX.read(bstr, { type: 'binary' });
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                const rawData = XLSX.utils.sheet_to_json(ws);
+
+                // Map Spanish headers back to expected keys
+                const mappedData = rawData.map(row => ({
+                    fullName: row['Nombre Completo'] || row['Nombre'],
+                    rut: row['RUT'],
+                    email: row['Email'],
+                    phone: row['Teléfono'],
+                    position: row['Cargo'],
+                    project: row['Proyecto'], // Optional, blank is fine
+                    startDate: row['Fecha Inicio Contrato'] || row['Fecha Modificacion'] || null
+                }));
+
+                const { data: results } = await api.post('/applicants/bulk-legacy', mappedData);
+
+                toast.success(`Carga completada: ${results.created} creados, ${results.skipped} omitidos.`);
+                if (results.errors.length > 0) {
+                    console.error('Bulk errors:', results.errors);
+                    toast.error(`${results.errors.length} errores encontrados. Revisar consola.`);
+                }
+
+                fetchData();
+            } catch (error) {
+                console.error('Error parsing excel:', error);
+                toast.error(error.response?.data?.message || 'Error al procesar el archivo Excel. Verifique el formato.');
+            } finally {
+                setBulkLoading(false);
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            }
+        };
+        reader.readAsBinaryString(file);
     };
 
     const filteredEmployees = employees.filter(emp =>
@@ -348,6 +396,21 @@ const HumanCapitalMaster = ({ auth, onLogout, onOpenCENTRALIZAT }) => {
                                 <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Control de accesos y estatus administrativo</p>
                             </div>
                             <div className="flex gap-3">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={handleBulkUpload}
+                                    disabled={bulkLoading}
+                                />
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={bulkLoading}
+                                    className="px-6 py-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-all flex items-center gap-2"
+                                >
+                                    <Users size={16} /> {bulkLoading ? 'Procesando...' : 'Importar Dotación Existente'}
+                                </button>
                                 <button className="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
                                     <FileText size={16} /> Exportar Reporte
                                 </button>

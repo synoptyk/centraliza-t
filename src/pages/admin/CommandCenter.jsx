@@ -12,7 +12,7 @@ import { COUNTRIES, validateTaxId } from '../../utils/intlUtils';
 import InternationalInput from '../../components/InternationalInput';
 
 const MODULES_LIST = [
-    { id: 'dashboard', name: 'Panel de Control' },
+    { id: 'dashboard', name: 'Dashboard Central' },
     { id: 'admin-command', name: 'Centro de Mando CEO' },
     { id: 'comercial', name: 'Mando Comercial' },
     { id: 'proyectos', name: 'Gestión de Proyectos' },
@@ -22,22 +22,21 @@ const MODULES_LIST = [
     { id: 'acreditacion-prevencion', name: 'Seguridad & Prevención' },
     { id: 'documentos', name: 'Gestión Documental' },
     { id: 'ficha-colaborador', name: 'Ficha y Validación' },
-    { id: 'contratos', name: 'Contrataciones (Generación)' },
-    { id: 'contratacion', name: 'Aprobaciones (Firma)' },
+    { id: 'contratos', name: 'Contrataciones (Generación IA)' },
+    { id: 'contratacion', name: 'Aprobaciones (Firma Final)' },
     { id: 'nomina', name: 'Nómina (Payroll)' },
-    { id: 'finiquitos', name: 'Finiquitos' },
+    { id: 'finiquitos', name: 'Finiquitos y Desvinculación' },
     { id: 'gestion-capital-humano', name: 'Capital Humano 360' },
-    { id: 'contenedor', name: 'Contenedor Cliente' },
-    { id: 'banco-central', name: 'Módulo Banco Central' },
-    { id: 'previred', name: 'Módulo PreviRed' },
-    { id: 'sii', name: 'Módulo SII' },
-    { id: 'dt', name: 'Módulo DT' },
-    { id: 'banco', name: 'Módulo Banco' },
+    { id: 'contenedor', name: 'Contenedor (Portal Cliente)' },
+    { id: 'banco-central', name: 'Banco Central' },
+    { id: 'previred', name: 'PreviRed' },
+    { id: 'sii', name: 'SII' },
+    { id: 'dt', name: 'Dirección del Trabajo (DT)' },
+    { id: 'banco', name: 'Banco / Pagos' },
     { id: 'configuracion', name: 'Ajustes del Sistema' },
     { id: 'parametros-legales', name: 'Parámetros Legales' },
     { id: 'suscripcion', name: 'Planes & Facturas' },
-    { id: 'ayuda', name: 'Centro de Ayuda' },
-    { id: 'historial', name: 'Historial / Expedientes' }
+    { id: 'ayuda', name: 'Centro de Ayuda' }
 ];
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];

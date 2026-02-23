@@ -25,9 +25,9 @@ const HelpCenter = ({ auth, onLogout }) => {
             category: "ADMINISTRACIÓN",
             icon: Building2,
             items: [
-                { id: 3, name: "Módulo de Cliente", obj: "Centralización de la operación diaria.", functions: "Vista rápida de vacantes activas, estadísticas de reclutamiento.", icon: LayoutDashboard },
+                { id: 3, name: "Dashboard Central", obj: "Centralización de la operación diaria.", functions: "Vista rápida de vacantes activas, estadísticas de reclutamiento.", icon: LayoutDashboard },
                 { id: 4, name: "Gestión de Proyectos", obj: "Estructuración del requerimiento.", functions: "Creación de vacantes, definición de perfiles, presupuestos.", icon: ClipboardList },
-                { id: 5, name: "APROBACIONES", obj: "Control ejecutivo y financiero.", functions: "Revisión 360 y decisión final de contratación.", icon: FileCheck },
+                { id: 5, name: "Aprobaciones (Firma Final)", obj: "Control ejecutivo y financiero.", functions: "Revisión 360 y decisión final de contratación.", icon: FileCheck },
                 { id: 6, name: "Capital Humano 360", obj: "Visión holística del equipo.", functions: "Perfiles detallados y monitoreo de dotación.", icon: Users },
                 { id: 7, name: "Contenedor (Portal Cliente)", obj: "Transparencia absoluta.", functions: "Repositorio compartido para clientes externos.", icon: FolderOpen }
             ]
@@ -45,37 +45,46 @@ const HelpCenter = ({ auth, onLogout }) => {
             ]
         },
         {
-            category: "CONTRATACIONES",
+            category: "GESTIÓN Y CONTRATACIONES",
             icon: FilePlus,
             items: [
-                { id: 14, name: "CONTRATACIONES (IA)", obj: "Formalización automatizada.", functions: "Generación de contratos con IA y editor inteligente.", icon: FilePlus }
-            ]
-        },
-        {
-            category: "CONTROL & GESTIÓN",
-            icon: Activity,
-            items: [
-                { id: 15, name: "Dashboard Empresa", obj: "BI para la directiva.", functions: "Gráficos de eficiencia y costos de contratación.", icon: Activity }
+                { id: 14, name: "Contrataciones (Generación IA)", obj: "Formalización automatizada.", functions: "Generación de contratos con IA y editor inteligente.", icon: FilePlus },
+                { id: 15, name: "Nómina (Payroll)", obj: "Cálculo y gestión de salarios.", functions: "Liquidaciones automáticas, reportes y conciliación mensual.", icon: Activity },
+                { id: 16, name: "Finiquitos y Desvinculación", obj: "Cierre de ciclo laboral.", functions: "Cálculo automático de obligaciones, gestión de renuncias o despidos.", icon: ShieldCheck }
             ]
         },
         {
             category: "AJUSTES Y PLANES",
             icon: Settings,
             items: [
-                { id: 16, name: "Ajustes del Sistema", obj: "Configuración maestra.", functions: "Gestión de roles, logos y preferencias.", icon: Settings },
-                { id: 17, name: "Planes & Facturas", obj: "Gestión financiera.", functions: "Suscripciones y pagos vía Mercado Pago.", icon: CreditCard }
+                { id: 17, name: "Ajustes del Sistema", obj: "Configuración maestra.", functions: "Gestión de roles, logos y preferencias.", icon: Settings },
+                { id: 18, name: "Parámetros Legales", obj: "Variables laborales vigentes.", functions: "UF, ingresos mínimos, sueldo empresarial y topes imponibles.", icon: ShieldCheck },
+                { id: 19, name: "Planes & Facturas", obj: "Gestión financiera de SaaS.", functions: "Suscripciones, cuotas y pagos vía Mercado Pago.", icon: CreditCard },
+                { id: 20, name: "Centro de Ayuda", obj: "Soporte y documentación.", functions: "Manuales del ecosistema y ciclo de vida operativo.", icon: Lightbulb }
+            ]
+        },
+        {
+            category: "CONEXIONES EXTERNAS",
+            icon: ExternalLink,
+            items: [
+                { id: 21, name: "Banco Central", obj: "Indicadores económicos en tiempo real.", functions: "Sincronización de UF, UTM, Dólar y Euro.", icon: ExternalLink },
+                { id: 22, name: "PreviRed", obj: "Vinculación previsional.", functions: "Métricas de AFP, rentas tope, seguro de cesantía.", icon: ExternalLink },
+                { id: 23, name: "SII", obj: "Parámetros de impuestos.", functions: "Tramos de impuesto único, honorarios, tabla de cálculo global.", icon: ExternalLink },
+                { id: 24, name: "Dirección del Trabajo (DT)", obj: "Acceso a la entidad reguladora.", functions: "Enlace directo al portal Mi DT.", icon: ExternalLink },
+                { id: 25, name: "Banco / Pagos", obj: "Gestión de desembolsos.", functions: "Enlace directo a servicios bancarios corporativos.", icon: ExternalLink }
             ]
         }
     ];
 
     const workflowSteps = [
         { title: "1. Captura", desc: "Registro integral de candidatos.", icon: UserPlus },
-        { title: "2. Filtro", desc: "Entrevistas y evaluación técnica.", icon: BrainCircuit },
+        { title: "2. Filtro", desc: "Entrevistas y evaluación técnica (IA).", icon: BrainCircuit },
         { title: "3. Compliance", desc: "Seguridad y acreditación documental.", icon: ShieldCheck },
-        { title: "4. Validación", desc: "RRHH consolida la ficha final.", icon: CheckCircle },
+        { title: "4. Validación", desc: "RRHH consolida la ficha final.", icon: UserPlus },
         { title: "5. Aprobación", desc: "Gerencia da el OK en APROBACIONES.", icon: FileCheck },
-        { title: "6. Contrato", desc: "IA genera el contrato legal.", icon: FilePlus },
-        { title: "7. Gestión", desc: "Monitoreo 360 del colaborador.", icon: Activity },
+        { title: "6. Contrato", desc: "IA genera el anexo/contrato legal.", icon: FilePlus },
+        { title: "7. Nómina", desc: "Pago y liquidación mensual de haberes.", icon: CreditCard },
+        { title: "8. Cierre", desc: "Gestión de Finiquito y Desvinculación.", icon: CheckCircle }
     ];
 
     const filteredManuals = manuals.map(cat => ({
