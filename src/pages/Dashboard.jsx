@@ -34,7 +34,7 @@ const Dashboard = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const [statsData, setStatsData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const serviceMode = auth?.company?.serviceMode || 'FULL_HR_360';
+    const effectiveServiceMode = statsData?.serviceMode || auth?.company?.serviceMode || 'FULL_HR_360';
 
     useEffect(() => {
         const fetchDashboardStats = async () => {
@@ -65,116 +65,174 @@ const Dashboard = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     }
 
     // Adapt Stats based on Mode
-    const cards = serviceMode === 'RECRUITMENT_ONLY' ? [
-        {
-            label: 'Proyectos Activos',
-            value: statsData.general.activeProjects,
-            icon: Briefcase,
-            color: 'text-indigo-600',
-            bg: 'bg-indigo-50',
-            border: 'border-indigo-200',
-            trend: '+12%',
-            trendUp: true
-        },
-        {
-            label: 'Pipeline Total',
-            value: statsData.general.totalApplicants,
-            icon: Users,
-            color: 'text-violet-600',
-            bg: 'bg-violet-50',
-            border: 'border-violet-200',
-            trend: '+8%',
-            trendUp: true
-        },
-        {
-            label: 'Contratados (Mes)',
-            value: statsData.agency.recruitedThisMonth,
-            icon: FileCheck,
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50',
-            border: 'border-emerald-200',
-            trend: '+24%',
-            trendUp: true
-        },
-        {
-            label: 'Eficiencia Promedio',
-            value: `${Math.round(statsData.agency.projectEffectiveness.reduce((a, b) => a + b.percent, 0) / (statsData.agency.projectEffectiveness.length || 1))}%`,
-            icon: Target,
-            color: 'text-amber-600',
-            bg: 'bg-amber-50',
-            border: 'border-amber-200',
-            trend: '+5%',
-            trendUp: true
-        },
-    ] : [
-        {
-            label: 'Dotación Activa',
-            value: statsData.integral.totalEmployees,
-            icon: Users,
-            color: 'text-indigo-600',
-            bg: 'bg-indigo-50',
-            border: 'border-indigo-200',
-            trend: 'Estable',
-            trendUp: true
-        },
-        {
-            label: 'Vacaciones Pendientes',
-            value: statsData.integral.pendingVacations,
-            icon: Clock,
-            color: 'text-amber-600',
-            bg: 'bg-amber-50',
-            border: 'border-amber-200',
-            trend: statsData.integral.pendingVacations > 5 ? 'Atención' : 'Normal',
-            trendUp: statsData.integral.pendingVacations <= 5
-        },
-        {
-            label: 'Alertas Contrato',
-            value: statsData.integral.expiringContracts,
-            icon: Bell,
-            color: 'text-rose-600',
-            bg: 'bg-rose-50',
-            border: 'border-rose-200',
-            trend: 'Próx. 15 días',
-            trendUp: statsData.integral.expiringContracts === 0
-        },
-        {
-            label: 'Altas del Mes',
-            value: statsData.integral.recentHires,
-            icon: TrendingUp,
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50',
-            border: 'border-emerald-200',
-            trend: 'Nuevos',
-            trendUp: true
-        },
-    ];
+    let cards = [];
+    if (effectiveServiceMode === 'RECRUITMENT_ONLY' && statsData.agency) {
+        cards = [
+            {
+                label: 'Proyectos Activos',
+                value: statsData.general.activeProjects,
+                icon: Briefcase,
+                color: 'text-indigo-600',
+                bg: 'bg-indigo-50',
+                border: 'border-indigo-200',
+                trend: '+12%',
+                trendUp: true
+            },
+            {
+                label: 'Pipeline Total',
+                value: statsData.general.totalApplicants,
+                icon: Users,
+                color: 'text-violet-600',
+                bg: 'bg-violet-50',
+                border: 'border-violet-200',
+                trend: '+8%',
+                trendUp: true
+            },
+            {
+                label: 'Contratados (Mes)',
+                value: statsData.agency.recruitedThisMonth,
+                icon: FileCheck,
+                color: 'text-emerald-600',
+                bg: 'bg-emerald-50',
+                border: 'border-emerald-200',
+                trend: '+24%',
+                trendUp: true
+            },
+            {
+                label: 'Eficiencia Promedio',
+                value: `${Math.round((statsData.agency.projectEffectiveness || []).reduce((a, b) => a + b.percent, 0) / (statsData.agency.projectEffectiveness?.length || 1))}%`,
+                icon: Target,
+                color: 'text-amber-600',
+                bg: 'bg-amber-50',
+                border: 'border-amber-200',
+                trend: '+5%',
+                trendUp: true
+            },
+        ];
+    } else if (effectiveServiceMode === 'CEO_GLOBAL') {
+        cards = [
+            {
+                label: 'Empresas Activas',
+                value: statsData.general.totalCompanies,
+                icon: Building2,
+                color: 'text-blue-600',
+                bg: 'bg-blue-50',
+                border: 'border-blue-200',
+                trend: 'Sistema',
+                trendUp: true
+            },
+            {
+                label: 'Candidatos Totales',
+                value: statsData.general.totalApplicants,
+                icon: Users,
+                color: 'text-indigo-600',
+                bg: 'bg-indigo-50',
+                border: 'border-indigo-200',
+                trend: 'Global',
+                trendUp: true
+            },
+            {
+                label: 'Proyectos Globales',
+                value: statsData.general.totalProjects,
+                icon: Target,
+                color: 'text-emerald-600',
+                bg: 'bg-emerald-50',
+                border: 'border-emerald-200',
+                trend: 'Activos',
+                trendUp: true
+            },
+            {
+                label: 'Estado Sistema',
+                value: 'Online',
+                icon: Activity,
+                color: 'text-rose-600',
+                bg: 'bg-rose-50',
+                border: 'border-rose-200',
+                trend: 'v5.0',
+                trendUp: true
+            }
+        ];
+    } else if (statsData.integral) {
+        cards = [
+            {
+                label: 'Dotación Activa',
+                value: statsData.integral.totalEmployees,
+                icon: Users,
+                color: 'text-indigo-600',
+                bg: 'bg-indigo-50',
+                border: 'border-indigo-200',
+                trend: 'Estable',
+                trendUp: true
+            },
+            {
+                label: 'Vacaciones Pendientes',
+                value: statsData.integral.pendingVacations,
+                icon: Clock,
+                color: 'text-amber-600',
+                bg: 'bg-amber-50',
+                border: 'border-amber-200',
+                trend: statsData.integral.pendingVacations > 5 ? 'Atención' : 'Normal',
+                trendUp: statsData.integral.pendingVacations <= 5
+            },
+            {
+                label: 'Alertas Contrato',
+                value: statsData.integral.expiringContracts,
+                icon: Bell,
+                color: 'text-rose-600',
+                bg: 'bg-rose-50',
+                border: 'border-rose-200',
+                trend: 'Próx. 15 días',
+                trendUp: statsData.integral.expiringContracts === 0
+            },
+            {
+                label: 'Altas del Mes',
+                value: statsData.integral.recentHires,
+                icon: TrendingUp,
+                color: 'text-emerald-600',
+                bg: 'bg-emerald-50',
+                border: 'border-emerald-200',
+                trend: 'Nuevos',
+                trendUp: true
+            },
+        ];
+    }
 
-    const pipelineData = serviceMode === 'RECRUITMENT_ONLY'
-        ? Object.entries(statsData.agency.pipeline).map(([name, value]) => ({
+    const pipelineData = effectiveServiceMode === 'RECRUITMENT_ONLY' && statsData.agency
+        ? Object.entries(statsData.agency.pipeline || {}).map(([name, value]) => ({
             name,
             value,
             color: name === 'Contratado' ? '#10B981' : name === 'Rechazado' ? '#EF4444' : '#6366F1'
         })).filter(d => d.value > 0).slice(0, 5)
-        : [
-            { name: 'Activos', value: statsData.integral.totalEmployees, color: '#10B981' },
-            { name: 'En Proceso', value: statsData.general.totalApplicants - statsData.integral.totalEmployees, color: '#6366F1' }
-        ];
+        : effectiveServiceMode === 'CEO_GLOBAL'
+            ? [
+                { name: 'Empresas', value: statsData.general.totalCompanies, color: '#10B981' },
+                { name: 'Candidatos', value: statsData.general.totalApplicants, color: '#6366F1' },
+                { name: 'Proyectos', value: statsData.general.totalProjects, color: '#F59E0B' }
+            ]
+            : statsData.integral
+                ? [
+                    { name: 'Activos', value: statsData.integral.totalEmployees, color: '#10B981' },
+                    { name: 'En Proceso', value: (statsData.general.totalApplicants || 0) - (statsData.integral.totalEmployees || 0), color: '#6366F1' }
+                ]
+                : [];
 
     return (
         <PageWrapper
             className="space-y-8 pb-20"
-            title={serviceMode === 'RECRUITMENT_ONLY' ? "CONTROL DE RECLUTAMIENTO" : "CENTRO DE GESTIÓN INTEGRAL"}
-            subtitle={serviceMode === 'RECRUITMENT_ONLY'
+            title={effectiveServiceMode === 'RECRUITMENT_ONLY' ? "CONTROL DE RECLUTAMIENTO" : effectiveServiceMode === 'CEO_GLOBAL' ? "CENTRO DE COMANDO GLOBAL" : "CENTRO DE GESTIÓN INTEGRAL"}
+            subtitle={effectiveServiceMode === 'RECRUITMENT_ONLY'
                 ? "Monitoreo estratégico del pipeline y efectividad de selección"
-                : "Visibilidad 360° de capital humano, contratos y bienestar"}
+                : effectiveServiceMode === 'CEO_GLOBAL'
+                    ? "Resumen táctico de todas las operaciones del ecosistema"
+                    : "Visibilidad 360° de capital humano, contratos y bienestar"}
             icon={Activity}
             auth={auth}
             onLogout={onLogout}
             headerActions={
                 <div className="flex items-center gap-3">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${serviceMode === 'RECRUITMENT_ONLY' ? 'border-purple-200 text-purple-600 bg-purple-50' : 'border-emerald-200 text-emerald-600 bg-emerald-50'
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${effectiveServiceMode === 'RECRUITMENT_ONLY' ? 'border-purple-200 text-purple-600 bg-purple-50' : effectiveServiceMode === 'CEO_GLOBAL' ? 'border-blue-200 text-blue-600 bg-blue-50' : 'border-emerald-200 text-emerald-600 bg-emerald-50'
                         }`}>
-                        Modo {serviceMode === 'RECRUITMENT_ONLY' ? 'Agencia' : 'Integral'}
+                        Modo {effectiveServiceMode === 'RECRUITMENT_ONLY' ? 'Agencia' : effectiveServiceMode === 'CEO_GLOBAL' ? 'CEO Global' : 'Integral'}
                     </span>
                 </div>
             }
@@ -208,7 +266,7 @@ const Dashboard = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {/* Main Progress Chart */}
                 <div className="xl:col-span-2 bg-white p-10 rounded-3xl border-2 border-slate-100 shadow-lg">
-                    {serviceMode === 'RECRUITMENT_ONLY' ? (
+                    {effectiveServiceMode === 'RECRUITMENT_ONLY' && statsData.agency ? (
                         <>
                             <div className="flex items-center justify-between mb-8">
                                 <div>
@@ -279,8 +337,15 @@ const Dashboard = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-4xl font-black text-slate-900">{serviceMode === 'RECRUITMENT_ONLY' ? statsData.general.totalApplicants : statsData.integral.totalEmployees}</span>
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{serviceMode === 'RECRUITMENT_ONLY' ? 'Talento' : 'Activos'}</span>
+                            <span className="text-4xl font-black text-slate-900">
+                                {effectiveServiceMode === 'RECRUITMENT_ONLY' ? statsData.general.totalApplicants :
+                                    effectiveServiceMode === 'CEO_GLOBAL' ? statsData.general.totalCompanies :
+                                        statsData.integral?.totalEmployees || 0}
+                            </span>
+                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                                {effectiveServiceMode === 'RECRUITMENT_ONLY' ? 'Talento' :
+                                    effectiveServiceMode === 'CEO_GLOBAL' ? 'Empresas' : 'Activos'}
+                            </span>
                         </div>
                     </div>
                     <div className="space-y-3">

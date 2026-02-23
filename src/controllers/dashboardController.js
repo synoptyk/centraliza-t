@@ -8,10 +8,39 @@ const Contract = require('../models/Contract');
 // @desc    Get dashboard statistics based on service mode
 // @route   GET /api/dashboard/stats
 const getDashboardStats = asyncHandler(async (req, res) => {
+    // If user has no company (e.g. Ceo_Centralizat), we return a placeholder or global stats
+    if (!req.user.companyId) {
+        if (req.user.role === 'Ceo_Centralizat') {
+            // Global stats for CEO
+            const [totalCompanies, totalApplicants, totalProjects] = await Promise.all([
+                Company.countDocuments(),
+                Applicant.countDocuments(),
+                Project.countDocuments()
+            ]);
+
+            return res.json({
+                serviceMode: 'CEO_GLOBAL',
+                general: {
+                    totalCompanies,
+                    totalApplicants,
+                    totalProjects
+                }
+            });
+        }
+
+        return res.status(200).json({
+            serviceMode: 'NONE',
+            general: { totalProjects: 0, totalApplicants: 0 }
+        });
+    }
+
     const company = await Company.findById(req.user.companyId);
     if (!company) {
-        res.status(404);
-        throw new Error('Empresa no encontrada');
+        return res.status(200).json({
+            serviceMode: 'NONE',
+            general: { totalProjects: 0, totalApplicants: 0 },
+            message: 'Empresa no encontrada vinculada al usuario'
+        });
     }
 
     const serviceMode = company.serviceMode;
