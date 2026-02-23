@@ -3,6 +3,7 @@ import { Landmark, TrendingUp, TrendingDown, Calendar, Activity, RefreshCcw, Dol
 import PageWrapper from '../components/PageWrapper';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import api from '../utils/api';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const IndicatorCard = ({ title, data, icon: Icon, colorClass, borderClass, prefix = '$' }) => {
@@ -80,10 +81,10 @@ const BancoCentral = ({ auth, onLogout }) => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            // Fetch from our backend — which auto-syncs and caches
+            // Fetch from both sources: mindicador.cl for live sparklines + our backend for cached&auth data
             const [apiRes, settingsRes] = await Promise.all([
                 axios.get('https://mindicador.cl/api'),
-                axios.get('/api/settings')
+                api.get('/settings')  // Uses JWT token automatically
             ]);
             setIndicators(apiRes.data);
             setSettings(settingsRes.data);
@@ -97,7 +98,7 @@ const BancoCentral = ({ auth, onLogout }) => {
     const handleForceSync = async () => {
         setSyncing(true);
         try {
-            await axios.post('/api/settings/force-sync');
+            await api.post('/settings/force-sync');  // Uses JWT token automatically
             toast.success('✅ Sincronización forzada completada');
             await fetchData();
         } catch (err) {

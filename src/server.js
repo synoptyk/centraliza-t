@@ -111,16 +111,6 @@ app.use('/api/comments', require('./routes/commentRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/config', require('./routes/configRoutes'));
 app.use('/api/settings', require('./routes/settingsRoutes'));
-
-// Manual sync endpoint for admins
-app.post('/api/settings/force-sync', async (req, res) => {
-    try {
-        const settings = await runManualSync();
-        res.json({ success: true, message: 'Sincronización forzada completada', settings });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
 app.use('/api/contracts', require('./routes/contractRoutes'));
 app.use('/api/subscriptions', require('./routes/subscriptionRoutes'));
 
