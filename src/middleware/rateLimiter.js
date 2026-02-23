@@ -57,8 +57,8 @@ const rateLimit = ({ windowMs = 15 * 60 * 1000, max = 100, message = 'Demasiadas
 };
 
 // Pre-configured limiters
-const globalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }); // 200 req/15min
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: 'Demasiados intentos de autenticación. Espere 15 minutos.' }); // 10 login attempts/15min
+const globalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500 }); // 500 req/15min
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, message: 'Demasiados intentos de autenticación. Espere 15 minutos.' }); // 30 login attempts/15min
 const apiLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 60 }); // 60 req/min for API
 
 module.exports = { rateLimit, globalLimiter, authLimiter, apiLimiter };

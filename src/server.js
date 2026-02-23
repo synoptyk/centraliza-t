@@ -21,6 +21,9 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
+// Trust Proxy for Render/Vercel (Necessary for Rate Limiting)
+app.set('trust proxy', 1);
+
 // Configuración de orígenes permitidos (Producción)
 const allowedOrigins = [
     'https://centraliza-t.synoptyk.cl',
