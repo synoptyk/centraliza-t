@@ -36,7 +36,34 @@ const log = (level, message) => {
 // FETCH HELPERS
 // =============================================
 
-const fetchMindicador = async () => {
+// Formatea la fecha actual como DD-MM-YYYY para mindicador.cl
+const getTodayStr = () => {
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+};
+
+// Consulta UN indicador específico por FECHA EXACTA (fecha = DD-MM-YYYY)
+// Devuelve el valor numérico o null si no está disponible
+const fetchIndicatorByDate = async (codigo, fechaStr) => {
+    try {
+        const url = `${MINDICADOR_API}/${codigo}/${fechaStr}`;
+        const res = await axios.get(url, { timeout: 8000 });
+        const serie = res.data?.serie;
+        if (serie && serie.length > 0) {
+            return { valor: serie[0].valor, fecha: serie[0].fecha };
+        }
+        return null;
+    } catch (err) {
+        log('WARN', `Could not fetch ${codigo} for ${fechaStr}: ${err.message}`);
+        return null;
+    }
+};
+
+// Consulta el endpoint genérico para indicadores sin fecha diaria (UTM, IPC, TPM, etc.)
+const fetchMindicadorGeneric = async () => {
     const res = await axios.get(MINDICADOR_API, { timeout: 8000 });
     return res.data;
 };
@@ -47,42 +74,56 @@ const fetchMindicador = async () => {
 
 /**
  * 🔴 SINCRONIZACIÓN DIARIA
- * Corre cada 6 horas. Actualiza indicadores que cambian diariamente:
- * UF, Dólar, Euro, Bitcoin, Libra de Cobre
+ * Usa endpoints con FECHA EXACTA para garantizar el valor del DÍA.
+ * ⚠️  El endpoint genérico /api puede tener datos de días anteriores
+ *     (ej: mindicador.cl actualizó el 15-feb y hoy es 22-feb = 6 días de retraso)
+ *
+ * Codigos con fecha diaria: uf, dolar, euro, bitcoin, libra_cobre
  */
 const syncDailyIndicators = async (settings) => {
     if (!isOlderThan(settings.lastDailySync, 6 * 60 * 60 * 1000)) {
         return false; // No necesita actualización
     }
 
-    log('INFO', 'Syncing daily indicators (UF, USD, EUR, BTC, Copper)...');
+    const hoy = getTodayStr();
+    log('INFO', `Syncing daily indicators for date: ${hoy} (UF, USD, EUR, BTC, Copper)...`);
 
-    const data = await fetchMindicador();
     let changed = false;
 
-    if (data.uf?.valor && data.uf.valor !== settings.ufValue) {
-        settings.ufValue = data.uf.valor;
+    // Fetch each indicator by exact today's date — ensures we get the Banco Central value for TODAY
+    const uf = await fetchIndicatorByDate('uf', hoy);
+    if (uf && uf.valor !== settings.ufValue) {
+        settings.ufValue = uf.valor;
+        changed = true;
+        log('INFO', `UF actualizada: $${uf.valor} (fecha: ${new Date(uf.fecha).toLocaleDateString('es-CL')})`);
+    }
+
+    const dolar = await fetchIndicatorByDate('dolar', hoy);
+    if (dolar && dolar.valor !== settings.dolarValue) {
+        settings.dolarValue = dolar.valor;
         changed = true;
     }
-    if (data.dolar?.valor && data.dolar.valor !== settings.dolarValue) {
-        settings.dolarValue = data.dolar.valor;
+
+    const euro = await fetchIndicatorByDate('euro', hoy);
+    if (euro && euro.valor) {
+        settings.euroValue = euro.valor;
         changed = true;
     }
-    if (data.euro?.valor) {
-        settings.euroValue = data.euro.valor;
+
+    const bitcoin = await fetchIndicatorByDate('bitcoin', hoy);
+    if (bitcoin && bitcoin.valor) {
+        settings.bitcoinValue = bitcoin.valor;
         changed = true;
     }
-    if (data.bitcoin?.valor) {
-        settings.bitcoinValue = data.bitcoin.valor;
-        changed = true;
-    }
-    if (data.libra_cobre?.valor) {
-        settings.libraCobre = data.libra_cobre.valor;
+
+    const libraCobre = await fetchIndicatorByDate('libra_cobre', hoy);
+    if (libraCobre && libraCobre.valor) {
+        settings.libraCobre = libraCobre.valor;
         changed = true;
     }
 
     settings.lastDailySync = new Date();
-    settings.lastIndicatorsUpdate = new Date(); // Backward compat
+    settings.lastIndicatorsUpdate = new Date();
     log('OK', `Daily sync complete. UF: $${settings.ufValue} | USD: $${settings.dolarValue} | EUR: $${settings.euroValue}`);
     return changed;
 };
@@ -99,7 +140,8 @@ const syncMonthlyIndicators = async (settings) => {
 
     log('INFO', 'Syncing monthly indicators (UTM, IPC, TPM, IMACEC)...');
 
-    const data = await fetchMindicador();
+    // UTM, IPC, TPM, IMACEC change monthly — generic endpoint is valid for these
+    const data = await fetchMindicadorGeneric();
     let changed = false;
 
     if (data.utm?.valor && data.utm.valor !== settings.utmValue) {
@@ -230,29 +272,41 @@ exports.runManualSync = async () => {
     const settings = await GlobalSettings.findOne({ id: 'UNIQUE_CONFIG_DOCUMENT' });
     if (!settings) throw new Error('No GlobalSettings document found');
 
-    // Force stale timestamps to trigger all syncs
-    settings.lastDailySync = null;
-    settings.lastMonthlySync = null;
+    const hoy = getTodayStr();
+    log('INFO', `Manual sync for date: ${hoy}`);
 
-    const data = await fetchMindicador();
+    // Daily: Fetch each by EXACT DATE for precision
+    const [uf, dolar, euro, bitcoin, libraCobre] = await Promise.allSettled([
+        fetchIndicatorByDate('uf', hoy),
+        fetchIndicatorByDate('dolar', hoy),
+        fetchIndicatorByDate('euro', hoy),
+        fetchIndicatorByDate('bitcoin', hoy),
+        fetchIndicatorByDate('libra_cobre', hoy)
+    ]);
 
-    // Apply all available indicators
-    if (data.uf?.valor) settings.ufValue = data.uf.valor;
-    if (data.dolar?.valor) settings.dolarValue = data.dolar.valor;
-    if (data.euro?.valor) settings.euroValue = data.euro.valor;
-    if (data.bitcoin?.valor) settings.bitcoinValue = data.bitcoin.valor;
-    if (data.libra_cobre?.valor) settings.libraCobre = data.libra_cobre.valor;
-    if (data.utm?.valor) settings.utmValue = data.utm.valor;
-    if (data.ipc?.valor) settings.ipcValue = data.ipc.valor;
-    if (data.tpm?.valor) settings.tpmValue = data.tpm.valor;
-    if (data.imacec?.valor) settings.imacecValue = data.imacec.valor;
+    if (uf.value?.valor) { settings.ufValue = uf.value.valor; }
+    if (dolar.value?.valor) { settings.dolarValue = dolar.value.valor; }
+    if (euro.value?.valor) { settings.euroValue = euro.value.valor; }
+    if (bitcoin.value?.valor) { settings.bitcoinValue = bitcoin.value.valor; }
+    if (libraCobre.value?.valor) { settings.libraCobre = libraCobre.value.valor; }
+
+    // Monthly: Generic endpoint is fine for UTM, IPC, TPM, IMACEC
+    try {
+        const generic = await fetchMindicadorGeneric();
+        if (generic.utm?.valor) settings.utmValue = generic.utm.valor;
+        if (generic.ipc?.valor) settings.ipcValue = generic.ipc.valor;
+        if (generic.tpm?.valor) settings.tpmValue = generic.tpm.valor;
+        if (generic.imacec?.valor) settings.imacecValue = generic.imacec.valor;
+    } catch (err) {
+        log('WARN', `Monthly indicators partial fail: ${err.message}`);
+    }
 
     settings.lastDailySync = new Date();
     settings.lastMonthlySync = new Date();
     settings.lastIndicatorsUpdate = new Date();
 
     await settings.save();
-    log('OK', 'Manual sync complete. All indicators updated.');
+    log('OK', `Manual sync complete. UF: $${settings.ufValue} | USD: $${settings.dolarValue}`);
 
     return settings;
 };
