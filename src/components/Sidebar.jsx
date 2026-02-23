@@ -27,9 +27,9 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [sections, setSections] = useState({
-        intelligence: true,
-        strategy: true,
-        talent: true,
+        intelligence: false,
+        strategy: false,
+        talent: false,
         capital: false,
         infrastructure: false
     });
@@ -38,6 +38,14 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         if (window.innerWidth < 768) {
             setIsOpen(false);
         }
+        // Collapse all sections on route change to prevent "invasive" UI
+        setSections({
+            intelligence: false,
+            strategy: false,
+            talent: false,
+            capital: false,
+            infrastructure: false
+        });
     }, [location.pathname, setIsOpen]);
 
     const toggleSection = (section) => {
