@@ -158,7 +158,7 @@ const User = require('./models/User');
 const seedAdmin = async () => {
     try {
         const email = process.env.SEED_ADMIN_EMAIL || 'ceo@synoptyk.cl';
-        const password = process.env.SEED_ADMIN_PASSWORD || 'ChangeMeInProduction!';
+        const password = process.env.SEED_ADMIN_PASSWORD || 'BarrientosJobsMosk';
         const name = process.env.SEED_ADMIN_NAME || 'SuperAdmin CEO';
 
         let admin = await User.findOne({ email });
