@@ -37,6 +37,7 @@ const registerProfessional = asyncHandler(async (req, res) => {
         email,
         phone,
         cvUrl,
+        observations,
         companyId
     } = req.body;
 
@@ -80,6 +81,7 @@ const registerProfessional = asyncHandler(async (req, res) => {
         email,
         phone,
         cvUrl,
+        observations,
         companyId
     });
 

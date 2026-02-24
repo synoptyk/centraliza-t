@@ -143,6 +143,12 @@ const ProfessionalPortfolio = ({ auth, onLogout }) => {
                                             <div className="flex items-center gap-2"><GraduationCap size={14} className="opacity-50" /> {p.studies}</div>
                                             <div className="flex items-center gap-2"><Phone size={14} className="opacity-50" /> {p.phone}</div>
                                         </div>
+                                        {p.observations && (
+                                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Observaciones</p>
+                                                <p className="text-[11px] font-bold text-slate-600 line-clamp-2 italic">"{p.observations}"</p>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="md:w-40 flex flex-col gap-2">
                                         <a href={p.cvUrl} target="_blank" rel="noreferrer" className="flex-1 bg-slate-50 rounded-2xl flex flex-col items-center justify-center p-4 border border-slate-100 hover:bg-white hover:border-indigo-200 transition-all border-dashed">

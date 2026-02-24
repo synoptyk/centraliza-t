@@ -44,6 +44,7 @@ const PortfolioPortal = () => {
         email: '',
         phone: '',
         cvUrl: '',
+        observations: '',
         companyId: companyId
     });
 
@@ -255,7 +256,9 @@ const PortfolioPortal = () => {
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Estudios</label>
                                     <select required name="studies" value={formData.studies} onChange={handleChange} className="w-full bg-[#0f172a] border border-white/10 rounded-2xl py-4 px-6 text-sm outline-none appearance-none">
                                         <option value="">Seleccionar</option>
-                                        <option value="Técnico">Técnico</option>
+                                        <option value="Enseñanza Media">Enseñanza Media</option>
+                                        <option value="Enseñanza Media Técnica">Enseñanza Media Técnica</option>
+                                        <option value="Técnico Nivel Superior">Técnico Nivel Superior</option>
                                         <option value="Universitario">Universitario</option>
                                         <option value="Postgrado">Postgrado</option>
                                         <option value="Otros">Otros</option>
@@ -284,6 +287,19 @@ const PortfolioPortal = () => {
                                 {formData.cvUrl ? (<div className="flex flex-col items-center gap-2"><CheckCircle2 className="text-emerald-500 mb-2" size={40} /> <span className="font-black text-xs uppercase tracking-[0.2em] text-emerald-400">CV Cargado Correctamente</span> </div>) : (<div className="flex flex-col items-center gap-4"> <div className="w-16 h-16 rounded-[24px] bg-slate-800 flex items-center justify-center text-slate-400 group-hover/upload:scale-110 group-hover/upload:text-indigo-400 transition-all duration-500"> <Upload size={32} /> </div> <p className="font-black text-xs uppercase tracking-[0.2em] text-slate-200">Sube tu Curriculum Vitae</p> </div>)}
                             </div>
                         </div>
+                    </div>
+
+                    {/* Observations */}
+                    <div className="md:col-span-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4 mb-2 block">Observaciones adicionales (Opcional)</label>
+                        <textarea
+                            name="observations"
+                            value={formData.observations}
+                            onChange={handleChange}
+                            placeholder="Ej: Experiencia en minería, certificaciones específicas..."
+                            rows={3}
+                            className="w-full bg-white/5 border border-white/10 rounded-[32px] py-6 px-8 text-sm outline-none focus:border-indigo-500/50 resize-none transition-all"
+                        />
                     </div>
 
                     {error && <div className="md:col-span-2 bg-rose-500/10 border border-rose-500/20 text-rose-400 p-6 rounded-3xl text-xs font-bold uppercase tracking-widest text-center">{error}</div>}

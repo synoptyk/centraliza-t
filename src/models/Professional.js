@@ -54,6 +54,9 @@ const professionalSchema = new mongoose.Schema({
     cvUrl: {
         type: String
     },
+    observations: {
+        type: String
+    },
     companyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',
