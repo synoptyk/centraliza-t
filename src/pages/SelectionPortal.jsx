@@ -17,6 +17,7 @@ const SelectionPortal = () => {
     const { companyId } = useParams();
     const navigate = useNavigate();
     const [companyName, setCompanyName] = useState('Nuestra Agencia');
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
