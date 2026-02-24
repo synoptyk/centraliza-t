@@ -35,7 +35,7 @@ const ProfessionalPortfolio = ({ auth, onLogout }) => {
     const [copied, setCopied] = useState(false);
     const [filters, setFilters] = useState({ specialty: '', region: '' });
 
-    const companyId = auth?.company?._id || auth?.companyId;
+    const companyId = auth?.company?.slug || auth?.company?._id || auth?.companyId;
     const portalUrl = companyId ? `${window.location.origin}/portal-captacion/${companyId}` : null;
 
     useEffect(() => {

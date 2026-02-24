@@ -172,11 +172,19 @@ const getCompanyPublic = asyncHandler(async (req, res) => {
 
     if (!id || id === 'undefined' || id === 'null') {
         res.status(400);
-        throw new Error('ID de Agencia no válido');
+        throw new Error('Identificador de Agencia no válido');
     }
 
     try {
-        const company = await Company.findById(id).select('name');
+        let company;
+        // Check if ID is a valid MongoDB ObjectID
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+            company = await Company.findById(id).select('name slug');
+        } else {
+            // Treat as slug
+            company = await Company.findOne({ slug: id.toLowerCase() }).select('name slug');
+        }
+
         if (company) {
             res.json(company);
         } else {

@@ -47,6 +47,8 @@ const CorporatePortal = () => {
             try {
                 const response = await axios.get(`${API_URL}/api/companies/${companyId}/public`);
                 setCompanyName(response.data.name);
+                // Resolve slug/id to real ObjectID for backend data integrity
+                setFormData(prev => ({ ...prev, companyId: response.data._id }));
             } catch (err) {
                 console.error('Error fetching company:', err);
             }

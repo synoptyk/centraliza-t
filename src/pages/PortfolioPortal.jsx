@@ -53,6 +53,8 @@ const PortfolioPortal = () => {
             try {
                 const response = await axios.get(`${API_URL}/api/companies/${companyId}/public`);
                 setCompanyName(response.data.name);
+                // Important: Update formData with the real ObjectID resolved by the backend
+                setFormData(prev => ({ ...prev, companyId: response.data._id }));
             } catch (err) {
                 console.error('Error fetching company:', err);
             }
