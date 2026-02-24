@@ -35,7 +35,8 @@ const ProfessionalPortfolio = ({ auth, onLogout }) => {
     const [copied, setCopied] = useState(false);
     const [filters, setFilters] = useState({ specialty: '', region: '' });
 
-    const portalUrl = `${window.location.origin}/portal-captacion/${auth?.company?._id}`;
+    const companyId = auth?.company?._id || auth?.companyId;
+    const portalUrl = companyId ? `${window.location.origin}/portal-captacion/${companyId}` : null;
 
     useEffect(() => {
         fetchData();
@@ -92,10 +93,16 @@ const ProfessionalPortfolio = ({ auth, onLogout }) => {
                         <p className="text-slate-400 text-sm font-medium">Comparte este link para recibir postulantes y empresas.</p>
                     </div>
                     <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 w-full md:w-auto">
-                        <span className="text-[10px] font-bold opacity-40 truncate max-w-[200px]">{portalUrl}</span>
-                        <button onClick={copyToClipboard} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 hover:bg-indigo-500 transition-all">
-                            {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copiado' : 'Copiar'}
-                        </button>
+                        {portalUrl ? (
+                            <>
+                                <span className="text-[10px] font-bold opacity-40 truncate max-w-[200px]">{portalUrl}</span>
+                                <button onClick={copyToClipboard} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 hover:bg-indigo-500 transition-all">
+                                    {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copiado' : 'Copiar'}
+                                </button>
+                            </>
+                        ) : (
+                            <span className="text-[10px] font-black uppercase text-amber-500 tracking-widest italic">Link no disponible para perfiles CEO</span>
+                        )}
                     </div>
                 </div>
             </div>

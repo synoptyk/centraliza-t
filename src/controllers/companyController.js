@@ -134,8 +134,6 @@ const deleteCompany = asyncHandler(async (req, res) => {
     }
 });
 
-// @desc    Bulk register companies
-// @route   POST /api/companies/bulk
 const bulkRegisterCompanies = asyncHandler(async (req, res) => {
     const companies = req.body; // Array of company objects
 
@@ -167,4 +165,35 @@ const bulkRegisterCompanies = asyncHandler(async (req, res) => {
     res.status(201).json(results);
 });
 
-module.exports = { registerCompany, getCompanies, updateCompany, deleteCompany, bulkRegisterCompanies };
+// @desc    Get company public info (Name only)
+// @route   GET /api/companies/:id/public
+const getCompanyPublic = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!id || id === 'undefined' || id === 'null') {
+        res.status(400);
+        throw new Error('ID de Agencia no válido');
+    }
+
+    try {
+        const company = await Company.findById(id).select('name');
+        if (company) {
+            res.json(company);
+        } else {
+            res.status(404);
+            throw new Error('Agencia no encontrada');
+        }
+    } catch (error) {
+        res.status(400);
+        throw new Error('Error al buscar la agencia');
+    }
+});
+
+module.exports = {
+    registerCompany,
+    getCompanies,
+    updateCompany,
+    deleteCompany,
+    bulkRegisterCompanies,
+    getCompanyPublic
+};

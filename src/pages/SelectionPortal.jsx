@@ -17,26 +17,56 @@ const SelectionPortal = () => {
     const { companyId } = useParams();
     const navigate = useNavigate();
     const [companyName, setCompanyName] = useState('Nuestra Agencia');
-    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchCompany = async () => {
+            if (!companyId || companyId === 'undefined' || companyId === 'null') {
+                setError('ID de Agencia no válido');
+                setLoading(false);
+                return;
+            }
+
             try {
                 const response = await axios.get(`${API_URL}/api/companies/${companyId}/public`);
                 setCompanyName(response.data.name);
             } catch (err) {
                 console.error('Error fetching company:', err);
+                setError('No pudimos encontrar la agencia asociada a este link');
             } finally {
                 setLoading(false);
             }
         };
-        if (companyId) fetchCompany();
+        fetchCompany();
     }, [companyId]);
 
     if (loading) {
         return (
             <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
                 <CircleDashed className="text-indigo-500 animate-spin" size={48} />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-[#0f172a] text-white flex flex-col items-center justify-center p-6 text-center">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-rose-600/10 blur-[120px] rounded-full -z-10"></div>
+                <div className="max-w-md w-full bg-white/5 backdrop-blur-xl rounded-[40px] border border-white/10 p-12">
+                    <div className="w-20 h-20 bg-rose-500/20 rounded-[28px] flex items-center justify-center mx-auto mb-8 text-rose-400">
+                        <Users size={40} />
+                    </div>
+                    <h2 className="text-3xl font-black uppercase italic tracking-tight mb-4 text-white">Portal no disponible</h2>
+                    <p className="text-slate-400 font-medium mb-8 leading-relaxed">
+                        {error}. Por favor verifica el link o contacta a tu ejecutivo de cuenta.
+                    </p>
+                    <button
+                        onClick={() => window.location.href = 'https://centralizat.cl'}
+                        className="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                    >
+                        Ir a Inicio
+                    </button>
+                </div>
             </div>
         );
     }
