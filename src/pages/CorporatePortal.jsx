@@ -122,11 +122,11 @@ const CorporatePortal = () => {
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] font-black uppercase tracking-[0.3em]">
                         <Building2 size={14} /> Red de Especialistas Centraliza-T
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none italic uppercase">
-                        SOLUCIONES DE TALENTO <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">SIN SESGOS</span>
+                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none italic uppercase">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">GARANTÍA HUMANA</span>
                     </h1>
-                    <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl mx-auto">
-                        Accede a la red de especialistas más grande de Chile para cubrir tus necesidades críticas. Conectamos tu empresa con talento validado humanamente por {companyName}, garantizando calidad técnica y compromiso.
+                    <p className="text-slate-300 text-lg md:text-2xl font-black italic max-w-2xl mx-auto leading-tight uppercase tracking-tight">
+                        "En Centraliza-T no delegamos tu búsqueda a algoritmos. Validamos humanamente cada perfil para conectar tu empresa con los expertos que realmente necesitas."
                     </p>
                 </div>
             </div>

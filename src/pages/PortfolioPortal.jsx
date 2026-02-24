@@ -153,18 +153,12 @@ const PortfolioPortal = () => {
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.3em]">
                         <Zap size={14} /> Cartera Profesional Centraliza-T
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none italic uppercase">
-                        PREPÁRATE PARA TU <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">PRÓXIMO PROYECTO</span>
+                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none italic uppercase">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">GARANTÍA HUMANA</span>
                     </h1>
-                    <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
-                        Forma parte de la red de expertos más grande de Chile. Regístrate ahora y te contactaremos proactivamente cuando activemos vacantes de {companyName} o nuevos desafíos de nuestra red empresarial.
+                    <p className="text-slate-300 text-lg md:text-2xl font-black italic max-w-2xl mx-auto leading-tight uppercase tracking-tight">
+                        "Aquí no usamos bots para leer tu CV. Analizamos tu potencial directamente con las empresas para que nunca seas solo un archivo en el olvido."
                     </p>
-
-                    {/* Anti-Bot Banner */}
-                    <div className="max-w-xl mx-auto bg-white/[0.03] border border-white/10 p-4 rounded-2xl backdrop-blur-md">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-1">Garantía Humana</p>
-                        <p className="text-xs text-slate-300 italic">"Aquí no usamos bots para leer tu CV. Analizamos tu potencial directamente con las empresas para que nunca seas solo un archivo en el olvido."</p>
-                    </div>
                 </div>
             </div>
 
