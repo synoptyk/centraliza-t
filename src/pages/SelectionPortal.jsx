@@ -82,14 +82,25 @@ const SelectionPortal = () => {
                 {/* Header */}
                 <div className="text-center space-y-6 mb-16 animate-in fade-in slide-in-from-top-10 duration-1000">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.3em]">
-                        <Zap size={14} /> Centro de Captación
+                        <Zap size={14} /> Ecosistema Centraliza-T
                     </div>
                     <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none italic uppercase">
-                        BIENVENIDO A <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">{companyName}</span>
+                        TU TALENTO, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">NUESTRA PRIORIDAD</span>
                     </h1>
                     <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
-                        Selecciona tu perfil para continuar con el proceso de vinculación.
+                        No somos una bolsa de empleo más. Somos el puente humano entre tu potencial y los proyectos más desafiantes de Chile.
                     </p>
+
+                    {/* Anti-Bot Disruptive Banner */}
+                    <div className="max-w-2xl mx-auto mt-8 p-6 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 backdrop-blur-3xl rounded-[32px] border border-white/10 shadow-2xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-150 transition-transform duration-1000">
+                            <ShieldCheck size={100} />
+                        </div>
+                        <p className="text-xs md:text-sm font-bold uppercase tracking-widest text-indigo-300 mb-2">Compromiso Centraliza-T</p>
+                        <h4 className="text-xl md:text-2xl font-black italic uppercase leading-tight">
+                            "Aquí no hay bots leyendo tu CV. Hablamos directamente con humanos para conectar con humanos."
+                        </h4>
+                    </div>
                 </div>
 
                 {/* Selection Cards */}
@@ -103,12 +114,12 @@ const SelectionPortal = () => {
                         <div className="w-20 h-20 rounded-[28px] bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center mb-8 shadow-xl shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-500">
                             <Users size={40} className="text-white" />
                         </div>
-                        <h3 className="text-3xl font-black uppercase italic tracking-tight mb-4 group-hover:text-indigo-400 transition-colors">Soy Postulante</h3>
+                        <h3 className="text-3xl font-black uppercase italic tracking-tight mb-4 group-hover:text-indigo-400 transition-colors">Busco Oportunidad</h3>
                         <p className="text-slate-400 font-medium leading-relaxed mb-8">
-                            Regístrate en nuestra cartera profesional para acceder a las mejores vacantes y oportunidades laborales.
+                            Únete a la mayor red de especialistas. Regístrate ahora y sé el primero en ser contactado cuando activamos nuevos proyectos masivos.
                         </p>
                         <div className="flex items-center gap-3 text-indigo-400 font-black text-xs uppercase tracking-widest">
-                            Empezar Registro <ChevronRight size={16} className="group-hover:translate-x-2 transition-transform" />
+                            Entrar a la Cartera <ChevronRight size={16} className="group-hover:translate-x-2 transition-transform" />
                         </div>
                     </button>
 
@@ -120,12 +131,12 @@ const SelectionPortal = () => {
                         <div className="w-20 h-20 rounded-[28px] bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mb-8 shadow-xl shadow-purple-500/20 group-hover:scale-110 transition-transform duration-500">
                             <Building2 size={40} className="text-white" />
                         </div>
-                        <h3 className="text-3xl font-black uppercase italic tracking-tight mb-4 group-hover:text-purple-400 transition-colors">Soy Empresa</h3>
+                        <h3 className="text-3xl font-black uppercase italic tracking-tight mb-4 group-hover:text-purple-400 transition-colors">Busco Talento</h3>
                         <p className="text-slate-400 font-medium leading-relaxed mb-8">
-                            Solicita la búsqueda de personal especializado para tus proyectos y optimiza tus procesos de contratación.
+                            Accede a personal validado humanamente. Cubre tus necesidades críticas con especialistas de nuestra red nacional al instante.
                         </p>
                         <div className="flex items-center gap-3 text-purple-400 font-black text-xs uppercase tracking-widest">
-                            Solicitar Personal <ChevronRight size={16} className="group-hover:translate-x-2 transition-transform" />
+                            Solicitar Especialistas <ChevronRight size={16} className="group-hover:translate-x-2 transition-transform" />
                         </div>
                     </button>
 

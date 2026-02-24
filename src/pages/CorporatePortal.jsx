@@ -120,13 +120,13 @@ const CorporatePortal = () => {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-purple-600/10 blur-[120px] rounded-full -z-10"></div>
                 <div className="max-w-4xl mx-auto space-y-6">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] font-black uppercase tracking-[0.3em]">
-                        <Building2 size={14} /> Cartera Empresarial
+                        <Building2 size={14} /> Red de Especialistas Centraliza-T
                     </div>
                     <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none italic uppercase">
-                        SOLICITAR PERSONAL <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">EXPERTOS</span>
+                        SOLUCIONES DE TALENTO <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">SIN SESGOS</span>
                     </h1>
                     <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl mx-auto">
-                        Ayúdanos a entender tus necesidades de talento para {companyName}.
+                        Accede a la red de especialistas más grande de Chile para cubrir tus necesidades críticas. Conectamos tu empresa con talento validado humanamente por {companyName}, garantizando calidad técnica y compromiso.
                     </p>
                 </div>
             </div>
