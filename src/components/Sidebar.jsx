@@ -31,7 +31,8 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         strategy: false,
         talent: false,
         capital: false,
-        infrastructure: false
+        infrastructure: false,
+        conexiones_nested: false
     });
 
     useEffect(() => {
@@ -44,7 +45,8 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
             strategy: false,
             talent: false,
             capital: false,
-            infrastructure: false
+            infrastructure: false,
+            conexiones_nested: false
         });
     }, [location.pathname, setIsOpen]);
 
@@ -104,6 +106,12 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         { id: 'parametros-legales', name: 'Parámetros Legales', icon: Scale, path: '/parametros-legales', color: 'text-amber-400' },
         { id: 'suscripcion', name: 'Planes & Facturas', icon: CreditCard, path: '/suscripcion', color: 'text-emerald-400' },
         { id: 'ayuda', name: 'Centro de Ayuda', icon: LifeBuoy, path: '/ayuda', color: 'text-blue-400' }
+    ];
+
+    const conexionesItems = [
+        { id: 'sii', name: 'Servicio Impuestos Internos', icon: Building2, path: '/ajustes/conexiones/sii', color: 'text-blue-400' },
+        { id: 'previred', name: 'Previsión Previred', icon: Scale, path: '/ajustes/conexiones/previred', color: 'text-amber-400' },
+        { id: 'banco-central', name: 'Indicadores Banco Central', icon: CircleDollarSign, path: '/ajustes/conexiones/banco-central', color: 'text-emerald-400' },
     ];
 
     const checkPermission = (item) => {
@@ -286,13 +294,28 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                         {infrastructureItems.filter(checkPermission).map(item => {
                             if (item.isFolder) {
                                 return (
-                                    <button key={item.id} onClick={() => toggleSection('conexiones_nested')} className="w-full flex items-center justify-between px-5 py-3 rounded-xl text-slate-400 hover:bg-white/[0.03] group transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-2.5 rounded-xl bg-slate-800/50 text-slate-500 group-hover:text-indigo-400 border border-white/5"><item.icon size={19} strokeWidth={2.5} /></div>
-                                            <span className="text-[11px] font-black uppercase tracking-[0.15em]">{item.name}</span>
+                                    <React.Fragment key={item.id}>
+                                        <button
+                                            onClick={() => toggleSection('conexiones_nested')}
+                                            className={`flex items-center justify-between mx-3 px-5 py-3.5 rounded-2xl transition-all duration-500 group relative mb-1.5 ${sections.conexiones_nested ? 'bg-indigo-600/5 text-white border border-indigo-500/20' : 'text-slate-400 hover:bg-white/[0.04]'}`}
+                                        >
+                                            <div className="flex items-center gap-4 relative z-10">
+                                                <div className={`p-2.5 rounded-xl border transition-all duration-500 ${getIconColors(item.color, sections.conexiones_nested)} group-hover:scale-110`}>
+                                                    <item.icon size={19} strokeWidth={2.5} />
+                                                </div>
+                                                <span className={`text-[11px] font-black uppercase tracking-[0.15em] transition-all ${sections.conexiones_nested ? 'text-white' : 'group-hover:text-white'}`}>
+                                                    {item.name}
+                                                </span>
+                                            </div>
+                                            <ChevronRight size={14} className={`transition-all duration-300 ${sections.conexiones_nested ? 'rotate-90 text-indigo-400' : 'text-slate-600'}`} />
+                                        </button>
+
+                                        <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.conexiones_nested ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                                            {conexionesItems.map(subItem => (
+                                                <NavItem key={subItem.id} item={subItem} level={1} />
+                                            ))}
                                         </div>
-                                        <ChevronRight size={12} className="transition-all" />
-                                    </button>
+                                    </React.Fragment>
                                 );
                             }
                             return <NavItem key={item.id} item={item} />;
