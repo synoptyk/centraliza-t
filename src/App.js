@@ -58,7 +58,7 @@ const ProtectedRoute = ({ children, allowedRoles, auth, blockRecruitmentOnly }) 
     }
 
     // Check dual-flow access (Block Agencies from HR 360 features)
-    if (blockRecruitmentOnly && auth?.company?.serviceMode === 'RECRUITMENT_ONLY') {
+    if (blockRecruitmentOnly && auth?.company?.serviceMode === 'RECRUITMENT_ONLY' && auth.role !== 'Ceo_Centralizat') {
         return <Navigate to="/dashboard" replace />;
     }
 

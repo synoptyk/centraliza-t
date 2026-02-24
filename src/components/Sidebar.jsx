@@ -76,41 +76,41 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
 
     // 3. RECLUTAMIENTO Y SELECCIÓN (Acquisition Funnel)
     const talentItems = [
-        { id: 'ingreso', name: 'Captura de Talento', icon: UserPlus, path: '/ingreso', color: 'text-indigo-400' },
-        { id: 'entrevista', name: 'Entrevistas Filtro', icon: Calendar, path: '/entrevista', badge: counts.entrevista, color: 'text-blue-400' },
-        { id: 'tests', name: 'Evaluación Técnica', icon: BrainCircuit, path: '/tests', badge: counts.tests, color: 'text-purple-400' },
-        { id: 'acreditacion-prevencion', name: 'Seguridad & PPE', icon: ShieldCheck, path: '/acreditacion-prevencion', badge: counts.acreditacion, color: 'text-emerald-400' },
+        { id: 'ingreso', name: 'Captura de Talento', icon: UserPlus, path: '/ingreso', color: 'text-amber-400' },
+        { id: 'entrevista', name: 'Entrevistas Filtro', icon: Calendar, path: '/entrevista', badge: counts.entrevista, color: 'text-amber-400' },
+        { id: 'tests', name: 'Evaluación Técnica', icon: BrainCircuit, path: '/tests', badge: counts.tests, color: 'text-amber-400' },
+        { id: 'acreditacion-prevencion', name: 'Seguridad & PPE', icon: ShieldCheck, path: '/acreditacion-prevencion', badge: counts.acreditacion, color: 'text-amber-400' },
         { id: 'documentos', name: 'Gestión Documental', icon: FileText, path: '/documentos', badge: counts.documentos, color: 'text-amber-400' },
-        { id: 'ficha-colaborador', name: 'Ficha y Validación', icon: Fingerprint, path: '/ficha-colaborador', badge: counts.ficha, color: 'text-rose-400' },
-        { id: 'cartera-profesional', name: 'Centro de Captación', icon: Zap, path: '/cartera-profesional', color: 'text-cyan-400' },
+        { id: 'ficha-colaborador', name: 'Ficha y Validación', icon: Fingerprint, path: '/ficha-colaborador', badge: counts.ficha, color: 'text-amber-400' },
+        { id: 'cartera-profesional', name: 'Centro de Captación', icon: Zap, path: '/cartera-profesional', color: 'text-amber-400' },
     ];
 
     // 4. RELACIONES LABORALES (Employee Lifecycle)
     const capitalItems = [
-        ...(!isRecruitmentOnly ? [
-            { id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano', color: 'text-indigo-400' },
+        ...((!isRecruitmentOnly || auth?.role === 'Ceo_Centralizat') ? [
+            { id: 'gestion-capital-humano', name: 'Capital Humano 360', icon: Users, path: '/gestion-capital-humano', color: 'text-rose-400' },
             { id: 'contratados', name: 'Personal Activo', icon: CheckSquare, path: '/contratados', color: 'text-emerald-400' },
             { id: 'contratos', name: 'Contratación (IA)', icon: FilePlus, path: '/contratos', color: 'text-blue-400' },
             { id: 'nomina', name: 'Nómina (Payroll)', icon: CircleDollarSign, path: '/nomina', color: 'text-emerald-400' },
             { id: 'vacaciones', name: 'Vacaciones/Licencias', icon: Plane, path: '/vacaciones', color: 'text-cyan-400' },
-            { id: 'relaciones-laborales', name: 'Relaciones Laborales', icon: ShieldAlert, path: '/relaciones-laborales', color: 'text-rose-400' },
+            { id: 'relaciones-laborales', name: 'Gestión de Protocolos', icon: ShieldAlert, path: '/relaciones-laborales', color: 'text-amber-400' },
             { id: 'finiquitos', name: 'Desvinculaciones', icon: Gavel, path: '/finiquitos', color: 'text-slate-400' }
         ] : []),
-        { id: 'contenedor', name: 'Portal Ético/Cliente', icon: FolderOpen, path: '/contenedor', color: 'text-indigo-400' }
+        { id: 'contenedor', name: 'Portal Ético/Cliente', icon: FolderOpen, path: '/contenedor', color: 'text-blue-400' }
     ];
 
     // 5. INFRAESTRUCTURA (System Integrity)
     const infrastructureItems = [
-        { id: 'conexiones', name: 'Conexiones API', icon: Network, path: '#', isFolder: true, color: 'text-indigo-400' },
-        { id: 'configuracion', name: 'Ajustes de Sistema', icon: Settings, path: '/configuracion', color: 'text-slate-400' },
-        { id: 'parametros-legales', name: 'Parámetros Legales', icon: Scale, path: '/parametros-legales', color: 'text-amber-400' },
+        { id: 'conexiones', name: 'Conexiones API', icon: Network, path: '#', isFolder: true, color: 'text-emerald-400' },
+        { id: 'configuracion', name: 'Ajustes de Sistema', icon: Settings, path: '/configuracion', color: 'text-emerald-400' },
+        { id: 'parametros-legales', name: 'Parámetros Legales', icon: Scale, path: '/parametros-legales', color: 'text-emerald-400' },
         { id: 'suscripcion', name: 'Planes & Facturas', icon: CreditCard, path: '/suscripcion', color: 'text-emerald-400' },
-        { id: 'ayuda', name: 'Centro de Ayuda', icon: LifeBuoy, path: '/ayuda', color: 'text-blue-400' }
+        { id: 'ayuda', name: 'Centro de Ayuda', icon: LifeBuoy, path: '/ayuda', color: 'text-emerald-400' }
     ];
 
     const conexionesItems = [
-        { id: 'sii', name: 'Servicio Impuestos Internos', icon: Building2, path: '/ajustes/conexiones/sii', color: 'text-blue-400' },
-        { id: 'previred', name: 'Previsión Previred', icon: Scale, path: '/ajustes/conexiones/previred', color: 'text-amber-400' },
+        { id: 'sii', name: 'Servicio Impuestos Internos', icon: Building2, path: '/ajustes/conexiones/sii', color: 'text-emerald-400' },
+        { id: 'previred', name: 'Previsión Previred', icon: Scale, path: '/ajustes/conexiones/previred', color: 'text-emerald-400' },
         { id: 'banco-central', name: 'Indicadores Banco Central', icon: CircleDollarSign, path: '/ajustes/conexiones/banco-central', color: 'text-emerald-400' },
     ];
 
@@ -177,20 +177,20 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         );
     };
 
-    const SectionHeader = ({ id, label, icon: Icon, color }) => (
+    const SectionHeader = ({ id, label, icon: Icon, color, activeColor }) => (
         <button
             onClick={() => toggleSection(id)}
             className={`w-[calc(100%-1.5rem)] flex items-center justify-between mx-3 px-5 py-4 mt-6 group transition-all duration-500 rounded-[20px] border relative overflow-hidden ${sections[id]
-                ? 'bg-white/[0.05] border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.4)] ring-1 ring-white/5'
+                ? `bg-white/[0.05] border-${activeColor}/30 shadow-[0_15px_40px_rgba(0,0,0,0.4)] ring-1 ring-white/5`
                 : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'}`}
         >
             {/* Subtle glow effect when open */}
             {sections[id] && (
-                <div className="absolute -top-10 -left-10 w-24 h-24 bg-indigo-500/10 rounded-full blur-[40px] pointer-events-none"></div>
+                <div className={`absolute -top-10 -left-10 w-24 h-24 bg-${activeColor}/10 rounded-full blur-[40px] pointer-events-none`}></div>
             )}
 
             <div className="flex items-center gap-4 relative z-10">
-                <div className={`p-2.5 rounded-xl border transition-all duration-500 ${getIconColors(color)} ${sections[id] ? 'scale-110 rotate-0 shadow-[0_0_20px_rgba(99,102,241,0.3)]' : 'group-hover:scale-110 group-hover:rotate-[8deg]'}`}>
+                <div className={`p-2.5 rounded-xl border transition-all duration-500 ${getIconColors(color)} ${sections[id] ? `scale-110 rotate-0 shadow-[0_0_20px_rgba(var(--${activeColor}-rgb),0.3)]` : 'group-hover:scale-110 group-hover:rotate-[8deg]'}`}>
                     <Icon size={18} strokeWidth={2.5} />
                 </div>
                 <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${sections[id] ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`}>
@@ -198,7 +198,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                 </span>
             </div>
             <div className={`relative z-10 transition-all duration-500 transform ${sections[id] ? 'rotate-90 scale-125' : ''}`}>
-                <ChevronRight size={14} className={sections[id] ? 'text-indigo-400' : 'text-slate-600'} />
+                <ChevronRight size={14} className={sections[id] ? `text-${activeColor}` : 'text-slate-600'} />
             </div>
 
             {/* Glossy overlay on hover */}
@@ -261,27 +261,27 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                 <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pt-2 pb-10">
 
                     {/* PHASE 1: CONTROL CEO */}
-                    <SectionHeader id="intelligence" label="CONTROL CEO" icon={ShieldCheck} color="text-indigo-500" />
+                    <SectionHeader id="intelligence" label="CONTROL CEO" icon={ShieldCheck} color="text-indigo-500" activeColor="indigo-500" />
                     <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.intelligence ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         {intelligenceItems.filter(checkPermission).map(item => <NavItem key={item.id} item={item} />)}
                     </div>
 
                     {/* PHASE 2: ADMINISTRACIÓN */}
-                    <SectionHeader id="strategy" label="ADMINISTRACIÓN" icon={Building2} color="text-blue-500" />
+                    <SectionHeader id="strategy" label="ADMINISTRACIÓN" icon={Building2} color="text-blue-500" activeColor="blue-500" />
                     <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.strategy ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         {strategyItems.filter(checkPermission).map(item => <NavItem key={item.id} item={item} />)}
                     </div>
 
                     {/* PHASE 3: RECLUTAMIENTO Y SELECCIÓN */}
-                    <SectionHeader id="talent" label="RECLUTAMIENTO Y SELECCIÓN" icon={Zap} color="text-cyan-500" />
+                    <SectionHeader id="talent" label="RECLUTAMIENTO Y SELECCIÓN" icon={Zap} color="text-amber-500" activeColor="amber-500" />
                     <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.talent ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         {talentItems.filter(checkPermission).map(item => <NavItem key={item.id} item={item} />)}
                     </div>
 
                     {/* PHASE 4: RELACIONES LABORALES */}
-                    {!isRecruitmentOnly && (
+                    {(!isRecruitmentOnly || auth?.role === 'Ceo_Centralizat') && (
                         <>
-                            <SectionHeader id="capital" label="RELACIONES LABORALES" icon={Users} color="text-emerald-500" />
+                            <SectionHeader id="capital" label="RELACIONES LABORALES" icon={Users} color="text-rose-500" activeColor="rose-500" />
                             <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.capital ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                                 {capitalItems.filter(checkPermission).map(item => <NavItem key={item.id} item={item} />)}
                             </div>
@@ -289,7 +289,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                     )}
 
                     {/* PHASE 5: INFRAESTRUCTURA */}
-                    <SectionHeader id="infrastructure" label="Infraestructura" icon={Settings} color="text-slate-500" />
+                    <SectionHeader id="infrastructure" label="Infraestructura" icon={Settings} color="text-emerald-500" activeColor="emerald-500" />
                     <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.infrastructure ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         {infrastructureItems.filter(checkPermission).map(item => {
                             if (item.isFolder) {
