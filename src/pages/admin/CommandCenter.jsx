@@ -432,25 +432,28 @@ const CommandCenter = ({ auth, onLogout }) => {
 
     const fetchData = async () => {
         console.log('--- CommandCenter: Starting fetchData ---');
+        setLoading(true);
+        const loadToast = toast.loading('Sincronizando Mando Central...');
         try {
-            setLoading(true);
-            console.log('Fetching companies...');
+            console.log('Step 1: Fetching companies...');
             const companiesRes = await api.get('/companies');
-            console.log('Companies loaded:', companiesRes.data?.length);
-
-            console.log('Fetching users...');
-            const usersRes = await api.get('/users');
-            console.log('Users loaded:', usersRes.data?.length);
-
-            console.log('Fetching applicants...');
-            const applicantsRes = await api.get('/applicants');
-            console.log('Applicants loaded:', applicantsRes.data?.length);
-
+            console.log('Step 1 Complete: Companies loaded:', companiesRes.data?.length);
             setCompanies(companiesRes.data);
+
+            console.log('Step 2: Fetching users...');
+            const usersRes = await api.get('/users');
+            console.log('Step 2 Complete: Users loaded:', usersRes.data?.length);
             setUsers(usersRes.data);
+
+            console.log('Step 3: Fetching applicants...');
+            const applicantsRes = await api.get('/applicants');
+            console.log('Step 3 Complete: Applicants loaded:', applicantsRes.data?.length);
             setApplicants(applicantsRes.data);
+
+            toast.success('Centro de Mando Actualizado', { id: loadToast });
         } catch (error) {
             console.error('Error fetching data in CommandCenter:', error);
+            toast.error('Error al sincronizar datos', { id: loadToast });
             if (error.response) {
                 console.error('Response data:', error.response.data);
                 console.error('Response status:', error.response.status);

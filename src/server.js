@@ -28,6 +28,7 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
     'https://centraliza-t.synoptyk.cl',
     'https://centraliza-t.vercel.app',
+    'https://centraliza-t.onrender.com',
     'https://centralizat.cl',
     process.env.FRONTEND_URL,
     'http://localhost:3000' // Mantener para debugging local controlado

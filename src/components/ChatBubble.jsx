@@ -4,8 +4,10 @@ import io from 'socket.io-client';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
+import API_URL from '../config/api';
+
 // Initialize Socket with reconnection limits to avoid console spam
-const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5005', {
+const socket = io(API_URL, {
     reconnectionAttempts: 5,
     reconnectionDelay: 5000,
     timeout: 10000
