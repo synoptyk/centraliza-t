@@ -114,6 +114,7 @@ app.use('/api/applicants', require('./routes/applicantRoutes'));
 app.use('/api/curriculum', require('./routes/curriculumRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/professionals', require('./routes/professionalRoutes'));
+app.use('/api/attendance', require('./routes/attendanceRoutes'));
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/companies', require('./routes/companyRoutes'));
@@ -217,7 +218,7 @@ if (process.env.NODE_ENV === 'production') {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || process.env.SERVER_PORT || 5000;
+const PORT = process.env.SERVER_PORT || process.env.PORT || 5000;
 
 // Connect to Database first, then start server
 connectDB().then(async () => {

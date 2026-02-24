@@ -45,6 +45,8 @@ import PortfolioPortal from './pages/PortfolioPortal';
 import ProfessionalPortfolio from './pages/ProfessionalPortfolio';
 import SelectionPortal from './pages/SelectionPortal';
 import CorporatePortal from './pages/CorporatePortal';
+import AttendancePortal from './pages/AttendancePortal';
+import AttendanceAdmin from './pages/AttendanceAdmin';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth, blockRecruitmentOnly }) => {
@@ -298,6 +300,18 @@ function AppContent() {
                         <Route path="/suscripcion" element={
                             <ProtectedRoute auth={auth}>
                                 <BillingAndSubscription auth={auth} onLogout={handleLogout} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/asistencia" element={
+                            <ProtectedRoute auth={auth}>
+                                <AttendancePortal auth={auth} />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="/control-asistencia" element={
+                            <ProtectedRoute auth={auth} allowedRoles={['Ceo_Centralizat', 'Admin_Empresa', 'Admin_Centralizat']}>
+                                <AttendanceAdmin auth={auth} />
                             </ProtectedRoute>
                         } />
 

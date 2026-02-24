@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
-    LayoutDashboard, ClipboardList, UserPlus, Calendar,
+    LayoutDashboard, ClipboardList, UserPlus, Calendar, Clock,
     BrainCircuit, FileText, FileCheck, ShieldCheck,
     History, Users, Settings, Search, X, Activity,
     ChevronRight, Building2, FolderOpen, CreditCard,
@@ -31,6 +31,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
         strategy: false,
         talent: false,
         capital: false,
+        attendance: false,
         infrastructure: false,
         conexiones_nested: false
     });
@@ -45,6 +46,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
             strategy: false,
             talent: false,
             capital: false,
+            attendance: false,
             infrastructure: false,
             conexiones_nested: false
         });
@@ -97,6 +99,11 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
             { id: 'finiquitos', name: 'Desvinculaciones', icon: Gavel, path: '/finiquitos', color: 'text-slate-400' }
         ] : []),
         { id: 'contenedor', name: 'Portal Ético/Cliente', icon: FolderOpen, path: '/contenedor', color: 'text-blue-400' }
+    ];
+
+    const attendanceItems = [
+        { id: 'asistencia', name: 'Registro de Asistencia', icon: Fingerprint, path: '/asistencia', color: 'text-emerald-400' },
+        { id: 'control-asistencia', name: 'Control de Asistencia', icon: FileCheck, path: '/control-asistencia', color: 'text-indigo-400' },
     ];
 
     // 5. INFRAESTRUCTURA (System Integrity)
@@ -288,7 +295,13 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
                         </>
                     )}
 
-                    {/* PHASE 5: INFRAESTRUCTURA */}
+                    {/* PHASE 5: ASISTENCIA CENTRALIZA-T */}
+                    <SectionHeader id="attendance" label="Asistencia Centraliza-t" icon={Clock} color="text-indigo-500" activeColor="indigo-500" />
+                    <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.attendance ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                        {attendanceItems.filter(checkPermission).map(item => <NavItem key={item.id} item={item} />)}
+                    </div>
+
+                    {/* PHASE 6: INFRAESTRUCTURA */}
                     <SectionHeader id="infrastructure" label="Infraestructura" icon={Settings} color="text-emerald-500" activeColor="emerald-500" />
                     <div className={`space-y-0.5 overflow-hidden transition-all duration-500 ${sections.infrastructure ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                         {infrastructureItems.filter(checkPermission).map(item => {
