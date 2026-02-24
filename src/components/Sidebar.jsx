@@ -103,6 +103,7 @@ const Sidebar = ({ onOpenCENTRALIZAT, auth, setAuth, onLogout, isOpen, setIsOpen
 
     const attendanceItems = [
         { id: 'asistencia', name: 'Registro de Asistencia', icon: Fingerprint, path: '/asistencia', color: 'text-emerald-400' },
+        { id: 'turnos', name: 'Programación de Turnos', icon: Calendar, path: '/turnos', color: 'text-orange-400' },
         { id: 'control-asistencia', name: 'Control de Asistencia', icon: FileCheck, path: '/control-asistencia', color: 'text-indigo-400' },
     ];
 

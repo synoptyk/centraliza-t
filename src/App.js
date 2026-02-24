@@ -47,6 +47,7 @@ import SelectionPortal from './pages/SelectionPortal';
 import CorporatePortal from './pages/CorporatePortal';
 import AttendancePortal from './pages/AttendancePortal';
 import AttendanceAdmin from './pages/AttendanceAdmin';
+import ShiftManagement from './pages/ShiftManagement';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles, auth, blockRecruitmentOnly }) => {
@@ -312,6 +313,11 @@ function AppContent() {
                         <Route path="/control-asistencia" element={
                             <ProtectedRoute auth={auth} allowedRoles={['Ceo_Centralizat', 'Admin_Empresa', 'Admin_Centralizat']}>
                                 <AttendanceAdmin auth={auth} />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/turnos" element={
+                            <ProtectedRoute auth={auth} allowedRoles={['Ceo_Centralizat', 'Admin_Empresa', 'Admin_Centralizat']}>
+                                <ShiftManagement auth={auth} />
                             </ProtectedRoute>
                         } />
 
