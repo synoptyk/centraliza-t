@@ -366,7 +366,8 @@ const applicantSchema = new mongoose.Schema({
             enum: ['Pendiente', 'En Proceso Validación', 'Enviado para Aprobación', 'Aprobado'],
             default: 'Pendiente'
         }
-    }
+    },
+    isDirectHire: { type: Boolean, default: false }
 }, { timestamps: true });
 
 applicantSchema.add({

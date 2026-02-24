@@ -308,6 +308,8 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
     const handleSave = async (isFinal = false) => {
         if (!selectedId) return toast.error('Seleccione un postulante');
 
+        const applicant = applicants.find(a => a._id === selectedId);
+
         if (isFinal) {
             // Validaciones Estrictas para Gerencia
             if (!formData.financial.liquidSalary || formData.financial.liquidSalary <= 0) {
@@ -323,18 +325,33 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
 
         setSaving(true);
         try {
-            const statusUpdate = isFinal ? 'Enviado para Aprobación' : 'En Proceso Validación';
+            let statusUpdate = isFinal ? 'Enviado para Aprobación' : 'En Proceso Validación';
+
+            // Bypass logic for Direct Hire
+            if (isFinal && applicant?.isDirectHire) {
+                statusUpdate = 'Contratado';
+            }
+
             const payload = {
-                workerData: { ...formData, validationStatus: statusUpdate }
+                workerData: { ...formData, validationStatus: statusUpdate === 'Contratado' ? 'Aprobado' : statusUpdate }
             };
 
-            // Si es final, gatillar el cambio de estado global para que aparezca en la cola de gerencia
+            // Si es final y no es ingreso directo, gatillar el cambio de estado global para que aparezca en la cola de gerencia
             if (isFinal) {
-                payload.status = 'Pendiente Aprobación Gerencia';
+                payload.status = statusUpdate === 'Contratado' ? 'Contratado' : 'Pendiente Aprobación Gerencia';
+                if (statusUpdate === 'Contratado') {
+                    payload.hiring = {
+                        ...applicant.hiring,
+                        managerApproval: 'Aprobado',
+                        approvedBy: 'Ingreso Directo (Admin)',
+                        contractStartDate: formData.contract.startDate,
+                        contractType: formData.contract.type
+                    };
+                }
             }
 
             await api.put(`/applicants/${selectedId}`, payload);
-            toast.success(isFinal ? 'Enviado a revisión de Gerencia' : 'Progreso guardado');
+            toast.success(statusUpdate === 'Contratado' ? 'Colaborador Contratado Exitosamente' : (isFinal ? 'Enviado a revisión de Gerencia' : 'Progreso guardado'));
             setSelectedId(''); // Limpiar selección para forzar refresco total de la cola
             fetchAwaitingApplicants();
         } catch (error) {
@@ -484,10 +501,19 @@ const FichaColaborador = ({ onOpenCENTRALIZAT, auth, onLogout }) => {
                             </button>
                             <button
                                 onClick={() => handleSave(true)}
-                                className="w-full py-4 bg-indigo-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-200 hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"
+                                className={`w-full py-4 rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3 ${applicants.find(a => a._id === selectedId)?.isDirectHire ? 'bg-emerald-600 shadow-emerald-200 hover:bg-emerald-700' : 'bg-indigo-600 shadow-indigo-200 hover:bg-indigo-700'} text-white`}
                             >
-                                <UserCheck size={16} />
-                                Enviar a Gerencia
+                                {applicants.find(a => a._id === selectedId)?.isDirectHire ? (
+                                    <>
+                                        <UserCheck size={16} />
+                                        Finalizar y Contratar
+                                    </>
+                                ) : (
+                                    <>
+                                        <UserCheck size={16} />
+                                        Enviar a Gerencia
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>

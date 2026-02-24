@@ -42,7 +42,8 @@ const ApplicantEntry = ({ auth, onLogout }) => {
             employeeName: ''
         },
         assignedLocation: '',
-        isWaitlisted: false
+        isWaitlisted: false,
+        isDirectHire: false
     };
 
     const [applicant, setApplicant] = useState(initialApplicantState);
@@ -216,12 +217,17 @@ const ApplicantEntry = ({ auth, onLogout }) => {
     const executeSave = async (dataToSave) => {
         setLoading(true);
         try {
-            if (dataToSave._id) {
-                await api.put(`/applicants/${dataToSave._id}`, dataToSave);
+            const finalData = { ...dataToSave };
+            if (finalData.isDirectHire && !finalData._id) {
+                finalData.status = 'Aprobado para Contratación';
+            }
+
+            if (finalData._id) {
+                await api.put(`/applicants/${finalData._id}`, finalData);
                 toast.success('Ficha de Postulación actualizada');
             } else {
-                await api.post('/applicants', dataToSave);
-                toast.success(dataToSave.isWaitlisted ? 'Postulante guardado en Lista de Espera' : 'Ficha guardada exitosamente');
+                await api.post('/applicants', finalData);
+                toast.success(finalData.isDirectHire ? 'Ingreso Directo registrado. Proceda a Ficha de Colaborador.' : (finalData.isWaitlisted ? 'Postulante guardado en Lista de Espera' : 'Ficha guardada exitosamente'));
             }
             setApplicant(initialApplicantState);
             setCalculatedLocation('');
@@ -354,6 +360,23 @@ const ApplicantEntry = ({ auth, onLogout }) => {
                                     <div>
                                         <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">1. Identificación</h3>
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">Datos Personales y del Proyecto</p>
+                                    </div>
+                                    <div className="flex-1 flex justify-end">
+                                        <label className="flex items-center gap-3 bg-slate-50 border border-slate-100 px-6 py-3 rounded-2xl cursor-pointer hover:bg-white hover:border-indigo-200 transition-all group">
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">Personal Ya Contratado</span>
+                                                <span className="text-[8px] font-bold text-slate-400 uppercase mt-1">Omitir Reclutamiento (Fast-Track)</span>
+                                            </div>
+                                            <div className={`w-12 h-6 rounded-full p-1 transition-all duration-300 ${applicant.isDirectHire ? 'bg-indigo-600' : 'bg-slate-200'}`}>
+                                                <div className={`w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-sm ${applicant.isDirectHire ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                className="hidden"
+                                                checked={applicant.isDirectHire}
+                                                onChange={(e) => setApplicant({ ...applicant, isDirectHire: e.target.checked })}
+                                            />
+                                        </label>
                                     </div>
                                 </div>
 
