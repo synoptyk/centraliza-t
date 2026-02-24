@@ -585,7 +585,7 @@ const ProjectRegistration = ({ auth, onLogout }) => {
                                 <Save size={20} className="sm:size-6" /> {editingProject ? 'Actualizar Proyecto' : 'Guardar Proyecto'}
                             </button>
                         </div>
-                        Broadway                    </form>
+                    </form>
                 )}
 
                 {/* --- LOCATION DISTRIBUTION MODAL --- */}

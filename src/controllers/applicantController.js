@@ -199,9 +199,19 @@ const registerInterview = asyncHandler(async (req, res) => {
         if (req.body.result === 'OK') {
             applicant.status = 'En Test';
             applicant.interview.interviewStatus = 'Realizada';
+            applicant.history.push({
+                status: 'En Test',
+                changedBy: req.user.name,
+                comments: 'Entrevista aprobada. Avanza a fase de tests.'
+            });
         } else if (req.body.result === 'NOK') {
             applicant.status = 'Rechazado';
             applicant.interview.interviewStatus = 'Realizada';
+            applicant.history.push({
+                status: 'Rechazado',
+                changedBy: req.user.name,
+                comments: `Entrevista no aprobada. Razón: ${req.body.notes || 'Sin observaciones'}`
+            });
         }
 
         const updatedApplicant = await applicant.save();
@@ -533,6 +543,13 @@ const updateContractDocStatus = asyncHandler(async (req, res) => {
         document.rejectionReason = req.body.rejectionReason;
     }
 
+    // Add to history for traceability
+    applicant.history.push({
+        status: applicant.status,
+        changedBy: req.user.name,
+        comments: `${req.body.status === 'Aprobado' ? 'Aprobación' : 'Rechazo'} de documento: ${document.name}.${req.body.status === 'Rechazado' ? ` Razón: ${req.body.rejectionReason}` : ''}`
+    });
+
     const updatedApplicant = await applicant.save();
     res.json(updatedApplicant);
 });
@@ -604,13 +621,22 @@ const updateTests = asyncHandler(async (req, res) => {
         // If both sections are interacted with (completed check)
         // For a more robust check, we see if they have scores
         if (applicant.tests.psychological.score !== undefined && applicant.tests.professional.score !== undefined) {
-            // Check if professional test is "No Aprobado" or below a threshold if exists
-            // Since there is no explicit result field shown in snippet beyond 'score' 
-            // but the user mentions 'no aprueba', let's check for a 'result' string if present in body
+            const oldStatus = applicant.status;
+            let newStatus = oldStatus;
+
             if (req.body.professional?.result === 'No Aprobado' || req.body.psychological?.result === 'No Aprobado') {
-                applicant.status = 'Rechazado';
+                newStatus = 'Rechazado';
             } else {
-                applicant.status = 'Carga Documental';
+                newStatus = 'Carga Documental';
+            }
+
+            if (newStatus !== oldStatus) {
+                applicant.status = newStatus;
+                applicant.history.push({
+                    status: newStatus,
+                    changedBy: req.user.name,
+                    comments: `Tests completados. Psicolaboral: ${applicant.tests.psychological.score}/100, Profesional: ${applicant.tests.professional.score}/100. Resultado: ${newStatus}`
+                });
             }
         }
 
@@ -998,6 +1024,13 @@ const submitTestResponses = asyncHandler(async (req, res) => {
     applicant.tests.psycholaborTest.status = 'Completado';
     applicant.tests.psycholaborTest.completedAt = new Date();
     applicant.tests.psycholaborTest.testToken = undefined; // Clear token after use
+
+    // Add to history for traceability
+    applicant.history.push({
+        status: applicant.status, // The main status probably remains 'En Test'
+        changedBy: 'Candidato (Portal Público)',
+        comments: `Test psicolaboral completado remotamente. Puntuación: ${analysis.overallScore}/100.`
+    });
 
     await applicant.save();
 

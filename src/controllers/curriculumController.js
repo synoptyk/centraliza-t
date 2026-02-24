@@ -617,6 +617,17 @@ const updateCurriculumItemStatus = asyncHandler(async (req, res) => {
         }
     }
 
+    // Add to history for traceability
+    const itemName = type === 'course'
+        ? (applicant.preventionDocuments.courses.find(c => c.courseCode === itemCode)?.courseName || itemCode)
+        : (applicant.preventionDocuments.exams.find(e => e.examCode === itemCode)?.examName || itemCode);
+
+    applicant.history.push({
+        status: applicant.status,
+        changedBy: req.user.name,
+        comments: `${status === 'Completado' ? 'Aprobación' : status === 'Rechazado' ? 'Rechazo' : 'Actualización'} de documento de prevención: ${itemName}.${status === 'Rechazado' ? ` Razón: ${rejectionReason || 'Sin especificar'}` : ''}`
+    });
+
     await applicant.save();
     res.json(applicant);
 });
